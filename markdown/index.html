@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="utf-8" />
+        <title>Markdown写作</title>
+        <link rel="stylesheet" href="../markdown/css/editormd.css" />
+        <link rel="shortcut icon" href="../markdown/favicon.ico" type="image/x-icon" />
+    </head>
+    <body>
+        <div id="layout">
+            <div style="display:flex;padding-bottom:6px;">
+				<img src="../markdown/favicon.png" />
+				<div style="padding:4px;outline: none;background-color:#fafafa;" contenteditable="true">新文档</div>
+				<button style="margin-left: auto;">保存</button>
+				<button style="margin-left:16px;">返回</button>
+            </div>
+			<div style="display:flex;">
+				<div id="editormd" >
+					<textarea style="display:none;"></textarea>
+				</div>
+				<div id="contents" style="width:100px;border:1px solid #eee;padding:4px;text-align:center;">
+					<div style="padding:6px;">目录列表</div>
+				</div>
+			</div>
+        </div>
+        <script src="../js/jquery.min.js"></script>
+        <script src="../markdown/editormd.js"></script>
+        <script type="text/javascript">
+            var mdEditor;
+
+            $(function() {
+                mdEditor = editormd("editormd", {
+                    height  : 640,
+                    syncScrolling : "single",
+                    path: "../markdown/lib/",
+					toolbarIcons : "me",
+					table: true,
+					imageUpload: true, // 开启图片上传功能
+					imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"], // 允许上传的图片格式
+					imageUploadURL: "/upload", // 图片上传接口的 URL
+					onload: function () {
+					    console.log('编辑器准备就绪.');
+					}
+                });
+                
+                /*
+                // or
+                testEditor = editormd({
+                    id      : "editormd",
+                    height  : 640,
+                    path    : "lib/",
+					toolbarIcons : "me"
+                });
+                */
+            });
+        </script>
+    </body>
+</html>

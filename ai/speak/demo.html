@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html >
+<head>
+	<meta charset="utf-8">
+	<title>在线机器朗读</title>
+	<script src="speakClient.js"></script>
+
+</head>
+<body>
+	<div id="audio"></div>	
+	<input type="button" onclick="readenglish()" value="英文朗读" />
+	<input type="text" id="worden" name="worden" value="Hello World!">
+	<br>
+	<input type="button" onclick="read()" value="中文朗读" />
+	<input type="text" id="wordcn" name="wordcn" value="世界，你好!">
+</body>
+
+	<script>
+	var period = 0;
+	function beat_it() {
+		if( period !== 0 ) {
+			speak('hello', {pitch: 10});
+			setTimeout(beat_it, period);
+		}
+	}
+	function stop_the_beat() {
+		period = 0;
+	}
+	function start_the_beat() {
+		period = 1000;
+		beat_it();
+	}
+	
+	function readenglish(){
+		var words=document.getElementById("worden").value;
+		speak(words);		
+	}
+	function readchinese(){
+		var words=document.getElementById("wordcn").value;
+		speak(words,{ voice: 'zh' });		
+	}	
+	
+	function read(){
+		this.speech = new SpeechSynthesisUtterance();
+		let speech = this.speech;
+		var words=document.getElementById("wordcn").value;
+		speech.text = words;
+		speech.pitch = 1 ;// 设置话语的音调(0-2 默认1，值越大越尖锐,越低越低沉)
+		speech.rate = 0.9; // 设置说话的速度(0.1-10 默认1，值越大语速越快,越小语速越慢)
+		speech.volume = 10; // 设置说话的音量
+		speech.lang = 'zh-CN'; // 设置播放语言
+		speechSynthesis.speak(speech);
+		alert("中文朗读");
+	}
+	</script>
+</html>

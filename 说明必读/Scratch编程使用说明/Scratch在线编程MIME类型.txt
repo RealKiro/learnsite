@@ -1,0 +1,14 @@
+使用说明：
+
+在IIS或apache的MIME类型添加以下类型，如果已经存在则忽略：
+
+.sb     application/octet-stream
+.sb2    application/octet-stream
+.sb3    application/octet-stream
+.po     text/plain
+.txt    text/plain
+.json   application/x-javascript
+.svg    image/svg+xml
+
+---------------------------------
+

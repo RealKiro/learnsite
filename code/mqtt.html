@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三垟中学——物联网MQTT服务</title>
+	<script src="../code/mqtt/mqtt.min.js" ></script>
+    <script src="../code/jquery.min.js"></script>
+    <link href="mqtt/mqtt.css" rel="stylesheet" type="text/css" />
+	<script src="../code/chart.js"></script>
+</head>
+
+<body>
+	<div class="banner"></div>
+	<div class="mqttset">
+		<img class="broker" src="mqtt/ready.png" title="Mqtt状态" />
+		MQTT地址：<input class ="txtIp" type="text"  readonly/>
+		MQTT端口：<input class ="txtPort" type="text" readonly/>
+		客户端ID：<input class ="txtId" type="text" readonly/>
+		用户账号：<input class ="txtUser" type="text"  readonly/>
+		用户密码：<input class ="txtPwd" type="text"  readonly/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;							
+		<input class="btnConnect" type="button" value="点击连接"/><br>			
+	
+	<table>
+		<tr>
+			<td>
+				<div class="messages"></div>					
+			</td>
+			<td>
+				<div class="center">				
+				<img class="led" src="mqtt/ledoff.png" title="灯光控制 led" /><br>
+				主题：<input class ="txtTopic" type="text" /><br><br>
+				消息：<input class="txtPayload" type="text" value="off"/><br><br>
+				<input class="btnPublish" type="button" value="发布" disabled="true"/><br><br>
+				
+				<table>
+				<tr style="display:none;">
+					<td><img class="light" src="mqtt/light.png" title="亮度检测 light" />
+					</td>
+					<td><img class="sound" src="mqtt/mic.png" title="声音检测 sound" />	
+					</td>
+				</tr>
+				<tr>
+					<td><div class="lightnum" ></div>	
+					</td>
+					<td><div class="soundnum" ></div>
+					</td>
+				</tr>
+				</table>					
+				
+				<div>
+								
+				
+				</div><br>
+				订阅主题：<input class ="txtSubTopic" type="text" /><br><br>		
+				<input class="btnSub" type="button" value="订阅" disabled="true"/>
+				
+				</div>
+			</td>
+			<td>
+				<div class="linkuser"></div>
+				<div class="divleft" >
+				已订阅主题:
+					<select class="subtopics">
+					</select>
+					&nbsp;
+				<input class="btnUnSub" type="button" value="取消订阅" disabled="true"/>
+				</div>
+			</td>
+		</tr>
+		
+	</table>
+	<div>
+	  <canvas id="myChart" height="60"></canvas>
+	</div>
+	</div>
+</body>
+<script>
+	const ctx = document.getElementById('myChart');
+	const user='20230111';
+    const clientId = 'stu'+ user;// Math.random().toString(16).substr(2, 8)
+	const pwsd='123456';
+	var   topicset='led/'+user;
+	var webip=window.location.host;
+
+	$('.txtIp').val(webip);
+	$('.txtPort').val(1883);
+	$('.txtId').val('m'+user);
+	$('.txtUser').val(user);
+	$('.txtPwd').val(pwsd);
+	$('.txtTopic').val(topicset);
+	$('.txtSubTopic').val('light/'+user);
+	
+	
+	var client;
+    const host = 'ws://'+webip+':5000/mqtt';
+
+    const options = {
+        keepalive: 30,
+        clientId: clientId,
+	    username: user,
+	    password: pwsd,
+        protocolId: 'MQTT',
+        protocolVersion: 4,
+        clean: true
+    }
+
+	console.log('物联网实验室');	
+	var isled=false;
+	var count=0;//信息数据
+	var countlist=[];
+	var msglist=[];
+	var islive=false;//是否连接
+		
+	$("#myChart").click(function(){
+	  const el = document.createElement('a');
+	  el.href = ctx.toDataURL();
+	  el.download = '传感器采集图表';
+	  const event = new MouseEvent('click');
+	  //el.dispatchEvent(event);
+	});
+	
+	$('.btnConnect').click(function () {		
+		console.log('正在连接mqtt服务……');		
+		client = mqtt.connect(host, options);
+		$(this).attr('disabled',true);
+	
+	$('.light').click(function () {
+		$('.txtSubTopic').val("light/"+user);
+    });
+	$('.sound').click(function () {
+		$('.txtSubTopic').val("sound/"+user);
+    });
+	
+	$('.led').click(function () {
+		if(isled){		
+			$('.txtPayload').val("off");	
+			$(this).attr("src","mqtt/ledoff.png");
+			isled=false;
+		}	
+		else{
+			$('.txtPayload').val("on");	
+			$(this).attr("src","mqtt/ledon.png");
+			isled=true;			
+		}
+		$('.txtSubTopic').val("led/"+user);
+    });
+
+	$('.btnSub').click(function () {
+		var mytopic= $('.txtSubTopic').val();		
+		console.log("订阅主题：",mytopic);		
+        client.subscribe(mytopic, { qos: 0 });
+		$('.linkuser').append("订阅主题："+mytopic+"<br>");	
+		var op="<option>"+mytopic+"</option>";
+		$('.subtopics').append(op);
+    });	
+	
+	$('.btnUnSub').click(function () {
+		var mytopic= $('.subtopics').find("option:selected").text();
+		if(mytopic){		
+			console.log("取消订阅：",mytopic);		
+			client.unsubscribe(mytopic, { qos: 0 })	
+			$('.linkuser').append("取消订阅："+mytopic+"<br>");	
+			$(".subtopics option:selected").remove(); 
+		}
+		else{
+			$(this).attr('disabled',true);
+		}
+    });	
+	
+	$('.btnPublish').click(function () {
+		var mytopic= $('.txtTopic').val();		
+		console.log("发布主题：",mytopic);
+		
+		var mypayload= $('.txtPayload').val();		
+		console.log("负载消息：",mypayload);
+		
+		client.publish(mytopic, mypayload, { qos: 0, retain: false });//发布		
+    });
+	
+	
+    client.on('error', function (err) {
+		$('.linkuser').append("连接Mqtt服务失败！");
+        console.log(err);
+        client.end();
+    })
+
+    client.on('connect', function () {
+		var str= " MQTT服务已连接<br>已订阅默认主题："+topicset+"<br> ";
+		islive=true;
+        console.log(clientId+"已连接.");		
+		$('.linkuser').append(str);
+		$('.broker').attr("src","mqtt/run.png");
+        client.subscribe(topicset, { qos: 0 });//订阅默认Led主题
+		var op="<option>"+topicset+"</option>";
+		$('.subtopics').append(op);
+        //client.publish(topic, 'wss secure connection 成功 demo...!', { qos: 0, retain: false })
+		$('.btnPublish').attr('disabled',false);
+		$('.btnSub').attr('disabled',false);
+		$('.btnUnSub').attr('disabled',false);
+		$('.btnConnect').val("服务已连接");
+    })
+
+    client.on('message', function (topic, message, packet) {
+		const decoder = new TextDecoder();//字节转字符串
+        //console.log(packet.topic,decoder.decode(packet.payload));
+		receiveMessage(topic,message,packet);		
+    })
+
+    client.on('close', function () {
+		if(islive){
+			var str='MQTT服务已断开！';
+			console.log(str);
+			$('.linkuser').append(str+"<br>");
+			$(".linkuser").scrollTop($(".linkuser").height()*count);
+			$('.broker').attr("src","mqtt/ready.png");
+		}
+		islive=false;
+    })
+	
+	receiveMessage = function (topic, message, type) {
+		count++;
+		const decoder = new TextDecoder();//字节转字符串		
+		message=decoder.decode(message);//字节转字符串
+		countlist.push(count);
+		switch(message){
+			case 'on':
+				msglist.push(5);//记录消息
+				break;
+			case 'off':
+				msglist.push(0);//记录消息
+				break
+			default:
+				msglist.push(message);//记录消息
+				break;
+		}				
+		//console.log('计数：',countlist);
+		//console.log('信息：',msglist);
+		updateChartData();//更新图表
+		//var d = new Date();//d.toLocaleString()
+		//adding new message
+		$(".messages").append(count+'. 主题： ' + topic + '  消息： ' + message + '<hr>');
+		//autoscrolling to the bottom
+		$(".messages").scrollTop($(".messages").height()*count);
+		
+		if(topic.includes('led')){
+			//console.log(topic,message);
+			switch(message){
+				case 'off':
+					$('.led').attr("src","mqtt/ledoff.png");
+					break;
+				case 'on':
+					$('.led').attr("src","mqtt/ledon.png");
+					break;
+			}			
+		}
+		if(topic.includes('light')){
+			//console.log(topic,message);
+			$('.lightnum').text(message);
+		}
+		if(topic.includes('sound')){
+			//console.log(topic,message);
+			$('.soundnum').text(message);
+		}
+		
+	}	
+	
+    });
+		
+</script>
+<script>
+// 创建图表实例 line bar 
+var myChart =new Chart(ctx, {
+type: 'line',
+data: {
+  labels: countlist, // X轴标签
+  datasets: [{
+		label: '传感器数据采集', // 数据集名称
+		data: msglist, // 初始数据
+		backgroundColor: 'rgba(68, 187, 109, 0.6)', // 数据集颜色
+		borderColor: 'rgba(68, 187, 109, 0.6)', // 数据集边框颜色
+		borderWidth: 1
+  }]
+},
+options: {
+  scales: {
+	y: {
+	  beginAtZero: true
+	}
+  }
+}
+});
+  // 更新图表数据的函数
+function updateChartData() {
+    // 假设我们获取了新的数据
+	var labels= countlist;
+    var newData = msglist; 
+    // 使用Chart.js的update方法更新数据
+    myChart.data.labels = labels;    
+    myChart.data.datasets.forEach(function(dataset) {
+        dataset.data = newData;
+    }); 
+    // 重绘图表
+    myChart.update();
+	
+	return "已更新"
+}
+</script>
+</html>

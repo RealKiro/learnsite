@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工智能初步</title>
+    <script src="../code/jquery.min.js"></script>
+	<style>	
+		/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸#585858;*/
+		::-webkit-scrollbar
+		{
+			width: 6px;
+			height: 6px;
+			background-color: #eee;
+		}
+		/*定义滑块 内阴影+圆角*/
+		::-webkit-scrollbar-thumb
+		{
+			-webkit-box-shadow: inset 0 0 4px rgba(0,0,0,.3);
+			background-color: #ddd;
+		}
+				
+		hr{border: none;background-color:#222;height: 1px;}		
+		.banner{background-image:url('ai.png'); height:100px;margin:0px;}
+		.main{margin:auto;display: flex;}
+		.left{width:10%;min-width:150px; border-right: 1px solid #ccc; }
+		.right{width:90%;min-width:880px; padding:4px;}
+		#aiframe{width:100%;height: 80vh; border: none;}
+
+		li {padding:10px; display:block; color:#000; background-color:#eee; cursor:pointer; border-bottom:1px solid #ccc; }
+		li:hover {color:#FFF; background-color:#61A4E6;}
+
+	</style>
+</head>
+
+<body>
+	<div class="banner"></div>
+	<div class="main">
+		<div class="left">
+				<li id="imgstyle" >图像风格迁移</li>		
+				<li id="stylization"  >任意风格迁移</li>					
+				<li id="speech" >语音合成技术</li>						
+				<li id="Recognition" >语音识别技术</li>					
+				<li id="t-rex">简单神经网络模型</li>				
+				<li id="translate" >在线翻译</li>				
+				<li id="handnum" >识别手写数字</li>			
+				<li >留空</li>	
+		</div>		
+		<div class="right">
+		<iframe id="aiframe" >内容</iframe>		
+		</div>	
+	</div>	
+</body>
+
+<script>
+	$('#imgstyle').click(function () {
+		$('#aiframe').attr('src', 'styleml5/index.html');
+    });
+	$('#stylization').click(function () {
+		$('#aiframe').attr('src', 'stylization/index.html');
+    });
+	$('#speech').click(function () {
+		$('#aiframe').attr('src', 'speak/index.html');
+    });
+	$('#Recognition').click(function () {
+		$('#aiframe').attr('src', 'speak/Rec.html');
+    });
+	$('#t-rex').click(function () {
+		$('#aiframe').attr('src', 't-rex/index.html');
+    });
+	$('#translate').click(function () {
+		$('#aiframe').attr('src', 'translate/index.html');
+    });
+    $('#handnum').click(function () {
+        $('#aiframe').attr('src', 'handnum/index.html');
+    });
+
+</script>
+<script type="text/javascript">
+/* 鼠标特效 */
+var a_idx = 0;
+jQuery(document).ready(function($) {
+    $("body").click(function(e) {
+        var a = new Array("❤富强❤","❤民主❤","❤文明❤","❤和谐❤","❤自由❤","❤平等❤","❤公正❤","❤法治❤","❤爱国❤","❤敬业❤","❤诚信❤","❤友善❤");
+        var $i = $("<span></span>").text(a[a_idx]);
+        a_idx = (a_idx + 1) % a.length;
+        var x = e.pageX,
+        y = e.pageY;
+        $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": "rgb("+~~(255*Math.random())+","+~~(255*Math.random())+","+~~(255*Math.random())+")"
+        });
+        $("body").append($i);
+        $i.animate({
+            "top": y - 180,
+            "opacity": 0
+        },
+        1500,
+        function() {
+            $i.remove();
+        });
+    });
+});
+</script>
+</html>

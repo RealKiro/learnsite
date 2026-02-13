@@ -1,0 +1,490 @@
+
+<html>
+<head>
+<meta charset="utf-8">
+<title>人工智能神经网络—图片识别手写输入</title>
+<link rel="stylesheet" href="css/index.css">
+<script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript" src="js/flexible.js"></script>
+<script src='js/pixi.js' ></script>
+<script src="js/tensorflow1.1.js"></script>
+<script src="js/axis.js"></script>
+<script src="js/jquery-3.1.1.js"></script>
+<script src="js/neural.js"></script>
+<style>
+	.prediction-canvas{
+        width: 80px;
+      }
+      .pred {
+        font-size: 16px;
+        line-height: 25px;
+		width: 80px;
+		text-align: center;
+		border-radius:5px;
+		border: 1px solid #001100;
+      }
+      .pred-correct {
+        background-color: #00cf00;
+      }
+      .pred-incorrect {
+        background-color: #e44848;
+      }
+      .pred-container {
+        display: inline-block;
+        width: 80px;
+        margin: 10px;
+      }
+
+</style>
+
+</head>
+
+<body>
+	<!-- 主DIV -->
+	<div class="main">
+		<div class="topdiv">
+			<div class="topdiv_img">
+				人工智能神经网络—图片识别手写输入
+			</div>
+		</div>
+		<div class="leftdiv">
+			<!-- 文字 -->
+			<div class="divtitle" style=" width: auto; text-align: left; padding-left: 0.2rem; background-color: rgb(142, 140, 140, 0.5);">
+				手写图片识别采用卷积神经网络，使用 65000 张图片进行训练。
+			</div>
+			<div class="divtitle" style="margin-top: 5px">训练</div>
+			<div class="divprogress1">
+				<div class="divprogress1_title">
+					<span>图片数量：</span> 
+					<span id="imageLoading">图片加载中 ...</span>
+				</div>
+				<div class="divprogress1_bj">
+					<div id="progress" style="width: 0%;"></div>
+				</div>
+				<div id="progressTxt" style="color: white;margin: 10px;opacity: 0.6;">
+					训练进度
+				</div>
+				<div class="divprogress1_btns">
+					<!-- <botton class="btn btn1" onclick="readTrainData()"></botton> -->
+					<!-- <botton class="btn btn2" onclick="draw100()"></botton> -->
+					<!-- <botton class="btn btnsave" onclick="save()"></botton> -->
+					<botton class="btn btn3" onclick="train()" title="点击开始训练模型"></botton>
+				</div>
+			</div>
+			
+			<div class="datalist">
+
+			</div>	
+
+		</div>
+		<script type="text/javascript">
+
+		</script>
+		<div class="rightdiv">
+			<div class="divtitle" style=" width: auto; text-align: center;  background-color: rgb(142, 140, 140, 0.6);">
+				在黑色区域用鼠标手写数字，点击“识别”按钮
+			</div>
+			<div class="divtitle">手写输入</div>
+			<div class="divsxsr">
+				<table border=0>
+					<tr>
+						<td>
+							<div id="hand" class="divsxsr_1"></div>
+						</td>
+						<td>
+							<botton class="btn btn4" onclick="doClear()" title="清空画布"></botton>
+							<botton class="btn btn5" onclick="test()" title="识别手写数字"></botton>
+							<botton class="btn btn6" onclick="return()" title="返回学案"></botton>
+						</td>
+					</tr>
+				</table>
+				
+				
+			</div>
+
+			<div class="divtitle">识别结果</div>
+			<div id="resultlist" class="resultlist">
+
+				<div  class="resultlist_div">
+					<div  class="resultlist_left" style="font-weight: 600;">
+					数字
+					</div>
+					<div class="resultlist_right" style=" text-align: center; font-weight: 600;">
+					相似度
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+	
+</body>
+
+	<script src="js/hand.js"></script>
+	<script>
+	var trained=false;
+	var tested=false;
+
+	window.onload = function(){
+		//加载数据
+		load();
+		//自适应
+		autoSize();
+	};
+
+	// ######################################
+    // #######        手写         ###########
+    // ######################################
+    
+
+    var hand = new Hand();
+    animate();
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(hand.stage);
+        
+	}
+
+	function doClear(){
+		hand.clear();
+	}
+	
+	//识别
+	function test() {
+        var input = hand.getData();
+
+        var re = model.predict(tf.tensor4d(input, [1, 28, 28, 1]));
+        //console.log(re.dataSync());
+        showResult(re.dataSync());
+	}
+	
+	//识别结果
+	function showResult(arr) {
+		html = ``;
+		
+		html += `<div  class="resultlist_div">`;
+		html += `<div  class="resultlist_left" style="font-weight: 600;">`;
+		html += `数字`;
+		html += `</div>`;
+		html += `<div class="resultlist_right" style="text-align: center;    font-weight: 600;">`;
+		html += `相似度`;
+		html += `</div>`;
+		html += `</div>`;
+		var getMax=0;
+		var getNum=0;
+
+        for(var i = 0; i < arr.length; i++) {
+            var width = (arr[i] * 100).toFixed(2);
+			if( parseFloat(width) > getMax) {
+				getMax = width;
+				getNum = i;
+			}
+			html += `<div  class="resultlist_div">`;
+			html += `<div class="resultlist_left"><font>` + (i) + `</font></div>`;
+			html += `<div class="resultlist_right" style="justify-content: flex-start">`;
+			html += `<div class="resultlist_width" style="width: ` + width + `%;justify-content: flex-start;"><font>` + width + `%</font></div>`;
+			html += `</div>`;
+			html += `</div>`;
+			
+			//console.log(width,getMax,getNum);
+			//console.log("行",i,getNum);
+        }    
+
+        document.getElementById("resultlist").innerHTML = html;
+		playText(getNum);
+		tested =true;
+		save();//自动保存模型
+		console.log(getNum);
+		
+    }
+
+	var storeItemName="handnum-layerArr";
+	
+	function save() {
+		var layerArr = [];
+
+		for(var i = 0; i < model.layers.length; i ++) {
+			var tfData = model.layers[i].getWeights();
+			var weights = [];
+			var bias = [];
+			if(tfData.length > 0) {
+				weights = tfData[0].dataSync();
+				bias = tfData[1].dataSync();
+			}
+			
+			layerArr.push({"weights":weights, "bias":bias});
+
+		}
+		localStorage.setItem(storeItemName, JSON.stringify(layerArr));
+		console.log("临时存储为：",storeItemName);
+	}
+
+	var layerNum = 0;
+	function readTrainData() {
+		var getStore = localStorage.getItem(storeItemName);
+		if(getStore){
+			console.log("读取缓存训练模型");
+			readDate(getStore);	
+			document.getElementById("progress").style.width = 100 + "%";
+			document.getElementById("progressTxt").innerHTML = "训练进度：" + 100 + "%  -  缓存训练模型";
+		}
+		else{
+			$.get("data/trainData2", function(data){
+				//设置训练数据
+				console.log("读取预设训练模型");
+				readDate(data);
+
+				document.getElementById("progress").style.width = 100 + "%";
+				document.getElementById("progressTxt").innerHTML = "训练进度：" + 100 + "%  -  识别精确度：" + 99.6 + "%";
+			});
+		}
+	}
+	
+	function readDate(data){
+		var layerArr = JSON.parse(data);
+
+		if(layerNum == 0) {
+			layerNum = layerArr.length;
+		}
+
+		for(var i = 0; i < layerNum; i ++ ) {
+			var weights = layerArr[i].weights;
+			var wArr = [];
+			for(var key in weights) {
+				wArr.push(weights[key]);
+			}
+			if(wArr.length == 0) {
+				continue;
+			}
+
+			var bias = layerArr[i].bias;
+			var bArr = [];
+			for(var key in bias) {
+				bArr.push(bias[key]);
+			}
+			
+			var w_shape = model.layers[i].getWeights()[0].shape;
+			var b_shape = model.layers[i].getWeights()[1].shape;
+
+			model.layers[i].setWeights([tf.tensor(wArr, w_shape), tf.tensor(bArr)]);
+			
+		}
+		draw100();	
+	}
+	
+	const IMAGE_H = 28;
+	const IMAGE_W = 28;
+	const IMAGE_SIZE = IMAGE_H * IMAGE_W; //784
+	const NUM_CLASSES = 10;
+
+	var NUM_DATASET_ELEMENTS = 65000;
+	var NUM_TRAIN_ELEMENTS = 65000;
+
+
+	const NUM_TEST_ELEMENTS = NUM_DATASET_ELEMENTS - NUM_TRAIN_ELEMENTS;
+
+	const model = tf.sequential();
+	model.add(tf.layers.conv2d({inputShape: [28, 28, 1], kernelSize: 3, filters: 16, activation: 'relu'}));
+	model.add(tf.layers.maxPooling2d({poolSize: 2, strides: 2}));
+	model.add(tf.layers.conv2d({kernelSize: 3, filters: 32, activation: 'relu'}));
+	model.add(tf.layers.maxPooling2d({poolSize: 2, strides: 2}));
+	model.add(tf.layers.conv2d({kernelSize: 3, filters: 32, activation: 'relu'}));
+	model.add(tf.layers.flatten({}));
+	model.add(tf.layers.dense({units: 10, activation: 'softmax'}));
+	model.summary();
+
+	//训练数据
+	var datasetImages ;
+	async function load() {
+		// 创建图片
+		const img = new Image();
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d', {willReadFrequently: true});
+		
+		const imgRequest = new Promise((resolve, reject) => {
+		img.onload = async () => {  // Changed to async function
+		    const datasetBytesBuffer = new ArrayBuffer(NUM_DATASET_ELEMENTS * IMAGE_SIZE * 4);
+		    
+		    const chunkSize = 1000;
+		    canvas.width = img.width;
+		    canvas.height = chunkSize;
+		    
+		    // Process chunks synchronously
+		    for (let i = 0; i < NUM_DATASET_ELEMENTS / chunkSize; i++) {
+		        const start = i * IMAGE_SIZE * chunkSize * 4;
+		        const chunkBuffer = new ArrayBuffer(IMAGE_SIZE * chunkSize * 4);
+		        const chunkView = new Float32Array(chunkBuffer);
+		        
+		        ctx.drawImage(img, 0, i * chunkSize, img.width, chunkSize, 0, 0, img.width, chunkSize);
+		        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		        
+		        const data = new Uint32Array(imageData.data.buffer);
+		        for (let j = 0; j < data.length; j++) {
+		            chunkView[j] = (data[j] & 0xff) / 255;
+		        }
+		        
+		        new Float32Array(datasetBytesBuffer, start).set(chunkView);
+		        await new Promise(r => setTimeout(r, 0));
+		    }
+		    
+		    // Assign datasetImages AFTER processing
+		    datasetImages = new Float32Array(datasetBytesBuffer);  // Added this line
+		    resolve();  // Move resolve inside
+		};
+		img.src = "img/mnist_images.png";
+		});
+		
+		const labelsRequest = fetch("data/mnist_labels_uint8.dms");
+		const [imgResponse, labelsResponse] = await Promise.all([imgRequest, labelsRequest]);
+
+		var datasetLabels = new Uint8Array(await labelsResponse.arrayBuffer());
+
+		var trainImages = datasetImages.slice(0, IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
+		var trainLabels = datasetLabels.slice(0, NUM_CLASSES * NUM_TRAIN_ELEMENTS);
+		console.log("训练集：",trainImages.length/ IMAGE_SIZE,trainLabels.length);
+		//训练数据
+		train_xs = tf.tensor4d(trainImages,[trainImages.length / IMAGE_SIZE, 28, 28, 1]);
+		train_labels = tf.tensor2d(trainLabels, [trainLabels.length / 10, 10]);
+
+		trainData = {"xs" : train_xs, "labels" : train_labels};
+		
+		document.getElementById("imageLoading").innerHTML = "训练图片加载完成";
+		//readTrainData();
+		//draw100();
+		train();
+	
+	}
+
+	
+	var train_xs;
+	var train_labels;
+
+	var test_xs;
+	var test_labels;
+	var trainData;
+	var examples;
+
+	async function train() {
+
+		const optimizer = 'rmsprop';
+		model.compile({
+			optimizer,
+			loss: 'categoricalCrossentropy',
+			metrics: ['accuracy']
+		});
+
+		console.log('Training model...');
+		const batchSize = 200;
+        const validationSplit = 1;
+		const trainEpochs = 1;
+		var trainImageNum = 0;
+
+		await model.fit(trainData.xs, trainData.labels, {
+            batchSize, //每次训练几个数据
+            validationSplit, //测试数据占比 0-1
+            epochs: trainEpochs, //训练次数
+            callbacks: {
+                onBatchEnd: async (batch, logs) => {
+                    //console.log("loss:" + logs.loss + " -- acc:" + logs.acc)
+					$("#imageLoading").html(trainImageNum);
+					trainImageNum += batchSize;
+					var pro = trainImageNum / (65000 * trainEpochs) * 100;
+					pro = pro.toFixed(2);
+					//更新进度条
+					document.getElementById("progress").style.width = pro + "%";
+					document.getElementById("progressTxt").innerHTML = "训练进度：" + pro + "%  -  识别精确度：" + logs.acc.toFixed(4) * 100 + "%";
+					
+					draw100();
+                    await tf.nextFrame();
+                },
+                onEpochEnd: async (epoch, logs) => {
+					console.log("训练完成");
+					trained = true;
+					$("#imageLoading").html(trainImageNum);
+
+					// trainImageNum ++;
+					// //更新进度条
+					// document.getElementById("progress").style.width = trainImageNum + "%";
+					// document.getElementById("progress").innerHTML = "训练进度：" + trainImageNum + "%";
+
+                    if(self.callBack) {
+                        self.callBack(logs.acc);
+                    }
+                    await tf.nextFrame();
+                }
+            }
+        });
+
+		console.log('Completed!');
+
+	}
+
+	function draw100() {
+
+		document.querySelector(".datalist").innerHTML = "";
+
+		for (let i = 0; i < 28; i++) {
+
+			var r = parseInt(Math.random() * 65000 / (28 * 28));
+			const image = train_xs.slice([r], [1]);
+			const label = train_labels.slice([r], [1]).argMax(1).dataSync()[0];
+
+			const div = document.createElement('div');
+			div.className = 'pred-container';
+
+			const canvas = document.createElement('canvas');
+			canvas.className = 'prediction-canvas';
+			draw(image.flatten(), canvas);
+
+			var prediction = model.predict(image).argMax(1).dataSync()[0];
+			//预测是否正确
+			const correct = prediction === label;
+
+			const pred = document.createElement('div');
+			pred.className = `预测 ${(correct ? '预测正确' : '预测错误')}`;
+    		pred.innerText = `预测: ${prediction}`;
+
+			div.appendChild(pred);
+			div.appendChild(canvas);
+			document.querySelector(".datalist").appendChild(div);
+			
+		}
+
+	}
+
+	function draw(image, canvas) {
+		const [width, height] = [28, 28];
+		canvas.width = width;
+		canvas.height = height;
+		const ctx = canvas.getContext('2d');
+		const imageData = new ImageData(width, height);
+		const data = image.dataSync();
+		for (let i = 0; i < height * width; ++i) {
+			const j = i * 4;
+			imageData.data[j + 0] = data[i] * 255;
+			imageData.data[j + 1] = data[i] * 255;
+			imageData.data[j + 2] = data[i] * 255;
+			imageData.data[j + 3] = 255;
+		}
+		ctx.putImageData(imageData, 0, 0);
+	}
+
+	const utterance = new SpeechSynthesisUtterance();
+	function playText(text) {
+	  if(text){
+		if (speechSynthesis.paused && speechSynthesis.speaking) {
+		  return speechSynthesis.resume();
+		}
+		if (speechSynthesis.speaking) return;
+		utterance.text = text;
+		utterance.rate =  1;//
+
+		speechSynthesis.speak(utterance);
+	  }
+	}
+
+	
+	</script>
+
+</html>

@@ -1,0 +1,80 @@
+﻿<html >
+<head>
+    <title>学习平台入口</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+		.ground
+		{
+			background-image: url('app_themes/Student/ground.jpg');
+			background-size:cover; 
+		}
+		.banner
+		{
+			padding: 0px;
+			top: 0px;
+			margin: 0px;
+			border-width: 0px;
+			height: 100px;
+			width: 100%;
+			overflow: hidden;
+			background-image: url('app_themes/Student/road.jpg');
+			background-repeat: no-repeat;
+		}
+        .link-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .grade-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .grade-link:hover {
+            background-color: #45a049;
+        }
+        .banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            /* 可选：添加背景色或高度 */
+            /* background: #fff; */
+            /* height: 60px; */
+			overflow: hidden;
+			background-image: url('app_themes/Student/road.jpg');
+			background-repeat: no-repeat;
+        }
+    </style>
+<body class="ground">
+	<div  class="banner" ></div>
+	<div class="link-container">
+		<a id="grade7" class="grade-link">七年级学习平台入口（http协议访问）</a>
+	</div>
+	<div class="link-container">
+		<a id="grade8" class="grade-link">八年级学习平台入口（https协议访问）</a>
+	</div>
+</body>
+<script language="javascript">
+	var used=true;
+	var protocol = window.location.protocol; // 获取网址的协议部分，例如 "http:" 或 "https:"  window.location.href
+	console.log(protocol); // 打印协议
+	var hostip = location.host;
+	var httpslink= 'https://'+hostip+'/index.aspx';
+	var httplink= 'http://'+hostip+'/index.aspx';
+	document.getElementById("grade7").href =httplink;
+	document.getElementById("grade8").href =httpslink;
+
+</script>
+</html>

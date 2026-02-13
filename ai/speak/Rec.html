@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Speech Recognition Example</title>
+</head>
+<body>
+<input type="text" id="search-box" placeholder="Search Baidu"/>
+<button id="search-button">Search</button>
+<script>
+    const recognition = window.webkitSpeechRecognition ? new webkitSpeechRecognition() : null; // 判断是否支持 webkitSpeechRecognition 
+    if (recognition) {
+        recognition.lang = window.navigator.language || 'en-US'; // 设置为语言 
+        const searchBox = document.getElementById('search-box');
+        const searchButton = document.getElementById('search-button');
+        recognition.onresult = (event) => {
+            const result = event.results[event.results.length - 1];
+            searchBox.value = result[0].transcript;
+        };
+        searchButton.addEventListener('click', () => {
+            const query = searchBox.value;
+			
+			window.location.href = ` https://www.baidu.com/s?ie=utf-8&wd=${query}`;
+
+            document.addEventListener('keydown', (event) => {
+                if (event.keyCode === 13) {
+                    event.preventDefault();
+                    searchButton.click();
+                }
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.keyCode === 32 && !event.repeat) {
+                    recognition.start();
+                }
+            });
+            document.addEventListener('keyup', (event) => {
+                if (event.keyCode === 32 && !event.repeat) {
+                    recognition.stop();
+                }
+            });
+        });
+		}
+    else
+        {
+            console.log('浏览器不支持语音识别');
+        } 
+</script>
+</body>
+</html>

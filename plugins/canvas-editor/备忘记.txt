@@ -1,0 +1,9 @@
+msg=editor.command.getValue()
+
+editor.command.executeSetValue(msg.data)
+
+a=JSON.stringify( msg.data)
+
+  a='{"header":[],"main":[],"footer":[]}'
+
+b=JSON.parse(a)

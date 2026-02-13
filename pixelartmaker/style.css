@@ -1,0 +1,167 @@
+body {
+		margin: 0;
+		background-color: rgb(250, 235, 215);
+}
+
+@font-face {
+  font-family: 'Monoton';
+  font-style: normal;
+  src: url(Monoton.woff2) format('woff2');
+}
+
+#logo{	
+	margin-top:4px;
+	width:80px;
+}
+
+#petcolor{
+	position:fixed;
+	z-index:99;
+	top:95px;
+	display:none;
+}
+
+.left{	
+	position: relative;
+	width:160px;
+	font-size:24px;
+    flex: 0 0 auto;
+	}
+.right{	
+	position: relative;
+	font-size:24px;
+    flex: 0 0 auto;
+	}
+
+h1 {
+	font-family: Monoton, cursive;
+	font-size: 36px;
+	margin: 0px;
+	color: rgb(255, 128, 128);	
+	user-select:none; 
+}
+
+
+#main{
+	min-width:1080px;		
+}
+
+#pick{
+	width:1080px;
+    text-align: center;
+	margin:auto;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+#pixel_canvas{
+  cursor:url(pen.png) 0 16 ,pointer;
+}
+
+.cell{	
+  border: 1px solid #ddd;
+  width: 18px;
+  height: 18px;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  background-color: rgb(255, 255, 255);
+}
+
+tr {
+  height: 0;
+}
+
+.palettehead
+{
+  width: 18px;
+  height: 23px;
+  border: 2px solid black;	
+}
+.paletteFull{
+  width: 18px;
+  height: 23px;
+  border: 2px solid black;
+}
+
+#palette {
+	margin-bottom: 10px;
+	cursor:pointer;
+}
+
+#sizePicker{
+	display:none;
+}
+
+td {
+}
+
+
+#colorPicker{
+}
+
+.savetext{  
+	width:60px;
+}
+.savetext:hover{
+	background:#aaddaa;
+	border:1px solid;
+}
+
+#framelist{
+	overflow: hidden;
+	width:1070px;
+	margin:auto;
+    display: flex;
+    flex-wrap: nowrap;
+}
+#frameadd{
+	position: relative;
+	width:30px;
+	background-color: #2C2925;
+    flex: 0 0 auto;	
+	color: #aaa;
+	cursor: pointer;
+	text-align:center;
+}
+
+#plus{	
+	font-size:24px;
+}
+
+#plus:hover{	
+	color: white;	
+}
+
+#minus{	
+	font-size:32px;
+}
+
+#minus:hover{	
+	color: white;
+}
+
+#playArt{
+	padding-top:10px;
+	font-size:18px;
+}
+
+.frame{
+    flex: 0 0 auto;
+	color: white;
+	margin: 0.3em 0.3em;
+	flex: 0 0 auto;
+	position: relative;
+	overflow: hidden;
+	opacity: 0.3;
+	cursor:pointer;
+	box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);	
+}
+.frame:hover{
+	opacity: 1;
+}
+
+.cellthumb{	
+}

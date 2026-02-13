@@ -1,0 +1,54 @@
+﻿使用openssl生成pfx数字证书（亲测实战好用）
+
+1.介绍
+
+现在主流的证书有cer，pfx证书，那么他们两者有啥区别呢？
+
+cer是公钥证书，里面包含公钥，生成的时候不需要输入密码加密；
+
+pfx是带有钥的证书，所以在生成的时候需要输入密码加密
+
+2.生成过程
+
+1）安装openssl
+
+通过官网下载软件，然后配置环境变量（具体操作自己搜，基本都很简单）
+
+2）生成证书
+
+第一步：win + x  进入powershell，使用管理员方式打开
+
+第二步：输入openssl
+
+第三步：输入
+
+req -newkey rsa:2048 -nodes -keyout learnsite.key -x509 -days 365000 -out learnsite.cer
+
+过期时间是1000年
+
+此时生成私钥，需要输入
+
+Country Name (2 letter code) [AU]:EN
+
+State or Province Name (full name) [Some-State]:China
+
+Locality Name (eg, city) []:CD
+
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:CD
+
+Organizational Unit Name (eg, section) []:CD
+
+Common Name (e.g. server FQDN or YOUR name) []:CD
+
+Email Address []:common@qq.com
+
+　文件夹下会生成私钥learnsite.key跟公钥learnsite.cer
+
+第四步：输入
+
+pkcs12 -export -in learnsite.cer -inkey learnsite.key -out learnsite.pfx
+
+然后输出pfx文件即可
+————————————————————————————————————
+                        
+原文链接：https://blog.csdn.net/thm0805/article/details/127647084

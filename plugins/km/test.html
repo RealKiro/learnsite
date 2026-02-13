@@ -1,0 +1,121 @@
+<head>		
+		<meta charset=utf-8>
+	<!-- bower:css -->
+	<link rel="stylesheet" href="../../Plugins/km/bower_components/bootstrap/dist/css/bootstrap.css" />
+	<link rel="stylesheet" href="../../Plugins/km/bower_components/codemirror/lib/codemirror.css" />
+	<link rel="stylesheet" href="../../Plugins/km/bower_components/hotbox/hotbox.css" />
+	<link rel="stylesheet" href="../../Plugins/km/bower_components/kityminder-core/dist/kityminder.core.css" />
+	<link rel="stylesheet" href="../../Plugins/km/bower_components/color-picker/dist/color-picker.min.css" />
+	<!-- endbower -->
+
+	<link rel="stylesheet" href="../../Plugins/km/kityminder.editor.css">
+		<style>
+		div.minder-editor-container {
+			top: 0px;
+		}
+        .tool {
+            width: 100%;
+            z-index: 999;
+            position: absolute;
+            top: 0px;
+            height: 40px;
+            font-size: 14px;
+            line-height: 40px;
+        }
+		.export{
+			height: 30px;
+			line-height: 30px;
+			margin: 2px;
+			float: right;
+			right:50px;
+			color: #333;
+			overflow: hidden;
+			position: relative;
+			cursor:pointer;
+		}
+	</style>
+</head>
+<body ng-app="kityminderDemo" >
+<kityminder-editor on-init="initEditor(editor, minder)" data-theme="fresh-green"></kityminder-editor>
+</body>
+
+<!-- bower:js -->
+<script src="../../Plugins/km/bower_components/jquery/dist/jquery.js"></script>
+<script src="../../Plugins/km/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="../../Plugins/km/bower_components/angular/angular.js"></script>
+<script src="../../Plugins/km/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<script src="../../Plugins/km/bower_components/codemirror/lib/codemirror.js"></script>
+<script src="../../Plugins/km/bower_components/codemirror/mode/xml/xml.js"></script>
+<script src="../../Plugins/km/bower_components/codemirror/mode/javascript/javascript.js"></script>
+<script src="../../Plugins/km/bower_components/codemirror/mode/css/css.js"></script>
+<script src="../../Plugins/km/bower_components/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="../../Plugins/km/bower_components/codemirror/mode/markdown/markdown.js"></script>
+<script src="../../Plugins/km/bower_components/codemirror/addon/mode/overlay.js"></script>
+<script src="../../Plugins/km/bower_components/codemirror/mode/gfm/gfm.js"></script>
+<script src="../../Plugins/km/bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
+<script src="../../Plugins/km/bower_components/marked/lib/marked.js"></script>
+<script src="../../Plugins/km/bower_components/kity/dist/kity.min.js"></script>
+<script src="../../Plugins/km/bower_components/hotbox/hotbox.js"></script>
+<script src="../../Plugins/km/bower_components/json-diff/json-diff.js"></script>
+<script src="../../Plugins/km/bower_components/kityminder-core/dist/kityminder.core.min.js"></script>
+<script src="../../Plugins/km/bower_components/color-picker/dist/color-picker.min.js"></script>
+<!-- endbower -->
+
+<script src="../../Plugins/km/kityminder.editor.js"></script>
+<script >
+
+	//点击导出链接自动下载
+function downfile(link) {
+        var title = editor.minder.getRoot().getData("text");
+        exportType = 'json';
+
+        var strJson;
+        var blob = new Blob();
+
+        editor.minder.exportData(exportType).then(function (content) {
+            strJson = $.parseJSON(content);
+            console.log(strJson);
+        });
+
+        exportType = 'png';
+        editor.minder.exportData(exportType).then(function (content) {
+            blob = dataURLtoBlob(content); //将base64编码转换为blob对象
+            var a = document.createElement("a"); //建立标签，模拟点击下载
+            a.download = title + '.' + exportType;
+            a.href = URL.createObjectURL(blob);
+            a.click();
+
+        });
+}
+
+
+//base64转换为图片blob
+function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(',');
+    //注意base64的最后面中括号和引号是不转译的
+    var _arr = arr[1].substring(0, arr[1].length - 2);
+    var mime = arr[0].match(/:(.*?);/)[1],
+    bstr = atob(_arr),
+    n = bstr.length,
+    u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {
+        type: mime
+    });
+}
+
+
+</script>
+
+
+<script>
+	angular.module('kityminderDemo', ['kityminderEditor'])
+	.controller('MainController', function($scope) {
+		$scope.initEditor = function(editor, minder) {
+			window.editor = editor;
+			window.minder = minder;
+		};
+	});
+</script>

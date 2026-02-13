@@ -1,0 +1,47 @@
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/pluginsCss.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/plugins.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/luckysheet.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/iconfont.css'/>
+    <script src="../../Plugins/luckysheet/js/plugin.js"></script>
+    <script src="../../Plugins/luckysheet/js/luckysheet.umd.js"></script>
+    <script src="../../Plugins/luckysheet/js/luckyexcel.umd.js"></script>
+
+</head>
+<body>
+<div id="lucky" style="height:90%;"></div>
+</body>
+<script type="text/javascript">
+    /* 导出的json字符串可以直接当作`luckysheet.create(options)`初始化工作簿时的参数`options`使用，使用场景在用户自己操作表格后想要手动保存全部的参数，再去别处初始化这个表格使用，类似一个luckysheet专有格式的导入导出
+    */
+    loadHandler();
+
+    function loadHandler() {
+        var value = "demo.xlsx"; //文件链接
+        var name = ""; //文件名
+        LuckyExcel.transformExcelToLuckyByUrl(value, name, function (exportJson, luckysheetfile) {
+
+            if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+                alert("只支持xlsx格式文档!");
+                return;
+            }
+            //console.log(exportJson, luckysheetfile);
+            //window.luckysheet.destroy();
+
+            window.luckysheet.create({
+                container: 'lucky', //luckysheet is the container id
+                showinfobar: false,
+                data: exportJson.sheets,
+                title: exportJson.info.name,
+                lang: 'zh',
+                showsheetbar: true,
+                myFolderUrl: "#",
+                plugins: ['chart']
+            });
+        });
+    }
+</script>
+
+</html>

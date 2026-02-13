@@ -1,0 +1,13 @@
+IIS里的mime类型添加扩展名如下，最后一行的点也要添加，用于机器学习模型下载(mime类型application/octet-stream)
+.sb3
+.py
+.woff2
+.woff 
+.mp4 
+.ogg 
+.svg 
+.mpptx 
+.bin 
+.
+.dms
+.webp

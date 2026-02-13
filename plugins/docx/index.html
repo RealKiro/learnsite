@@ -1,0 +1,31 @@
+    <script crossorigin src="../../plugins/docx/dist/jszip.min.js"></script>
+    <script src="../../plugins/docx/dist/docx-preview.js"></script>
+    <script crossorigin src="../../plugins/docx/dist/tiff.min.js"></script>
+    <script src="../../plugins/docx/dist/tiff-preprocessor.js"></script>
+
+     <div id="document-container" style="user-select: none;"></div>
+
+    <script>
+		let currentDocument = null;
+        let docurl = "Sample.docx";
+	
+        const container = document.querySelector("#document-container");
+		
+		init();
+		
+		async function init(){		
+			let resp = await fetch(docurl);		
+			renderDocx(await resp.blob());	
+		}
+
+        async function renderDocx(file) {
+            currentDocument = file; 
+            if (!currentDocument) 
+                return;            
+            // optional, find and convert all tiff images 
+            let docxBlob = preprocessTiff(currentDocument); 
+            // render document
+            let res = await docx.renderAsync(docxBlob, container, null, null)
+        }    
+
+    </script>

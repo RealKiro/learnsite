@@ -1,0 +1,11 @@
+[
+  {
+    "id": "test-slide-1",
+    "elements": [      
+    ],
+    "background": {
+      "type": "solid",
+      "color": "#ffffff"
+    }
+  }
+]

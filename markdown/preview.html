@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="utf-8" />
+        <title>Markdown写作</title>
+        <link rel="stylesheet" href="../markdown/css/editormd.css" />
+        <link rel="shortcut icon" href="../markdown/favicon.ico" type="image/x-icon" />
+    </head>
+    <body>
+        <div id="layout">
+			<div id="editormd" >
+				<textarea style="display:none;">#mymd#</textarea>
+			</div>
+        </div>
+        <script src="../js/jquery.min.js"></script>
+        <script src="../markdown/editormd.js"></script>
+        <script type="text/javascript">
+            var mdEditor;
+            $(function() {
+                mdEditor = editormd("editormd", {
+                    height  : 640,
+                    syncScrolling : "single",
+                    path: "../markdown/lib/",
+					toolbarIcons : "me",
+					table: true
+                });
+            });
+        </script>
+    </body>
+</html>

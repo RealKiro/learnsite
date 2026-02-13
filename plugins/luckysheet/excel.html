@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>在线电子表格</title>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/pluginsCss.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/plugins.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/luckysheet.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/iconfont.css'/>
+    <script src="../../Plugins/luckysheet/js/plugin.js"></script>
+    <script src="../../Plugins/luckysheet/js/luckysheet.umd.js"></script>
+    <script src="../../Plugins/luckysheet/js/luckyexcel.umd.js"></script>
+	<style>
+		.save{
+            position: absolute;
+            z-index: 999;
+            top: 2px;
+			margin: 2px;
+			float: right;
+			right:240px;
+		}
+		.loader{
+            position: absolute;
+            z-index: 999;
+            top: 2px;
+			margin: 2px;
+			float: right;
+			right:340px;
+		}
+	</style>
+</head>
+<body>
+<button id="loader" class="loader" onclick="loadHandler()">加载表格</button>
+<button class="save" onclick="save()">立即保存</button>
+<div id="lucky" style="margin:0px;padding:0px;position:absolute;width:100%;height:100%;left: 0px;top: 30px; font-size:16px;"></div>
+</body>
+<script type="text/javascript">
+    options = {
+        container: 'lucky',
+        title: "",
+        lang: 'zh',
+        showsheetbar: false,
+        myFolderUrl: "#"
+    }
+    window.luckysheet.create(options);
+
+    function save() {
+        console.log("保存信息");
+        var test = window.luckysheet.toJson();
+        console.log(test);
+    }
+
+    /*
+    导出的json字符串可以直接当作`luckysheet.create(options)`初始化工作簿时的参数`options`使用，使用场景在用户自己操作表格后想要手动保存全部的参数，再去别处初始化这个表格使用，类似一个luckysheet专有格式的导入导出
+    */
+</script>
+
+<script>
+    function loadHandler() {
+        var value = "demo.xlsx"; //文件链接
+        var name = ""; //文件名
+        if (value == "") {
+            return;
+        }
+        LuckyExcel.transformExcelToLuckyByUrl(value, name, function (exportJson, luckysheetfile) {
+
+            if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+                alert("只支持xlsx格式文档!");
+                return;
+            }
+            //console.log(exportJson, luckysheetfile);
+            window.luckysheet.destroy();
+
+            window.luckysheet.create({
+                container: 'lucky', //luckysheet is the container id
+                showinfobar: false,
+                data: exportJson.sheets,
+                title: exportJson.info.name,
+                lang: 'zh',
+                showsheetbar: false,
+                myFolderUrl: "#",
+                plugins: ['chart']
+            });
+        });
+
+    }
+</script>
+
+</html>

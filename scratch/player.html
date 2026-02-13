@@ -1,0 +1,32 @@
+  
+  <script>
+    window.scratchConfig = {
+      
+      handleVmInitialized: (vm) => {
+        window.vm = vm
+        console.log("VM初始化完毕")
+        
+      },
+      handleProjectLoaded:() => {
+        console.log("作品载入完毕")
+
+      },
+      handleDefaultProjectLoaded:() => {
+        //默认作品加载完毕，一般在这里控制项目加载
+		window.scratch.setProjectName("默认项目")
+          window.scratch.loadProject("../scratch/project.sb3", () => { 
+             console.log("项目加载完毕")
+             window.scratch.setProjectName("默认项目")
+          })
+      },
+    }
+
+
+  </script>
+
+
+  <div id="scratch">
+    
+  </div>
+<script type="text/javascript" src="../scratch/lib.min.js"></script>
+<script type="text/javascript" src="../scratch/chunks/player.js"></script>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>机器学习—图像分类</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Import the webpage's stylesheet -->
+  <link rel="stylesheet" href="font-awesome.css">
+  <style>
+    #whatimg {
+      width: 224px;
+      height: 224px;
+    }
+
+    h1 {
+      font-family: 迷你简雪峰;
+      color: #1f5069;
+      text-shadow: 2px 2px 0 #d1d1d1;
+      margin-left: 1em;
+    }
+    i{
+      cursor: pointer;
+    }
+    .accbox {
+      margin: 4px auto;
+      width: 230px;
+      height: 16px;
+      border: 1px solid #dadada;
+      align-items: center;
+    }
+
+    .accload {
+      width: 0px;
+      height: 16px;
+      background: #eea24c;
+      color: white;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    #model-name {
+      margin: auto;
+      text-align: center;
+      padding: 10px;
+    }
+
+    #webcam-container {
+      margin: auto;
+      width: 224px;
+      height: 224px;
+      border: 1px solid rgb(211, 211, 211);
+      padding: 2px;
+      line-height: 224px;
+    }
+
+    #label-container {
+      margin: auto;
+      width: 224px;
+      text-align: center;
+    }
+    
+    .uploadpic{
+      height: 16px;
+      background-color: #eee;
+      width: 120px;
+      padding: 6px;
+      margin: 6px;
+      cursor: pointer;
+    }
+    .uploadpic:hover{
+      background-color: #ddd;
+
+    }
+  </style>
+</head>
+
+<body>
+  <div style="text-align: center;">
+
+    <h1><i id="logo" class="fa fa-cog" aria-hidden="true"></i> 机器学习—图像分类</h1>
+    <input type="file" id="image-obj" style="display: none;" />
+
+    <div>      
+			<i id="enable-canvas" class="fa fa-paint-brush" aria-hidden="true" title="开启画布"></i>
+      <span id="model-name"></span>
+			<span class="videoicon"><i id="enable-webcam" class="fa fa-video-camera" aria-hidden="true"  title="开启摄像头" ></i></span>
+    </div>
+    <div id="webcam-container">
+      <canvas height="224" width="224" id="whatimg"></canvas>
+    </div>
+    <br>
+    <div>
+      <span class="uploadpic" id="uppic">选择图片</span>
+      <span class="uploadpic" id="clearpic">清除画布</span>
+    </div>
+    <br>
+    <div>
+      <i id="enable-voice" class="fa fa-volume-up" aria-hidden="true" title="语音播报"></i>
+      <span id="label-container">分类模型读取中……</span>
+    </div>    
+
+  </div>
+  <script src='../code/jquery.min.js' type="text/javascript"></script>
+  <script src="tf.min.js" type="text/javascript"></script>
+  <script src="teachablemachine-image.min.js" type="text/javascript"></script>
+  <script src="fabric.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    let predict = false;
+    let voice = true;
+    const MOBILE_NET_INPUT_WIDTH = 224;
+    const MOBILE_NET_INPUT_HEIGHT = 224;
+    let mobilenet;
+    const webcanContain = document.getElementById("webcam-container");
+    const camContain = document.getElementById("cam-container");
+    const imageObj = document.getElementById('image-obj');
+    const modeltitle = document.getElementById('model-name');
+    const envoice = document.getElementById("enable-voice");
+    const enwebcam=document.getElementById("enable-webcam");
+    const encanvas=document.getElementById("enable-canvas");
+    const modelName = GetRequest();
+
+    loadMobileNetFeatureModel();
+
+    let CLASS_NAMES;
+    let canvasnull = document.getElementById("whatimg");//空画布
+    canvasnull.getContext('2d').clearRect(0, 0, 224, 224);
+
+    
+    var fabric_canvas = new fabric.Canvas('whatimg', { backgroundColor: "#000000"});
+    fabric_canvas.renderTop();
+    fabric_canvas.isDrawingMode = true;
+    fabric_canvas.freeDrawingBrush.width = 18;
+    fabric_canvas.freeDrawingBrush.color = "#ffffff";
+
+    
+    enwebcam.addEventListener('click', webcamdo);
+    encanvas.addEventListener('click', canvasdo);
+
+    let videoPlaying = false;//有无摄像头
+    const flip = true; // whether to flip the webcam
+    let webcam ; // width, height, flip
+
+    try{
+      navigator.getUserMedia(
+        {   // we would like to use video but not audio
+          // This object is browser API specific! - some implementations require boolean properties, others require strings!
+          video: true, 
+          audio: false
+        },
+        async function(videoStream) {
+          // 'success' callback - user has given permission to use the camera
+          // my code to use the camera here ... 
+          console.log("支持摄像头");
+          videoPlaying=true;
+          webcam = new tmImage.Webcam(224, 224, flip); // width, height, flip
+          await webcam.setup(); // request access to the webcam
+          await webcam.play();
+          webcanContain.innerHTML='';
+          webcanContain.appendChild(webcam.canvas);
+          console.log("加载摄像头");
+          window.requestAnimationFrame(loop);
+        },
+      async function() {
+          // 'no permission' call back
+          console.log("没有摄像头");
+          videoPlaying=false;
+        }               
+      );
+    }
+    catch{
+      console.log("不支持摄像头");
+    }
+
+
+    // append elements to the DOM
+    async function loop() {
+        await webcam.update(); // update the webcam frame
+        window.requestAnimationFrame(loop);
+    }
+
+    envoice.addEventListener('click', voicedo);
+    async function voicedo() {
+      if (voice) {
+        voice = false;
+        envoice.className = "fa fa-volume-off";
+        envoice.title = "语音禁用";
+      }
+      else {
+        voice = true;
+        envoice.className = "fa fa-volume-up";
+        envoice.title = "语音播报";
+      }
+    }
+
+    $("#uppic").click(function () {
+      imageObj.click();
+    });
+
+    $("#clearpic").click(function(){
+        fabric_canvas.clear();
+    });
+    let model, labelContainer;
+    model = tf.sequential();
+    labelContainer = document.getElementById("label-container");
+
+    initmodel();
+
+    async function initmodel() {
+      model.add(tf.layers.dense({ inputShape: [1024], units: 128, activation: 'relu' }));
+      model.add(tf.layers.dense({ units: 2, activation: 'softmax' }));
+
+      model.summary();
+
+      // Compile the model with the defined optimizer and specify a loss function to use.
+      model.compile({
+        // Adam changes the learning rate over time which is useful.
+        optimizer: 'adam',
+        // Use the correct loss function. If 2 classes of data, must use binaryCrossentropy.
+        // Else categoricalCrossentropy is used if more than 2 classes.
+        loss: (2 === 2) ? 'binaryCrossentropy' : 'categoricalCrossentropy',
+        // As this is a classification problem you can record accuracy in the logs too!
+        metrics: ['accuracy']
+      });
+    }
+
+    // Load the image model and setup the webcam
+    async function init() {
+
+      const modelclass = 'tensorflowjs_models/' + modelName + '/model_classname';
+      //const metadataURL = URL + "metadata.json";    
+      // load the model and metadata
+      // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+      // or files from your local hard drive
+      // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+      //model = await tmImage.load(modelURL, metadataURL);
+      //model = await tf.loadLayersModel(modelURL);
+      if (localStorage.getItem(modelclass)) {
+        CLASS_NAMES = window.localStorage.getItem(modelclass).split(',');
+        console.log("分类：", CLASS_NAMES);
+        labelContainer.innerHTML = "加载模型成功！";
+        modeltitle.innerHTML = " 《" + CLASS_NAMES.toString().replace(',', '✡')+"》";
+        model = await tf.loadLayersModel('localstorage://' + modelName);
+        console.log("加载模型成功！")
+        predict=true;
+        // append elements to the DOM
+        predictLoop();
+      }
+      else {
+        modeltitle.innerHTML = "当前无分类模型";
+      }
+    }
+
+    // run the webcam image through the image model
+
+    async function predictLoop() {
+      if (predict) {
+        tf.tidy(function () {
+          let imageFeatures = calculateFeaturesOnCurrentFrame();
+          let prediction = model.predict(imageFeatures.expandDims()).squeeze();
+          let highestIndex = prediction.argMax().arraySync();
+          let predictionArray = prediction.arraySync();
+
+          let acc = Math.floor(predictionArray[highestIndex] * 100);
+          let classname = "";
+          if (CLASS_NAMES) {
+            classname = CLASS_NAMES[highestIndex];
+          }
+          let canvas = document.getElementById("whatimg");
+          let anshtml = [
+            '<div class="accbox">',
+            '<div class="accload" style="width:' + acc + '%" >' + acc + '%</div>',
+            '</div> '
+          ].join('');
+          
+        labelContainer.innerHTML = classname + anshtml;
+        if (acc > 30) {
+          playText("这是" + classname);
+        }        
+
+
+        });
+      }
+      window.requestAnimationFrame(predictLoop); 
+    }
+
+
+    //识别对像
+    function calculateFeaturesOnCurrentFrame() {
+      return tf.tidy(function () {
+        // Grab pixels from current VIDEO frame. datacanvas
+        let videoFrameAsTensor = tf.browser.fromPixels(canvasnull);
+        let canvas = document.getElementById("whatimg");
+        if (canvas) {
+          videoFrameAsTensor = tf.browser.fromPixels(canvas);
+        }
+          else{
+            videoFrameAsTensor = tf.browser.fromPixels(webcam.canvas);
+          }
+        // Resize video frame tensor to be 224 x 224 pixels which is needed by MobileNet for input.
+        let resizedTensorFrame = tf.image.resizeBilinear(
+          videoFrameAsTensor,
+          [MOBILE_NET_INPUT_HEIGHT, MOBILE_NET_INPUT_WIDTH],
+          true
+        );
+        let normalizedTensorFrame = resizedTensorFrame.div(255);
+
+        return mobilenet.predict(normalizedTensorFrame.expandDims()).squeeze();
+      });
+    }
+
+    async function loadMobileNetFeatureModel() {
+      const URL = 'mobilenetv3';
+      mobilenet = await tf.loadGraphModel(URL, { fromTFHub: true });
+      //enableCam();
+      // Warm up the model by passing zeros through it once.
+      tf.tidy(function () {
+        let answer = mobilenet.predict(tf.zeros([1, MOBILE_NET_INPUT_HEIGHT, MOBILE_NET_INPUT_WIDTH, 3]));
+        console.log(answer.shape);
+
+        init();//加载模型之后执行初始化
+      });
+    }
+
+    async function webcamdo(){
+        console.log("视频状态：",videoPlaying);
+        videoPlaying=true;
+        webcanContain.innerHTML='';
+        webcanContain.appendChild(webcam.canvas);
+        await webcam.play();
+    }
+
+    async function canvasdo(){
+        var canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 224;                
+        canvas.id="whatimg"; 
+        webcanContain.innerHTML='';
+        webcanContain.appendChild(canvas);
+        fabric_canvas = new fabric.Canvas('whatimg', { backgroundColor: "#000000"});
+        fabric_canvas.renderTop();
+        fabric_canvas.isDrawingMode = true;
+        fabric_canvas.freeDrawingBrush.width = 18;
+        fabric_canvas.freeDrawingBrush.color = "#ffffff";
+        console.log("初始化画布");
+        videoPlaying=false;
+    }
+
+    imageObj.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (function (theFile) {
+            return function (e) {
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              img.onload = function () {
+                var imgWidth = img.width;
+                var imgHeight = img.height;
+                // 选择宽度和高度中较小的一个作为正方形边长
+                var squareSize = Math.min(imgWidth, imgHeight);
+                // 设置Canvas的尺寸
+                let canvas = document.createElement("canvas");
+                canvas.width = canvas.height = squareSize;
+                canvas.id = "whatimg";
+                // 绘制裁剪后的图片
+                canvas.getContext('2d').drawImage(
+                  img, // 图片元素
+                  (imgWidth - squareSize) / 2, // 从图片的x坐标开始裁剪
+                  (imgHeight - squareSize) / 2, // 从图片的y坐标开始裁剪
+                  squareSize, // 裁剪的宽度
+                  squareSize, // 裁剪的高度
+                  0, 0, // 在Canvas上的x和y位置
+                  squareSize, // 绘制的宽度
+                  squareSize // 绘制的高度
+                );
+                webcanContain.innerHTML = '';
+                webcanContain.appendChild(canvas);
+              }
+            };
+          })(file);
+
+          reader.readAsDataURL(file);
+        }
+      }
+    });
+
+
+    function GetRequest() {
+      var url = location.search; //获取url中"?"符后的字串
+      var theRequest = new Object();
+      if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        theRequest = decodeURI(str);
+      }
+      console.log(theRequest);
+      return theRequest;
+    }
+
+    const utterance = new SpeechSynthesisUtterance();
+    function playText(text) {
+      if (text && voice) {
+        if (speechSynthesis.paused && speechSynthesis.speaking) {
+          return speechSynthesis.resume();
+        }
+        if (speechSynthesis.speaking) return;
+        utterance.text = text;
+        utterance.rate = 1;
+
+        speechSynthesis.speak(utterance);
+      }
+    }
+
+
+  </script>
+
+</body>
+
+</html>

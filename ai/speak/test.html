@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>在线语音朗读</title>
+    <style>
+        body {
+            width: 90%;
+            margin: 0 auto;
+            margin-top: 1rem;
+        }
+
+        #text {
+            width: 100%;
+            height: 10vh;
+			font-size:24px;
+        }
+    </style>
+<script>
+function myFunction() {
+   var msg = new SpeechSynthesisUtterance();
+    msg.text = document.getElementById("text").value;
+	msg.rate = 0.8;
+	window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(msg);
+	//佳佳好，新年快乐，你好
+}
+</script>
+</head>
+<body>
+
+<h2>在线语音朗读</h2>
+<textarea id="text">佳佳好，快起床啦，今天还要上学呢！</textarea>
+<button type="button" onclick="myFunction()">朗读</button>
+</body>
+</html>
