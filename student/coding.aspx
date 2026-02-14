@@ -1,4 +1,4 @@
-﻿<%@ page language="C#" autoeventwireup="true" inherits="Student_coding, LearnSite" %>
+<%@ page language="C#" autoeventwireup="true" inherits="Student_coding, LearnSite" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -111,13 +111,58 @@
     <script src="../scratch/lib.min.js" type="text/javascript"></script>
     <script src="../scratch/chunks/gui.js" type="text/javascript"></script>
     
-   <div id="mcontext" style="display: none; background: #FFF1C4; overflow-y: auto; overflow-x: hidden;
-        position: absolute;  width: 520px; height: 450px; z-index: 999; left:312px; opacity:90%;
-        bottom: 0px; ">
-        <div style="margin:10px; ">
+
+
+<style>
+/* 弹窗容器样式 */
+#mcontext {
+    display: none;
+    background: #FFF1C4;
+    overflow-y: auto;         /* 垂直溢出显示滚动条 */
+    overflow-x: auto;         /* 水平溢出显示滚动条 */
+    position: absolute;
+    width: 520px;
+    height: 450px;
+    z-index: 999;
+    left: 312px;
+    opacity: 0.9;
+    bottom: 0px;
+    /* 滚动条整体样式（webkit内核浏览器：Chrome、Edge、Safari等） */
+    scrollbar-width: thick;   /* 火狐：设置滚动条宽度（thin/auto/thick） */
+}
+
+/* ===== 自定义滚动条样式（webkit内核）===== */
+/* 滚动条轨道（背景） */
+#mcontext::-webkit-scrollbar {
+    width: 12px;    /* 垂直滚动条宽度 */
+    height: 12px;   /* 水平滚动条高度 */
+}
+
+/* 滚动条轨道 */
+#mcontext::-webkit-scrollbar-track {
+    background: #f1f1f1;    /* 轨道背景色 */
+    border-radius: 6px;     /* 圆角，更美观 */
+}
+
+/* 滚动条滑块（可拖动的部分） */
+#mcontext::-webkit-scrollbar-thumb {
+    background: #888;       /* 滑块默认颜色 */
+    border-radius: 6px;     /* 滑块圆角 */
+    border: 2px solid #f1f1f1; /* 加边框，和轨道区分更明显 */
+}
+
+/* 滑块 hover 时的样式（更醒目） */
+#mcontext::-webkit-scrollbar-thumb:hover {
+    background: #555;       /* hover时加深颜色 */
+}
+</style>
+
+<!-- 弹窗容器 -->
+<div id="mcontext">
+    <div style="margin:10px; ">
         <h4><%=Titles%></h4>
         <%=Mcontents %><br />
-        </div>
     </div>
+</div>
 </body>
 </html>
