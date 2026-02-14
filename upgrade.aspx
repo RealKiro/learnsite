@@ -4,6 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
+    <meta charset="utf-8" />
     <title>LearnSite信息技术学习平台数据库更新页面</title>
         <link rel="stylesheet" type="text/css" href="../App_Themes/Teacher/StyleSheet.css" />
     <style type="text/css">
