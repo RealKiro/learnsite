@@ -1,4 +1,4 @@
-﻿<%@ page language="C#" autoeventwireup="true" inherits="Student_turtleidle, LearnSite" %>
+<%@ page language="C#" autoeventwireup="true" inherits="Student_turtleidle, LearnSite" %>
 
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <head id="Head1" runat="server">

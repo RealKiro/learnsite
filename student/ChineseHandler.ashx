@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="ChineseHandler" %>
+<%@ WebHandler Language="C#" Class="ChineseHandler" %>
 
 using System;
 using System.Web;

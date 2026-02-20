@@ -1,4 +1,4 @@
-﻿<%@ page title="" language="C#" masterpagefile="~/student/Scm.master" stylesheettheme="Student" autoeventwireup="true" inherits="Student_txtform, LearnSite" %>
+<%@ page title="" language="C#" masterpagefile="~/student/Scm.master" stylesheettheme="Student" autoeventwireup="true" inherits="Student_txtform, LearnSite" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="Cpcm" runat="Server">
     <div id="showcontent">

@@ -1,4 +1,4 @@
-﻿<%@ page title="" language="C#" stylesheettheme="Student" autoeventwireup="true" inherits="index, LearnSite" %>
+<%@ page title="" language="C#" stylesheettheme="Student" autoeventwireup="true" inherits="index, LearnSite" %>
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head id="Head1" runat="server">
     <meta charset="utf-8" />

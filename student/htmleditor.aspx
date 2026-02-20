@@ -1,4 +1,4 @@
-﻿<%@ page language="C#" autoeventwireup="true" inherits="student_htmleditor, LearnSite" %>
+<%@ page language="C#" autoeventwireup="true" inherits="student_htmleditor, LearnSite" %>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head >  
