@@ -1,4 +1,4 @@
-﻿<%@ page title="" language="C#" masterpagefile="~/teacher/Teach.master" enableeventvalidation="false" inherits="teacher_wareadd, LearnSite" %>
+<%@ page title="" language="C#" masterpagefile="~/teacher/Teach.master" enableeventvalidation="false" inherits="teacher_wareadd, LearnSite" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="Content" Runat="Server">
 <style>    

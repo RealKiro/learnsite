@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="judgesave" %>
+<%@ WebHandler Language="C#" Class="judgesave" %>
 
 using System;
 using System.Web;

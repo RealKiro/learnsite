@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="Runpy" %>
+<%@ WebHandler Language="C#" Class="Runpy" %>
 
 using System;
 using System.Web;

@@ -1,4 +1,4 @@
-﻿<%@ page title="" language="C#" masterpagefile="~/teacher/Teach.master" autoeventwireup="true" inherits="Teacher_grouping, LearnSite" %>
+<%@ page title="" language="C#" masterpagefile="~/teacher/Teach.master" autoeventwireup="true" inherits="Teacher_grouping, LearnSite" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="Content" Runat="Server">
 <div style="margin: auto; padding: 2px; font-family: Arial; font-size: 11pt; font-weight: bold; border-bottom-style: dashed; border-bottom-width: 1px; border-bottom-color: #CCCCCC; width: 96%;">

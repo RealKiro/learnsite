@@ -1,4 +1,4 @@
-﻿<%@ page title="" language="C#" stylesheettheme="Teacher" validaterequest="false" autoeventwireup="true" inherits="Teacher_attitude, LearnSite" %>
+<%@ page title="" language="C#" stylesheettheme="Teacher" validaterequest="false" autoeventwireup="true" inherits="Teacher_attitude, LearnSite" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
