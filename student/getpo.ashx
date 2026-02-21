@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="getpo" %>
+<%@ WebHandler Language="C#" Class="getpo" %>
 
 using System;
 using System.Web;

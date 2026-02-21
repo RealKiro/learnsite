@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="backend" %>
+<%@ WebHandler Language="C#" Class="backend" %>
 
 using System;
 using System.Web;

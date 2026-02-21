@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="Savetype" %>
+<%@ WebHandler Language="C#" Class="Savetype" %>
 
 using System;
 using System.Web;

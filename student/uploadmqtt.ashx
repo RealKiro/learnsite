@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="uploadmqtt" %>
+<%@ WebHandler Language="C#" Class="uploadmqtt" %>
 
 using System;
 using System.Web;

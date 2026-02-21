@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="FileManager" %>
+<%@ WebHandler Language="C#" Class="FileManager" %>
 
 using System;
 using System.Web;

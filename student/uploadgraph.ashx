@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="uploadgraph" %>
+<%@ WebHandler Language="C#" Class="uploadgraph" %>
 
 using System;
 using System.Web;

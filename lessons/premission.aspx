@@ -1,4 +1,4 @@
-﻿<%@ page title="" language="C#" masterpagefile="~/lessons/prescm.master" autoeventwireup="true" stylesheettheme="Student" inherits="Lessons_premission, LearnSite" %>
+<%@ page title="" language="C#" masterpagefile="~/lessons/prescm.master" autoeventwireup="true" stylesheettheme="Student" inherits="Lessons_premission, LearnSite" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="Ppcm" Runat="Server">
 <div  id="showcontent">

@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="savechat" %>
+<%@ WebHandler Language="C#" Class="savechat" %>
 
 using System;
 using System.Web;

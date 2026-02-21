@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="share" %>
+<%@ WebHandler Language="C#" Class="share" %>
 
 using System;
 using System.Web;

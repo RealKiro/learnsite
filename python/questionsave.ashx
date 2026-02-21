@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="questionsave" %>
+<%@ WebHandler Language="C#" Class="questionsave" %>
 
 using System;
 using System.Web;

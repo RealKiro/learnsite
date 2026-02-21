@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="uploadexcel" %>
+<%@ WebHandler Language="C#" Class="uploadexcel" %>
 
 using System;
 using System.Web;

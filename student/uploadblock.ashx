@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="uploadblock" %>
+<%@ WebHandler Language="C#" Class="uploadblock" %>
 
 using System;
 using System.Web;

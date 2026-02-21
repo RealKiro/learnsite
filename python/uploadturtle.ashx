@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="uploadturtle" %>
+<%@ WebHandler Language="C#" Class="uploadturtle" %>
 
 using System;
 using System.IO;

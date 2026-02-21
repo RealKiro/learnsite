@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="pptupload" %>
+<%@ WebHandler Language="C#" Class="pptupload" %>
 
 using System;
 using System.Web;

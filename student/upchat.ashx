@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="upchat" %>
+<%@ WebHandler Language="C#" Class="upchat" %>
 
 using System;
 using System.Web;

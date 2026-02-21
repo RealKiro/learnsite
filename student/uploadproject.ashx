@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="GenericHandler1" %>
+<%@ WebHandler Language="C#" Class="GenericHandler1" %>
 
 using System;
 using System.Web;

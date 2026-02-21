@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="getproject" %>
+<%@ WebHandler Language="C#" Class="getproject" %>
 
 using System;
 using System.Web;

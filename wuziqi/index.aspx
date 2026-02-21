@@ -1,4 +1,4 @@
-﻿<%@ page language="C#" autoeventwireup="true" inherits="wuziqi_index, LearnSite" %>
+<%@ page language="C#" autoeventwireup="true" inherits="wuziqi_index, LearnSite" %>
 <!DOCTYPE html>
 <html >
 <head>

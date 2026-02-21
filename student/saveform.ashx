@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="saveform" %>
+<%@ WebHandler Language="C#" Class="saveform" %>
 
 using System;
 using System.Web;

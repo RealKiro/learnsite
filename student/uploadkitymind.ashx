@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="uploadkitymind" %>
+<%@ WebHandler Language="C#" Class="uploadkitymind" %>
 
 using System;
 using System.Web;

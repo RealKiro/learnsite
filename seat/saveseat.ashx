@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="saveseat" %>
+<%@ WebHandler Language="C#" Class="saveseat" %>
 
 using System;
 using System.Web;

@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="FingerHandler" %>
+<%@ WebHandler Language="C#" Class="FingerHandler" %>
 
 using System;
 using System.Web;

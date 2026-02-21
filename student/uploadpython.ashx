@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="uploadpython" %>
+<%@ WebHandler Language="C#" Class="uploadpython" %>
 
 using System;
 using System.Web;
