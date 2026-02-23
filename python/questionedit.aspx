@@ -4,6 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
+	<meta charset="utf-8" />
     <title></title>    
     <link href="../code/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
     <style type="text/css">

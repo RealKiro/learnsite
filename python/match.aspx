@@ -4,6 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
+    <meta charset="utf-8" />
     <title>比赛</title>
     <link href="../js/bootstrap.min.css" rel="stylesheet" type="text/css" />
 	<style>

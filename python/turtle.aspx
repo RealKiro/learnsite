@@ -2,6 +2,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
+	<meta charset="utf-8" />
     <title>Python绘画编程</title>
   <link href="../code/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
   <link href="../code/site.css" rel="stylesheet" type="text/css" />
