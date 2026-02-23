@@ -4,7 +4,8 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
-<title></title> 
+    <meta charset="utf-8" />
+    <title></title> 
     <style type="text/css">
     .by{margin:0px}
     .phold{margin: auto; width:360px; text-align: center;font-size: 11pt;font-family: Arial;}

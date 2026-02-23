@@ -4,6 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
+    <meta charset="utf-8" />
     <link rel="stylesheet" type="text/css" href="../App_Themes/Teacher/StyleSheet.css" />
     <script src="../js/MenuCookie.js" type="text/javascript"></script>
     <script src="../js/jquery-1.8.2.min.js" type="text/javascript"></script>

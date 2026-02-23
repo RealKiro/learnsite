@@ -4,6 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
+    <meta charset="utf-8" />
     <title>网站异常信息记录页面</title>
     <style type="text/css">
         body{font-size: 11pt; font-family: Arial;}

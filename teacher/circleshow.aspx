@@ -3,6 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
+    <meta charset="utf-8" />
     <title>学生文档作品自动展示</title>
     <script src="../js/jquery.min.js" type="text/javascript"></script>
 </head>

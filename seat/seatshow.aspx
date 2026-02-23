@@ -4,6 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
+    <meta charset="utf-8" />
     <title>机房电脑布置图</title>
     <script src="../js/jquery-1.8.2.min.js" type="text/javascript"></script>
     <script src="../js/jquery-ui-1.8.24.custom.min.js" type="text/javascript"></script>
