@@ -4,8 +4,8 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
+    <meta charset="utf-8" />
     <title></title>
-    	<meta charset=utf-8>
 	<!-- bower:css -->
 	<link rel="stylesheet" href="../../Plugins/km/bower_components/bootstrap/dist/css/bootstrap.css" />
 	<link rel="stylesheet" href="../../Plugins/km/bower_components/codemirror/lib/codemirror.css" />

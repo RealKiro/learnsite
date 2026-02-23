@@ -4,14 +4,14 @@
 
 <html>
 <head id="Head1"  runat="server">
-<meta charset="UTF-8">
-<title>二维码生成器</title>
-<link rel="stylesheet" href="../plugins/qrcode/spectre.min.css">
-<link rel="stylesheet" href="../plugins/qrcode/style.css">
-<script src="../plugins/qrcode/vue.min.js"></script>
-<script src="../plugins/qrcode/qrcanvas@3"></script>
-<script src="../plugins/qrcode/jsQR.js"></script>
-<script src="../code/jquery.min.js"></script>
+  <meta charset="UTF-8">
+  <title>二维码生成器</title>
+  <link rel="stylesheet" href="../plugins/qrcode/spectre.min.css">
+  <link rel="stylesheet" href="../plugins/qrcode/style.css">
+  <script src="../plugins/qrcode/vue.min.js"></script>
+  <script src="../plugins/qrcode/qrcanvas@3"></script>
+  <script src="../plugins/qrcode/jsQR.js"></script>
+  <script src="../code/jquery.min.js"></script>
 </head>
 <body>
 <div id="app" class="container" style="display:none" v-show="true">

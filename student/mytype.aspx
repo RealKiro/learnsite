@@ -1,6 +1,7 @@
 <%@ page title="" language="C#" masterpagefile="~/student/Stud.master" stylesheettheme="Student" autoeventwireup="true" inherits="Student_mytype, LearnSite" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="Cphs" Runat="Server">
+    <meta charset="utf-8" />
     <link href="../js/Typer.css" rel="stylesheet" type="text/css" />
 <div id="student">
 <div class="left">

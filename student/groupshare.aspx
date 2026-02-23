@@ -4,6 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
+    <meta charset="utf-8" />
     <title></title>
     <style type="text/css">
     .by {margin: 0px;background-color: #E6F0E7}

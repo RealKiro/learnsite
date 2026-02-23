@@ -1,6 +1,7 @@
 <%@ page title="" language="C#" masterpagefile="~/student/Stud.master" stylesheettheme="Student" autoeventwireup="true" inherits="Student_allfinger, LearnSite" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="Cphs" Runat="Server">
+<meta charset="utf-8" />
 <div id="student">
 <div style="margin:auto;">
 <center>

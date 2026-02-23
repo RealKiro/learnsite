@@ -2,6 +2,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
+    <meta charset="utf-8" />
     <title>学号查询</title>
     <link href="../App_Themes/Student/StyleSheet.css" rel="stylesheet" type="text/css" />
     <link href="../js/tooltip.css" rel="stylesheet" type="text/css" />

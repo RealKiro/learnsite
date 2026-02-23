@@ -4,6 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server">
+    <meta charset="utf-8" />
     <title>在线讨论</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="../code/imgchat/chat.css" />

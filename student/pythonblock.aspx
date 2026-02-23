@@ -4,16 +4,17 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head id="Head1" runat="server"> 
-  <title></title>
-<link href="../code/block.css" rel="stylesheet" type="text/css" />
-<link href="../code/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+	<meta charset="utf-8" />
+  	<title></title>
+	<link href="../code/block.css" rel="stylesheet" type="text/css" />
+	<link href="../code/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
     <script src="../js/jquery-1.8.2.min.js" type="text/javascript"></script>
     <script src="../js/jquery-ui-1.8.24.custom.min.js" type="text/javascript"></script>
-<script src="../code/build/src/ace.js" type="text/javascript"></script>
-<script src="../code/build/src/ext-language_tools.js" type="text/javascript"></script>
-<script src="../code/skulpt.min.js?ver=20211202" type="text/javascript"></script>
-<script src="../code/skulpt-stdlib.js" type="text/javascript"></script>
-<script src="../code/html2canvas.min.js" type="text/javascript"></script>
+	<script src="../code/build/src/ace.js" type="text/javascript"></script>
+	<script src="../code/build/src/ext-language_tools.js" type="text/javascript"></script>
+	<script src="../code/skulpt.min.js?ver=20211202" type="text/javascript"></script>
+	<script src="../code/skulpt-stdlib.js" type="text/javascript"></script>
+	<script src="../code/html2canvas.min.js" type="text/javascript"></script>
 </head>
 <body>
 <div>
