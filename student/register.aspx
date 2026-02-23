@@ -2,6 +2,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head id="Head1" runat="server">
+    <meta charset="utf-8" />
     <title>新学员注册</title>   
     <link href="../App_Themes/student/StyleSheet.css" rel="stylesheet" type="text/css" />
     </head>
