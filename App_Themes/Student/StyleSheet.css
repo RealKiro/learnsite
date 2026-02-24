@@ -7,7 +7,7 @@
 .ground
 {
     position: relative;      /* 相对定位，为伪元素提供参照 */
-    background-color: #f0f0f0; /* 背景色，在图片未加载或留白时显示 */
+    background-color: #f0f0f0; /* 背景色，在图片未加载或留白时显示（cover下一般不留白） */
     z-index: 1;              /* 确保内容在伪元素之上 */
 }
 
@@ -21,7 +21,7 @@
     width: 100%;
     height: 100%;
     background-image: url('ground.jpg'); /* 将背景图片移至此伪元素 */
-    background-size: contain;            /* 完整显示图片，可能留白 */
+    background-size: cover;              /* 覆盖整个容器（可能裁剪图片），不留空白 */
     background-position: center;         /* 图片居中 */
     background-repeat: no-repeat;        /* 不重复 */
     opacity: 0.7;            /* 透明度：0.7 表示 30% 透明（70% 不透明） */
