@@ -5,7 +5,10 @@
 .ground
 {
     background-image: url('ground.jpg');
-	background-size:cover; 
+    background-size: contain;    /* 完整显示图片，可能留白 */
+    background-position: center; /* 居中显示 */
+    background-repeat: no-repeat;/* 不重复 */
+    background-color: #f0f0f0;   /* 可选：设置背景色填充留白区域 */
 }
 
 ::-webkit-scrollbar { /* display: none;  Chrome Safari */  }
