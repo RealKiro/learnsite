@@ -136,8 +136,10 @@ table {border-collapse:collapse;}
     border-width: 0px;
     height: 100px;
     overflow: hidden;
-    background-image: url('road.jpg');
+    background-image: url('road.jpg');  /* 根据实际图片名修改，例如 'raod.png' */
     background-repeat: no-repeat;
+    background-position: center;        /* 水平垂直居中 */
+    background-size: cover;             /* 等比例覆盖，可能裁剪；若需完整显示可改为 contain */
 }
 .canner
 {
