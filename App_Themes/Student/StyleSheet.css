@@ -149,6 +149,7 @@ table {border-collapse:collapse;}
     text-overflow:ellipsis; 
 }
 
+/* 顶部横幅：图片居中且覆盖整个容器 */
 .banner
 {
     padding: 0px;
