@@ -25,7 +25,7 @@
     <add key="Kindeditor" value="svg,gif,jpg,jpeg,png,bmp,tif,tiff,swf,flv,mp3,wav,wma,wmv,mid,avi,mpg,mp4,asf,rm,rmvb,doc,docx,xls,xlsx,ppt,pptx,htm,html,txt,zip,rar,gz,bz2,flv,psd,fla,e,chm,mht,sb3,pdf,hd" />
     <add key="ShareDiskLimit" value="100" />
     <add key="TeacherLogin" value="False" />
-    <add key="HostName" value="192.168.1.8,www.learnsite.cn" />
+    <add key="HostName" value="127.0.0.1,localhost" />
     <add key="HouseMode" value="False" />
     <add key="HideName" value="True" />
     <add key="OfficePng" value="True" />
