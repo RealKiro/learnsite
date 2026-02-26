@@ -255,6 +255,8 @@ KindEditor.lang({
 		'2.html' : '表格',
 		'3.html' : '项目编号',
 		'xc.html': '学案模板',
+		'xuean.html': '新学案折叠显示',
+		'xuean_npd.html': '新学案直接显示',
 		'pagination.html':'分页模板'
 	}
 }, 'zh_CN');
