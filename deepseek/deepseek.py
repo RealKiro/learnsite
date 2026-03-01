@@ -27,14 +27,22 @@ def index():
     with open("index.html", "r", encoding="utf-8") as f:
         return f.read()
 
-DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+# DeepSeek API 配置（可替换为其他兼容 OpenAI 的 API）
+# 使用环境变量配置：
+# - DEEPSEEK_API_URL: API 地址（默认：https://api.deepseek.com/v1/chat/completions）
+# - DEEPSEEK_API_KEY: API Key
+# - DEEPSEEK_MODEL: 模型名称（默认：deepseek-chat）
+# 示例（硅基流动）：https://api.siliconflow.cn/v1/chat/completions
+DEEPSEEK_API_URL = os.getenv("DEEPSEEK_API_URL", "https://api.deepseek.com/v1/chat/completions")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
-DEEPSEEK_MODEL = "deepseek-chat"
+DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 
+# Qwen API 配置
 Qwen_API_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
 Qwen_API_KEY = os.getenv("QWEN_API_KEY", "sk-e2f0cdd2fd04446c83e698a4bea0e40f")
 Qwen_MODEL = "qwen-max"
 
+# 智谱 AI 图片生成配置
 PHOTO_API_URL = "https://open.bigmodel.cn/api/paas/v4/images/generations"
 PHOTO_API_KEY = os.getenv("PHOTO_API_KEY", "67121ff795f24159a4f2eaaabb89cc78.DDAMTxnDEFuiYR7f")
 
@@ -79,10 +87,14 @@ def extract_content(data):
 
 @app.route('/config')
 def get_config():
+    print(f"DEEPSEEK_API_URL: {DEEPSEEK_API_URL}")
     print(f"DEEPSEEK_API_KEY: {DEEPSEEK_API_KEY[:10]}..." if DEEPSEEK_API_KEY else "DEEPSEEK_API_KEY: None")
+    print(f"DEEPSEEK_MODEL: {DEEPSEEK_MODEL}")
     print(f"Qwen_API_KEY: {Qwen_API_KEY[:10]}..." if Qwen_API_KEY else "Qwen_API_KEY: None")
     print(f"PHOTO_API_KEY: {PHOTO_API_KEY[:10]}..." if PHOTO_API_KEY else "PHOTO_API_KEY: None")
     return jsonify({
+        "api_url": DEEPSEEK_API_URL,
+        "api_model": DEEPSEEK_MODEL,
         "deepseek_configured": bool(DEEPSEEK_API_KEY),
         "qwen_configured": bool(Qwen_API_KEY and Qwen_API_KEY != "sk-e2f0cdd2fd04446c83e698a4bea0e40f"),
         "photo_configured": bool(PHOTO_API_KEY and PHOTO_API_KEY != "67121ff795f24159a4f2eaaabb89cc78.DDAMTxnDEFuiYR7f"),
