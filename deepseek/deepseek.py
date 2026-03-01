@@ -47,7 +47,7 @@ API_MODEL = DEEPSEEK_MODEL
 def get_config():
     return jsonify({
         "deepseek_configured": bool(DEEPSEEK_API_KEY),
-        "qwen_configured": bool(QWEN_API_KEY and QWEN_API_KEY != "sk-e2f0cdd2fd04446c83e698a4bea0e40f"),
+        "qwen_configured": bool(Qwen_API_KEY and Qwen_API_KEY != "sk-e2f0cdd2fd04446c83e698a4bea0e40f"),
         "photo_configured": bool(PHOTO_API_KEY and PHOTO_API_KEY != "67121ff795f24159a4f2eaaabb89cc78.DDAMTxnDEFuiYR7f"),
     })
 
