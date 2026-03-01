@@ -11,7 +11,7 @@ import random
 import time
 import cv2
 import numpy as np
-from paddleocr import PaddleOCR
+import easyocr
 import base64
 from translate import Translator
 
@@ -403,23 +403,22 @@ def ocr():
         message = data.get('messages', [{'role': 'user', 'content': 'car.jpg'}])
         image_name = message['content']
 
-        # 调用 PaddleOCR
-        ocr = PaddleOCR(use_angle_cls=True, lang='ch')
-        # 读取图像
+        # 调用 EasyOCR
+        reader = easyocr.Reader(['ch_sim', 'en'], gpu=False, verbose=False)
         image_path = 'uploads/'+image_name
-        img = cv2.imread(image_path)
+        
+        # 使用 EasyOCR 进行文本检测
+        result = reader.readtext(image_path)
 
-        # 使用 PaddleOCR 进行文本检测
-        result = ocr.ocr(image_path, cls=True)
-
-        texts=[]
-        for txt in result[0]:
-            texts.append(txt[1][0])
+        texts = []
+        for detection in result:
+            text = detection[1]
+            texts.append(text)
                    
-        return jsonify({"response":texts})
+        return jsonify({"response": texts})
 
     except Exception as e:
-        print(f"Error calling PaddleOCR API: {e}")
+        print(f"Error calling EasyOCR: {e}")
         return jsonify({"error": "Failed to process the request"})
 
 # 代理路由 中英翻译
