@@ -83,42 +83,34 @@ def generate_page(title, placeholder, api_endpoint):
 </body>
 </html>'''
 
-# 为每个功能添加 GET 路由
-@app.route('/chat', methods=['GET', 'POST'])
+# 为每个功能添加 GET 页面路由
+@app.route('/chat')
 def chat_page():
-    if request.method == 'GET':
-        return generate_page('AI 对话', '请输入您的问题...', '/chat')
-    # POST 处理...
+    return generate_page('AI 对话', '请输入您的问题...', '/chat')
 
-@app.route('/aippt', methods=['GET', 'POST'])
+@app.route('/aippt')
 def aippt_page():
-    if request.method == 'GET':
-        return generate_page('PPT 大纲生成', '请输入 PPT 主题...', '/aippt')
+    return generate_page('PPT 大纲生成', '请输入 PPT 主题...', '/aippt')
 
-@app.route('/photo', methods=['GET', 'POST'])
+@app.route('/photo')
 def photo_page():
-    if request.method == 'GET':
-        return generate_page('图片生成', '请描述您想生成的图片...', '/photo')
+    return generate_page('图片生成', '请描述您想生成的图片...', '/photo')
 
-@app.route('/photos', methods=['GET', 'POST'])
+@app.route('/photos')
 def photos_page():
-    if request.method == 'GET':
-        return generate_page('智谱图片生成', '请描述您想生成的图片...', '/photos')
+    return generate_page('智谱图片生成', '请描述您想生成的图片...', '/photos')
 
-@app.route('/voice', methods=['GET', 'POST'])
+@app.route('/voice')
 def voice_page():
-    if request.method == 'GET':
-        return generate_page('语音合成', '请输入要转语音的文本...', '/voice')
+    return generate_page('语音合成', '请输入要转语音的文本...', '/voice')
 
-@app.route('/translator', methods=['GET', 'POST'])
+@app.route('/translator')
 def translator_page():
-    if request.method == 'GET':
-        return generate_page('中英翻译', '请输入要翻译的文本...', '/translator')
+    return generate_page('中英翻译', '请输入要翻译的文本...', '/translator')
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload')
 def upload_page():
-    if request.method == 'GET':
-        return generate_page('文件上传', '请上传图片文件...', '/upload')
+    return generate_page('文件上传', '请上传图片文件...', '/upload')
 
 # DeepSeek API 配置（可替换为其他兼容 OpenAI 的 API）
 # 使用环境变量配置：
