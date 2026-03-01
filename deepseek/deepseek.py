@@ -43,6 +43,14 @@ API_URL = DEEPSEEK_API_URL
 API_KEY = DEEPSEEK_API_KEY
 API_MODEL = DEEPSEEK_MODEL
 
+@app.route('/config')
+def get_config():
+    return jsonify({
+        "deepseek_configured": bool(DEEPSEEK_API_KEY),
+        "qwen_configured": bool(QWEN_API_KEY and QWEN_API_KEY != "sk-e2f0cdd2fd04446c83e698a4bea0e40f"),
+        "photo_configured": bool(PHOTO_API_KEY and PHOTO_API_KEY != "67121ff795f24159a4f2eaaabb89cc78.DDAMTxnDEFuiYR7f"),
+    })
+
 # markdown格式转换json
 def markdown_to_special_json(md_text):
     lines = md_text.strip().split('\n')

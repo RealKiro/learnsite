@@ -679,6 +679,26 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeModal();
         });
+
+        // 获取配置状态
+        async function loadConfig() {
+            try {
+                const res = await fetch('/config');
+                const cfg = await res.json();
+                
+                const statusHtml = `
+                    <span style="font-size:12px;color:#64748b;margin-left:12px;">
+                        ${cfg.deepseek_configured ? '✅' : '❌'} DeepSeek
+                        ${cfg.qwen_configured ? '✅' : '❌'} Qwen
+                        ${cfg.photo_configured ? '✅' : '❌'} 智谱
+                    </span>
+                `;
+                document.querySelector('.subtitle').innerHTML = 'DeepSeek AI 能力集成平台' + statusHtml;
+            } catch (e) {
+                console.error('Failed to load config:', e);
+            }
+        }
+        loadConfig();
     </script>
 </body>
 </html>
