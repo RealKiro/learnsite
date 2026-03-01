@@ -13,28 +13,32 @@ import cv2
 import numpy as np
 from paddleocr import PaddleOCR
 import base64
-# 识别结果即时翻译（支持100+语种）
 from translate import Translator
 
 app = Flask(__name__)
-CORS(app)  # 启用 CORS 支持
+CORS(app)
 
-# DeepSeek API 配置
+@app.route('/health')
+def health():
+    return "OK"
+
+@app.route('/')
+def index():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
+
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_API_KEY = ""  # 替换为你的 DeepSeek API Key
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_MODEL = "deepseek-chat"
 
-# Qwen API 配置
 Qwen_API_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
-Qwen_API_KEY = "sk-e2f0cdd2fd04446c83e698a4bea0e40f"  # 替换为你的 DeepSeek API Key
+Qwen_API_KEY = os.getenv("QWEN_API_KEY", "sk-e2f0cdd2fd04446c83e698a4bea0e40f")
 Qwen_MODEL = "qwen-max"
 
-# 图片生成 API 配置（假设）
 PHOTO_API_URL = "https://open.bigmodel.cn/api/paas/v4/images/generations"
-PHOTO_API_KEY = "67121ff795f24159a4f2eaaabb89cc78.DDAMTxnDEFuiYR7f"  # 替换为你的图片生成 API Key
+PHOTO_API_KEY = os.getenv("PHOTO_API_KEY", "67121ff795f24159a4f2eaaabb89cc78.DDAMTxnDEFuiYR7f")
 
-# HostIp设置为服务器IP，并在服务器防火墙开放2000端口允许访问
-HostIp = "127.0.0.1"
+HostIp = os.getenv("HOST_IP", "0.0.0.0")
 API_URL = DEEPSEEK_API_URL
 API_KEY = DEEPSEEK_API_KEY
 API_MODEL = DEEPSEEK_MODEL
