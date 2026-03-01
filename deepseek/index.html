@@ -79,6 +79,8 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            text-decoration: none;
+            display: block;
         }
 
         .card::before {
@@ -135,227 +137,19 @@
             line-height: 1.6;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #1e293b;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow: hidden;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            animation: modalIn 0.3s ease;
-        }
-
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .modal-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            background: rgba(148, 163, 184, 0.1);
-            color: #94a3b8;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
-        }
-
-        .modal-body {
-            padding: 24px;
-            overflow-y: auto;
-            max-height: calc(90vh - 140px);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: #94a3b8;
-            margin-bottom: 8px;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(148, 163, 184, 0.15);
-            border-radius: 10px;
-            color: #e8eaed;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 10px;
-            border: none;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            color: white;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 16px;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 10px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            display: none;
-        }
-
-        .result.show {
-            display: block;
-        }
-
-        .result-content {
-            font-size: 14px;
-            line-height: 1.7;
-            color: #e8eaed;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .result img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 12px;
-        }
-
-        .loading {
-            display: none;
-            align-items: center;
-            gap: 12px;
+        .card .arrow {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
             color: #64748b;
-            font-size: 14px;
+            transition: all 0.3s;
         }
 
-        .loading.show {
-            display: flex;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(59, 130, 246, 0.2);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .file-input-wrapper {
-            position: relative;
-        }
-
-        .file-input-wrapper input[type="file"] {
-            display: none;
-        }
-
-        .file-input-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 16px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 2px dashed rgba(148, 163, 184, 0.2);
-            border-radius: 10px;
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .file-input-label:hover {
-            border-color: #3b82f6;
-            color: #94a3b8;
+        .card:hover .arrow {
+            right: 16px;
+            color: #3b82f6;
         }
 
         footer {
@@ -378,10 +172,6 @@
             .grid {
                 grid-template-columns: 1fr;
             }
-
-            .modal-content {
-                max-height: 95vh;
-            }
         }
     </style>
 </head>
@@ -396,309 +186,66 @@
         </header>
 
         <div class="grid">
-            <div class="card" onclick="openModal('chat')">
+            <a href="/chat" target="_blank" class="card">
                 <div class="card-icon blue">💬</div>
                 <h3>AI 对话</h3>
                 <p>基于 DeepSeek 的智能对话系统，支持多轮对话和上下文理解</p>
-            </div>
+                <span class="arrow">→</span>
+            </a>
 
-            <div class="card" onclick="openModal('aippt')">
+            <a href="/aippt" target="_blank" class="card">
                 <div class="card-icon purple">📊</div>
                 <h3>PPT 大纲</h3>
                 <p>输入主题，自动生成专业的 PPT 大纲和内容建议</p>
-            </div>
+                <span class="arrow">→</span>
+            </a>
 
-            <div class="card" onclick="openModal('photo')">
+            <a href="/photo" target="_blank" class="card">
                 <div class="card-icon orange">🖼️</div>
                 <h3>图片生成</h3>
                 <p>文字描述生成图片，支持多种风格（pollinations）</p>
-            </div>
+                <span class="arrow">→</span>
+            </a>
 
-            <div class="card" onclick="openModal('photos')">
+            <a href="/photos" target="_blank" class="card">
                 <div class="card-icon pink">🎨</div>
                 <h3>智谱图片</h3>
                 <p>基于智谱 AI 的图片生成能力，创作高质量图像</p>
-            </div>
+                <span class="arrow">→</span>
+            </a>
 
-            <div class="card" onclick="openModal('voice')">
+            <a href="/voice" target="_blank" class="card">
                 <div class="card-icon cyan">🔊</div>
                 <h3>语音合成</h3>
                 <p>文本转语音，支持多种音色和语调选择</p>
-            </div>
+                <span class="arrow">→</span>
+            </a>
 
-            <div class="card" onclick="openModal('ocr')">
+            <a href="/upload" target="_blank" class="card">
                 <div class="card-icon green">📷</div>
                 <h3>文字识别</h3>
                 <p>上传图片，自动识别并提取其中的文字内容</p>
-            </div>
+                <span class="arrow">→</span>
+            </a>
 
-            <div class="card" onclick="openModal('translator')">
+            <a href="/translator" target="_blank" class="card">
                 <div class="card-icon blue">🌐</div>
                 <h3>中英翻译</h3>
                 <p>快速准确的中英文互译，支持多种表达方式</p>
-            </div>
+                <span class="arrow">→</span>
+            </a>
 
-            <div class="card" onclick="openModal('upload')">
+            <a href="/upload" target="_blank" class="card">
                 <div class="card-icon purple">📁</div>
                 <h3>文件上传</h3>
                 <p>上传文件到服务器，支持各类常见文件格式</p>
-            </div>
+                <span class="arrow">→</span>
+            </a>
         </div>
 
         <footer>
             <p>Powered by DeepSeek API • Built with LearnSite</p>
         </footer>
     </div>
-
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">功能</h2>
-                <button class="modal-close" onclick="closeModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <form id="modalForm" onsubmit="submitForm(event)">
-                    <div id="formFields"></div>
-                    <div class="loading" id="loading">
-                        <div class="spinner"></div>
-                        <span>处理中...</span>
-                    </div>
-                    <div class="result" id="result">
-                        <div class="result-content" id="resultContent"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">提交</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const config = {
-            chat: {
-                title: 'AI 对话',
-                fields: [
-                    { name: 'messages', type: 'textarea', label: '输入内容', placeholder: '请输入你想对话的内容...' }
-                ],
-                endpoint: '/chat',
-                method: 'POST'
-            },
-            aippt: {
-                title: 'PPT 大纲生成',
-                fields: [
-                    { name: 'content', type: 'textarea', label: '主题', placeholder: '输入 PPT 主题，例如：大学生职业生涯规划' }
-                ],
-                endpoint: '/aippt',
-                method: 'POST'
-            },
-            photo: {
-                title: '图片生成',
-                fields: [
-                    { name: 'messages[content]', type: 'text', label: '图片描述', placeholder: '描述你想生成的图片，例如：一只可爱的兔子' }
-                ],
-                endpoint: '/photo',
-                method: 'POST'
-            },
-            photos: {
-                title: '智谱图片生成',
-                fields: [
-                    { name: 'messages', type: 'textarea', label: '图片描述', placeholder: '描述你想生成的图片...' }
-                ],
-                endpoint: '/photos',
-                method: 'POST'
-            },
-            voice: {
-                title: '语音合成',
-                fields: [
-                    { name: 'messages[role]', type: 'select', label: '音色', 
-                      options: ['zh-CN-XiaoxiaoNeural', 'zh-CN-YunxiNeural', 'zh-CN-YunyangNeural', 'en-US-JennyNeural'] },
-                    { name: 'messages[content]', type: 'textarea', label: '文本内容', placeholder: '输入要转语音的文本...' }
-                ],
-                endpoint: '/voice',
-                method: 'POST'
-            },
-            ocr: {
-                title: '文字识别',
-                fields: [
-                    { name: 'messages[content]', type: 'file', label: '上传图片', accept: 'image/*' }
-                ],
-                endpoint: '/ocr',
-                method: 'POST'
-            },
-            translator: {
-                title: '中英翻译',
-                fields: [
-                    { name: 'messages[content]', type: 'textarea', label: '待翻译文本', placeholder: '输入要翻译的内容...' }
-                ],
-                endpoint: '/translator',
-                method: 'POST'
-            },
-            upload: {
-                title: '文件上传',
-                fields: [
-                    { name: 'file', type: 'file', label: '选择文件', accept: '*' }
-                ],
-                endpoint: '/upload',
-                method: 'POST'
-            }
-        };
-
-        let currentType = '';
-
-        function openModal(type) {
-            currentType = type;
-            const cfg = config[type];
-            document.getElementById('modalTitle').textContent = cfg.title;
-            
-            const fieldsHtml = cfg.fields.map(f => {
-                if (f.type === 'textarea') {
-                    return `<div class="form-group">
-                        <label>${f.label}</label>
-                        <textarea name="${f.name}" placeholder="${f.placeholder || ''}" required></textarea>
-                    </div>`;
-                } else if (f.type === 'select') {
-                    return `<div class="form-group">
-                        <label>${f.label}</label>
-                        <select name="${f.name}" required>
-                            ${f.options.map(o => `<option value="${o}">${o}</option>`).join('')}
-                        </select>
-                    </div>`;
-                } else if (f.type === 'file') {
-                    return `<div class="form-group">
-                        <label>${f.label}</label>
-                        <div class="file-input-wrapper">
-                            <input type="file" name="${f.name}" id="fileInput" accept="${f.accept || ''}" onchange="updateFileName()">
-                            <label for="fileInput" class="file-input-label" id="fileLabel">
-                                <span>📁</span>
-                                <span>点击选择文件</span>
-                            </label>
-                        </div>
-                    </div>`;
-                } else {
-                    return `<div class="form-group">
-                        <label>${f.label}</label>
-                        <input type="text" name="${f.name}" placeholder="${f.placeholder || ''}" required>
-                    </div>`;
-                }
-            }).join('');
-            
-            document.getElementById('formFields').innerHTML = fieldsHtml;
-            document.getElementById('result').classList.remove('show');
-            document.getElementById('loading').classList.remove('show');
-            document.getElementById('submitBtn').style.display = 'inline-flex';
-            document.getElementById('modal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-        }
-
-        function updateFileName() {
-            const input = document.getElementById('fileInput');
-            const label = document.getElementById('fileLabel');
-            if (input.files[0]) {
-                label.innerHTML = `<span>📄</span><span>${input.files[0].name}</span>`;
-            }
-        }
-
-        async function submitForm(e) {
-            e.preventDefault();
-            
-            const cfg = config[currentType];
-            const form = document.getElementById('modalForm');
-            const formData = new FormData(form);
-            
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('result').classList.remove('show');
-            
-            try {
-                let response;
-                if (currentType === 'upload') {
-                    response = await fetch(cfg.endpoint, {
-                        method: 'POST',
-                        body: formData
-                    });
-                } else {
-                    const data = {};
-                    formData.forEach((value, key) => {
-                        if (key.includes('[')) {
-                            const [parent, child] = key.split(/[\[\]]+/).filter(Boolean);
-                            if (!data[parent]) data[parent] = {};
-                            data[parent][child] = value;
-                        } else {
-                            data[key] = value;
-                        }
-                    });
-                    
-                    response = await fetch(cfg.endpoint, {
-                        method: cfg.method,
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ messages: cfg.endpoint === '/chat' ? [{role: 'user', content: data.messages || data['messages[content]']}] : data })
-                    });
-                }
-                
-                const resultDiv = document.getElementById('resultContent');
-                const resultBox = document.getElementById('result');
-                
-                if (currentType === 'voice' || currentType === 'photo' || currentType === 'photos') {
-                    const json = await response.json();
-                    const html = json.response || json.error || JSON.stringify(json, null, 2);
-                    if (html.includes('<img') || html.includes('.mp3') || html.includes('.jpg') || html.includes('.png')) {
-                        if (html.includes('<img')) {
-                            resultDiv.innerHTML = html;
-                        } else {
-                            resultDiv.innerHTML = `<audio controls src="${html}" style="width:100%"></audio>`;
-                        }
-                    } else {
-                        resultDiv.textContent = html;
-                    }
-                } else if (currentType === 'ocr' || currentType === 'translator') {
-                    const json = await response.json();
-                    resultDiv.textContent = json.response || json.error || JSON.stringify(json, null, 2);
-                } else if (currentType === 'upload') {
-                    const json = await response.json();
-                    resultDiv.textContent = json.response || json.error || '上传成功';
-                } else {
-                    resultDiv.textContent = await response.text();
-                }
-                
-                resultBox.classList.add('show');
-            } catch (err) {
-                document.getElementById('resultContent').textContent = '请求失败: ' + err.message;
-                document.getElementById('result').classList.add('show');
-            } finally {
-                document.getElementById('loading').classList.remove('show');
-                document.getElementById('submitBtn').disabled = false;
-            }
-        }
-
-        document.getElementById('modal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // 获取配置状态
-        async function loadConfig() {
-            try {
-                const res = await fetch('/config');
-                const cfg = await res.json();
-                
-                const statusHtml = `
-                    <span style="font-size:12px;color:#64748b;margin-left:12px;">
-                        ${cfg.deepseek_configured ? '✅' : '❌'} DeepSeek
-                        ${cfg.qwen_configured ? '✅' : '❌'} Qwen
-                        ${cfg.photo_configured ? '✅' : '❌'} 智谱
-                    </span>
-                `;
-                document.querySelector('.subtitle').innerHTML = 'DeepSeek AI 能力集成平台' + statusHtml;
-            } catch (e) {
-                console.error('Failed to load config:', e);
-            }
-        }
-        loadConfig();
-    </script>
 </body>
 </html>
