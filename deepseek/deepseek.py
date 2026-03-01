@@ -112,6 +112,10 @@ def translator_page():
 def upload_page():
     return generate_page('文件上传', '请上传图片文件...', '/upload')
 
+@app.route('/ocr')
+def ocr_page():
+    return generate_page('文字识别', '请上传图片文件...', '/ocr')
+
 # DeepSeek API 配置（可替换为其他兼容 OpenAI 的 API）
 # 使用环境变量配置：
 # - DEEPSEEK_API_URL: API 地址（默认：https://api.deepseek.com/v1/chat/completions）
