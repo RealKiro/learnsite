@@ -52,12 +52,12 @@ learnsite
         -- blockpy.html Python Blokly积木编程
         -- block.html Python拼图编程
 
-  -- deepseek 人工智能会话助手
+  -- deepseek 人工智能会话助手（Docker 化部署）
         -- deepseek.html AI会话
         -- aidraw.html AI绘画
         -- ocr.html OCR文字识别
-        -- soundlab.html 语音识别
         -- speek.html 语音合成
+        -- robot.html 翻译
         -- tic-tac-toe.html 井字棋游戏
   -- fabriceditor 在线图片设计
   -- faceai 人脸识别
