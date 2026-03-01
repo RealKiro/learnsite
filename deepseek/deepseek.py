@@ -45,6 +45,9 @@ API_MODEL = DEEPSEEK_MODEL
 
 @app.route('/config')
 def get_config():
+    print(f"DEEPSEEK_API_KEY: {DEEPSEEK_API_KEY[:10]}..." if DEEPSEEK_API_KEY else "DEEPSEEK_API_KEY: None")
+    print(f"Qwen_API_KEY: {Qwen_API_KEY[:10]}..." if Qwen_API_KEY else "Qwen_API_KEY: None")
+    print(f"PHOTO_API_KEY: {PHOTO_API_KEY[:10]}..." if PHOTO_API_KEY else "PHOTO_API_KEY: None")
     return jsonify({
         "deepseek_configured": bool(DEEPSEEK_API_KEY),
         "qwen_configured": bool(Qwen_API_KEY and Qwen_API_KEY != "sk-e2f0cdd2fd04446c83e698a4bea0e40f"),
