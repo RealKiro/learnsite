@@ -27,6 +27,99 @@ def index():
     with open("index.html", "r", encoding="utf-8") as f:
         return f.read()
 
+# 生成功能页面的通用函数
+def generate_page(title, placeholder, api_endpoint):
+    return f'''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - LearnSite AI</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }}
+        h1 {{ font-size: 28px; margin-bottom: 8px; color: #f8fafc; }}
+        .subtitle {{ color: #64748b; margin-bottom: 32px; }}
+        .form {{ width: 100%; max-width: 600px; }}
+        textarea {{ width: 100%; min-height: 150px; padding: 16px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; color: #e2e8f0; font-size: 16px; resize: vertical; }}
+        textarea:focus {{ outline: none; border-color: #3b82f6; }}
+        .btn {{ margin-top: 16px; padding: 12px 32px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }}
+        .btn:hover {{ background: #2563eb; }}
+        .result {{ margin-top: 24px; width: 100%; max-width: 600px; padding: 16px; background: #1e293b; border-radius: 12px; white-space: pre-wrap; display: none; }}
+        .result.show {{ display: block; }}
+        .back {{ position: fixed; top: 20px; left: 20px; color: #64748b; text-decoration: none; }}
+        .back:hover {{ color: #3b82f6; }}
+    </style>
+</head>
+<body>
+    <a href="/" class="back">← 返回首页</a>
+    <h1>{title}</h1>
+    <p class="subtitle">LearnSite AI</p>
+    <div class="form">
+        <textarea id="input" placeholder="{placeholder}"></textarea>
+        <button class="btn" onclick="submit()">提交</button>
+    </div>
+    <div class="result" id="result"></div>
+    <script>
+        async function submit() {{
+            const input = document.getElementById('input').value;
+            const result = document.getElementById('result');
+            result.classList.add('show');
+            result.textContent = '处理中...';
+            
+            try {{
+                const response = await fetch('{api_endpoint}', {{
+                    method: 'POST',
+                    headers: {{'Content-Type': 'application/json'}},
+                    body: JSON.stringify({{content: input}})
+                }});
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+            }} catch (e) {{
+                result.textContent = '错误: ' + e.message;
+            }}
+        }}
+    </script>
+</body>
+</html>'''
+
+# 为每个功能添加 GET 路由
+@app.route('/chat', methods=['GET', 'POST'])
+def chat_page():
+    if request.method == 'GET':
+        return generate_page('AI 对话', '请输入您的问题...', '/chat')
+    # POST 处理...
+
+@app.route('/aippt', methods=['GET', 'POST'])
+def aippt_page():
+    if request.method == 'GET':
+        return generate_page('PPT 大纲生成', '请输入 PPT 主题...', '/aippt')
+
+@app.route('/photo', methods=['GET', 'POST'])
+def photo_page():
+    if request.method == 'GET':
+        return generate_page('图片生成', '请描述您想生成的图片...', '/photo')
+
+@app.route('/photos', methods=['GET', 'POST'])
+def photos_page():
+    if request.method == 'GET':
+        return generate_page('智谱图片生成', '请描述您想生成的图片...', '/photos')
+
+@app.route('/voice', methods=['GET', 'POST'])
+def voice_page():
+    if request.method == 'GET':
+        return generate_page('语音合成', '请输入要转语音的文本...', '/voice')
+
+@app.route('/translator', methods=['GET', 'POST'])
+def translator_page():
+    if request.method == 'GET':
+        return generate_page('中英翻译', '请输入要翻译的文本...', '/translator')
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_page():
+    if request.method == 'GET':
+        return generate_page('文件上传', '请上传图片文件...', '/upload')
+
 # DeepSeek API 配置（可替换为其他兼容 OpenAI 的 API）
 # 使用环境变量配置：
 # - DEEPSEEK_API_URL: API 地址（默认：https://api.deepseek.com/v1/chat/completions）
