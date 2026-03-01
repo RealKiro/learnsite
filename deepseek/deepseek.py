@@ -207,7 +207,9 @@ def chat():
         
         # 检查 API 响应是否成功
         if api_response.status_code != 200:
-            return jsonify({"error": "Failed to call DeepSeek API"})
+            error_detail = api_response.text
+            print(f"DeepSeek API error: {api_response.status_code} - {error_detail}")
+            return jsonify({"error": f"Failed to call DeepSeek API: {api_response.status_code}", "detail": error_detail})
         
         # 定义生成器函数来处理流式响应
         def generate():
