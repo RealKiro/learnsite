@@ -111,12 +111,13 @@ def markdown_to_special_json(md_text):
 
 
 
-# 代理路由 人工智能对话
+# 代理路由 PPT大纲生成
 @app.route('/aippt', methods=['POST'])                
 def aippt():
-    #return '{"type": "cover", "data": {"title": "大学生职业生涯规划", "text": "明确职业方向，规划精彩未来"}}'
     try:
         data = request.json
+        if not data or 'content' not in data:
+            return jsonify({"error": "Missing 'content' in request"}), 400
         mdstr = data['content']
 
         def generate_stream():
@@ -256,11 +257,23 @@ def chat():
 @app.route('/photo', methods=['POST'])
 def photo():
     try:
-        # 获取请求体中的 messages
         data = request.json
         print(data)
-        messages = data.get('messages', [{'role': 'system', 'content': 'please,draw a rabit.'}])
-        prompt = messages['content']
+        # 兼容两种格式：{content: "..."} 或 {messages: {content: "..."}}
+        if 'messages' in data:
+            messages = data['messages']
+            if isinstance(messages, dict):
+                prompt = messages.get('content', '')
+            elif isinstance(messages, list) and len(messages) > 0:
+                prompt = messages[0].get('content', '')
+            else:
+                prompt = ''
+        else:
+            prompt = data.get('content', '')
+        
+        if not prompt:
+            return jsonify({"error": "Missing content"}), 400
+            
         print(prompt)
         # Image details
         # prompt = 'A beautiful landscape'
@@ -299,14 +312,26 @@ def photo():
         return jsonify({"error": "Failed to process the request"})
     
 
-# 代理路由 文本生成图片
+# 代理路由 智谱AI图片生成
 @app.route('/photos', methods=['POST'])
 def photos():
     try:
-        # 获取请求体中的 messages
         data = request.json
-        messages = data.get('messages', [{'role': 'system', 'content': 'please,draw a rabit.'}])
-        prompt = messages[0]['content']
+        # 兼容两种格式
+        if 'messages' in data:
+            messages = data['messages']
+            if isinstance(messages, dict):
+                prompt = messages.get('content', '')
+            elif isinstance(messages, list) and len(messages) > 0:
+                prompt = messages[0].get('content', '')
+            else:
+                prompt = ''
+        else:
+            prompt = data.get('content', '')
+            
+        if not prompt:
+            return jsonify({"error": "Missing content"}), 400
+            
         print(prompt)
         request_body = {
             "model": "cogview-4",
@@ -351,20 +376,35 @@ def photos():
 @app.route('/voice', methods=['POST'])                
 def voice():
     try:
-        # 获取请求体中的 messages
         timestamp = str(int(time.time()))
         savefile = f"downmp3/{timestamp}.mp3" 
         data = request.json
         
-        message = data.get('messages', [{'role': 'zh-CN-XiaoxiaoNeural', 'content': '你今天真漂亮！You are a helpful assistant.'}])
-        speeker = message['role']
-        text = message['content']
-        print(speeker)
-        #print(text)
+        # 兼容两种格式
+        if 'messages' in data:
+            message = data['messages']
+            if isinstance(message, dict):
+                speaker = message.get('role', 'zh-CN-XiaoxiaoNeural')
+                text = message.get('content', '')
+            elif isinstance(message, list) and len(message) > 0:
+                speaker = message[0].get('role', 'zh-CN-XiaoxiaoNeural')
+                text = message[0].get('content', '')
+            else:
+                speaker = 'zh-CN-XiaoxiaoNeural'
+                text = ''
+        else:
+            speaker = data.get('role', 'zh-CN-XiaoxiaoNeural')
+            text = data.get('content', '')
+            
+        if not text:
+            return jsonify({"error": "Missing content"}), 400
+            
+        print(speaker)
+        print(text)
         
         # 调用 edge_tts
         communicate = edge_tts.Communicate(text=text,
-                voice=speeker,
+                voice=speaker,
                 rate='+0%',
                 volume='+0%',
                 pitch='+0Hz')
@@ -400,10 +440,22 @@ def upload():
 @app.route('/ocr', methods=['POST'])                
 def ocr():
     try:
-        # 获取请求体中的 messages
-        data = request.json        
-        message = data.get('messages', [{'role': 'user', 'content': 'car.jpg'}])
-        image_name = message['content']
+        data = request.json
+        
+        # 兼容两种格式
+        if 'messages' in data:
+            message = data['messages']
+            if isinstance(message, dict):
+                image_name = message.get('content', '')
+            elif isinstance(message, list) and len(message) > 0:
+                image_name = message[0].get('content', '')
+            else:
+                image_name = ''
+        else:
+            image_name = data.get('content', '')
+            
+        if not image_name:
+            return jsonify({"error": "Missing content"}), 400
 
         # 调用 EasyOCR
         reader = easyocr.Reader(['ch_sim', 'en'], gpu=False, verbose=False)
@@ -427,12 +479,25 @@ def ocr():
 @app.route('/translator', methods=['POST'])                
 def translator():
     try:
-        # 获取请求体中的 messages
-        data = request.json        
-        message = data.get('messages', [{'role': 'user', 'content': '好好学习，天天向上。'}])
-        print(message)
-        text = message['content']
+        data = request.json
+        
+        # 兼容两种格式
+        if 'messages' in data:
+            message = data['messages']
+            if isinstance(message, dict):
+                text = message.get('content', '')
+            elif isinstance(message, list) and len(message) > 0:
+                text = message[0].get('content', '')
+            else:
+                text = ''
+        else:
+            text = data.get('content', '')
+            
+        if not text:
+            return jsonify({"error": "Missing content"}), 400
           
+        print(text)
+        
         translator = Translator(from_lang="zh", to_lang="en")
         translation = translator.translate(text)
         print(translation)
