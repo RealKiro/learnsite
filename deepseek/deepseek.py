@@ -3,6 +3,7 @@ from flask_cors import CORS  # 引入 CORS 支持
 import requests
 import re
 import json
+import asyncio
 from urllib.parse import urlparse
 import os
 from gevent import pywsgi
@@ -402,14 +403,20 @@ def voice():
             pitch='+0Hz'
         )
 
-        # 确保目录存在
+       
         os.makedirs('downmp3', exist_ok=True)
         
-        # 使用同步方式保存
-        import asyncio
-        asyncio.run(communicate.save(savefile))
-        
-        print(f"Audio saved to: {savefile}")
+        # 异步保存
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(communicate.save(savefile))
+            print(f"Audio saved to: {savefile}")
+        except Exception as e:
+            print(f"Save error: {e}")
+            raise
+        finally:
+            loop.close()
 
         return jsonify({"response": savefile})
 
