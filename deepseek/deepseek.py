@@ -404,7 +404,7 @@ def voice():
 
         # 确保目录存在
         os.makedirs('downmp3', exist_ok=True)
-        communicate.save_sync(savefile)
+        communicate.save(savefile)
 
         return jsonify({"response": savefile})
 
