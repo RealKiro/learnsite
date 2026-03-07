@@ -45,7 +45,7 @@
     <script>
         let messageHistory = []; // 新增：存储对话历史的数组
 		
-		var lor=location.origin;
+		var lor = location.origin || (location.protocol + '//' + location.host);
 		console.log(location.origin);
 		
         const apiChatUrl = lor+"/chat";
