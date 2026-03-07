@@ -404,7 +404,12 @@ def voice():
 
         # 确保目录存在
         os.makedirs('downmp3', exist_ok=True)
-        communicate.save(savefile)
+        
+        # 使用同步方式保存
+        import asyncio
+        asyncio.run(communicate.save(savefile))
+        
+        print(f"Audio saved to: {savefile}")
 
         return jsonify({"response": savefile})
 
