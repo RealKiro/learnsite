@@ -98,11 +98,14 @@
                     body: JSON.stringify({ messages: userMessage }) 
                 });
                 
-                const data = await response.json();
+                 const data = await response.json();
+                
+                // 添加 base URL 前缀（因为后端返回相对路径）
+                const audioUrl = lor + '/' + data.response;
                 
                 // 新增：将AI回复添加到历史记录
-                const botMessage = { role: "assistant", content: data.response };
-                addMessage("bot", data.response);
+                const botMessage = { role: "assistant", content: audioUrl };
+                addMessage("bot", audioUrl);
 			
 				const chatTitle = document.createElement("div");
 				chatTitle.className="chattitle";
