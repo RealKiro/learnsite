@@ -1,0 +1,300 @@
+/*
+ * register.aspx.cs 后端集成示例代码
+ *
+ * 由于当前项目使用预编译程序集，此文件仅作为参考示例
+ * 实际需要在项目源代码中添加以下逻辑
+ */
+
+using System;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class Student_register : System.Web.UI.Page
+{
+    // 现有的控件声明
+    protected TextBox Tsname;
+    protected TextBox TxtEmail;        // 新增：邮箱输入框
+    protected TextBox TxtVerifyCode;   // 新增：验证码输入框
+    protected Button BtnSendCode;      // 新增：发送验证码按钮
+    protected HiddenField HiddenEmailVerified;  // 新增：验证状态隐藏字段
+    protected DropDownList DDLgrade;
+    protected DropDownList DDLclass;
+    protected DropDownList DDLsex;
+    protected Label labelmsg;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            // 初始化下拉列表等...
+        }
+    }
+
+    protected void BtnRegister_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // 1. 基本信息验证
+            if (string.IsNullOrEmpty(Tsname.Text.Trim()))
+            {
+                labelmsg.Text = "请输入姓名";
+                return;
+            }
+
+            if (DDLgrade.SelectedIndex <= 0 || DDLclass.SelectedIndex <= 0)
+            {
+                labelmsg.Text = "请选择年级和班级";
+                return;
+            }
+
+            // 2. 邮箱验证
+            string email = TxtEmail.Text.Trim();
+            if (string.IsNullOrEmpty(email))
+            {
+                labelmsg.Text = "请输入电子邮箱";
+                return;
+            }
+
+            if (!IsValidEmail(email))
+            {
+                labelmsg.Text = "请输入有效的电子邮箱地址";
+                return;
+            }
+
+            // 3. 验证码验证
+            string code = TxtVerifyCode.Text.Trim();
+            if (string.IsNullOrEmpty(code))
+            {
+                labelmsg.Text = "请输入邮箱验证码";
+                return;
+            }
+
+            // 检查验证状态（前端已验证）
+            if (HiddenEmailVerified.Value != "true")
+            {
+                labelmsg.Text = "请先完成邮箱验证";
+                return;
+            }
+
+            // 后端再次验证（双重验证，提高安全性）
+            if (!VerifyEmailCode(email, code))
+            {
+                labelmsg.Text = "邮箱验证码错误或已过期";
+                Session.Remove("EmailVerified");
+                HiddenEmailVerified.Value = "false";
+                return;
+            }
+
+            // 4. 检查邮箱是否已被注册
+            if (IsEmailRegistered(email))
+            {
+                labelmsg.Text = "该邮箱已被注册，请使用其他邮箱";
+                return;
+            }
+
+            // 5. 执行注册逻辑
+            bool success = RegisterStudent(
+                Tsname.Text.Trim(),
+                email,
+                DDLgrade.SelectedValue,
+                DDLclass.SelectedValue,
+                DDLsex.SelectedValue
+            );
+
+            if (success)
+            {
+                // 清除验证Session
+                Session.Remove("EmailVerifyCode");
+                Session.Remove("EmailVerifyCodeEmail");
+                Session.Remove("EmailVerifyCodeTime");
+                Session.Remove("EmailVerified");
+
+                // 注册成功，跳转到成功页面或显示学号
+                labelmsg.Text = "注册成功！请使用分配的学号登录";
+                // Response.Redirect("login.aspx");
+            }
+            else
+            {
+                labelmsg.Text = "注册失败，请重试";
+            }
+        }
+        catch (Exception ex)
+        {
+            labelmsg.Text = "系统错误：" + ex.Message;
+            // 记录错误日志
+            System.Diagnostics.Debug.WriteLine("注册错误：" + ex.ToString());
+        }
+    }
+
+    /// <summary>
+    /// 验证邮箱格式
+    /// </summary>
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 验证邮箱验证码（后端验证）
+    /// </summary>
+    private bool VerifyEmailCode(string email, string code)
+    {
+        try
+        {
+            // 从Session中获取验证码信息
+            string sessionCode = Session["EmailVerifyCode"] as string;
+            string sessionEmail = Session["EmailVerifyCodeEmail"] as string;
+            object sessionTimeObj = Session["EmailVerifyCodeTime"];
+
+            if (string.IsNullOrEmpty(sessionCode) || string.IsNullOrEmpty(sessionEmail))
+            {
+                return false;
+            }
+
+            // 检查验证码是否过期
+            if (sessionTimeObj != null)
+            {
+                DateTime expireTime = (DateTime)sessionTimeObj;
+                if (DateTime.Now > expireTime)
+                {
+                    return false;
+                }
+            }
+
+            // 验证邮箱是否匹配
+            if (!sessionEmail.Equals(email, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // 验证验证码是否正确
+            if (!sessionCode.Equals(code))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 检查邮箱是否已注册
+    /// </summary>
+    private bool IsEmailRegistered(string email)
+    {
+        // TODO: 查询数据库检查邮箱是否已存在
+        // 示例SQL: SELECT COUNT(*) FROM Students WHERE Email = @Email
+        // 返回 true 表示已注册，false 表示未注册
+
+        /* 示例代码：
+        using (var db = new YourDbContext())
+        {
+            return db.Students.Any(s => s.Email == email);
+        }
+        */
+
+        return false;
+    }
+
+    /// <summary>
+    /// 注册学生
+    /// </summary>
+    private bool RegisterStudent(string name, string email, string grade, string classId, string sex)
+    {
+        // TODO: 实现学生注册逻辑
+        // 1. 生成学号
+        // 2. 设置初始密码
+        // 3. 保存到数据库
+        // 4. 可选：发送欢迎邮件
+
+        /* 示例代码：
+        try
+        {
+            using (var db = new YourDbContext())
+            {
+                var student = new Student
+                {
+                    Name = name,
+                    Email = email,
+                    GradeId = int.Parse(grade),
+                    ClassId = int.Parse(classId),
+                    Sex = sex,
+                    StudentNo = GenerateStudentNo(), // 生成学号
+                    Password = GenerateInitialPassword(), // 生成初始密码
+                    CreateTime = DateTime.Now
+                };
+
+                db.Students.Add(student);
+                db.SaveChanges();
+
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine("注册失败：" + ex.ToString());
+            return false;
+        }
+        */
+
+        return true;
+    }
+
+    /// <summary>
+    /// 生成学号
+    /// </summary>
+    private string GenerateStudentNo()
+    {
+        // TODO: 根据业务规则生成学号
+        // 示例：年级(2位) + 班级(2位) + 序号(3位)
+        return DateTime.Now.ToString("yyyyMMddHHmmss");
+    }
+
+    /// <summary>
+    /// 生成初始密码
+    /// </summary>
+    private string GenerateInitialPassword()
+    {
+        // TODO: 生成初始密码，建议使用随机密码或默认密码
+        return "123456"; // 示例，实际应该更安全
+    }
+
+    protected void BtnReturn_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/default.aspx");
+    }
+}
+
+/*
+ * 数据库表结构建议（仅供参考）
+ *
+ * CREATE TABLE Students (
+ *     Id INT PRIMARY KEY IDENTITY(1,1),
+ *     StudentNo NVARCHAR(20) NOT NULL UNIQUE,  -- 学号
+ *     Name NVARCHAR(50) NOT NULL,               -- 姓名
+ *     Email NVARCHAR(100) NOT NULL UNIQUE,      -- 邮箱（新增）
+ *     Password NVARCHAR(100) NOT NULL,          -- 密码（应加密存储）
+ *     GradeId INT NOT NULL,                     -- 年级ID
+ *     ClassId INT NOT NULL,                     -- 班级ID
+ *     Sex NVARCHAR(10),                         -- 性别
+ *     CreateTime DATETIME NOT NULL,             -- 创建时间
+ *     LastLoginTime DATETIME,                   -- 最后登录时间
+ *     IsActive BIT DEFAULT 1                    -- 是否激活
+ * );
+ *
+ * -- 建议添加索引
+ * CREATE INDEX IX_Students_Email ON Students(Email);
+ * CREATE INDEX IX_Students_StudentNo ON Students(StudentNo);
+ */

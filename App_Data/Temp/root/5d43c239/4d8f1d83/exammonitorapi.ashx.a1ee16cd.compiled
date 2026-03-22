@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/exammonitorapi.ashx" hash="33c60594" filehash="161d33be1b12" flags="110000" assembly="App_Web_s54_nlzj" type="exammonitorapi">
+    <filedeps>
+        <filedep name="/teacher/exammonitorapi.ashx" />
+    </filedeps>
+</preserve>

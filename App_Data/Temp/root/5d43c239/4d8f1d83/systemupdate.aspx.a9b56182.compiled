@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/manager/systemupdate.aspx" hash="fffffff94ae4f160" filehash="6375818a63d9c9e8" flags="110000" assembly="App_Web_systemupdate.aspx.a9b56182.yfcyvms6" type="ASP.manager_systemupdate_aspx">
+    <filedeps>
+        <filedep name="/manager/Manage.master" />
+        <filedep name="/manager/systemupdate.aspx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/printtyper.aspx" hash="fffffff94ae4f160" filehash="8b0fbad4ce620549" flags="110000" assembly="App_Web_crfpj8vs" type="ASP.teacher_printtyper_aspx">
+    <filedeps>
+        <filedep name="/teacher/printtyper.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/pythonadd.aspx" hash="fffffff94ae4f160" filehash="d55ea6eec40913a1" flags="110000" assembly="App_Web_fkucpe61" type="ASP.teacher_pythonadd_aspx">
+    <filedeps>
+        <filedep name="/teacher/pythonadd.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

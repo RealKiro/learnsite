@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/learnrate.aspx" hash="fffffff94ae4f160" filehash="ffffd6b344110699" flags="110000" assembly="App_Web_v_6y3bxz" type="ASP.teacher_learnrate_aspx">
+    <filedeps>
+        <filedep name="/teacher/learnrate.aspx" />
+    </filedeps>
+</preserve>

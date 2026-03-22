@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/knowledgeapi.ashx" hash="33c60594" filehash="ffffc81b7d76d5b5" flags="110000" assembly="App_Web_j3vbsri1" type="knowledgeapi">
+    <filedeps>
+        <filedep name="/teacher/knowledgeapi.ashx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/pptupload.ashx" hash="33c60594" filehash="ffffb9d7df8f764f" flags="110000" assembly="App_Web_zgidwflv" type="pptupload">
+    <filedeps>
+        <filedep name="/student/pptupload.ashx" />
+    </filedeps>
+</preserve>

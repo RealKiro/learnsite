@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/uploadblockpy.ashx" hash="33c60594" filehash="113e89f085e9" flags="110000" assembly="App_Web_v0nriqn2" type="uploadblockpy">
+    <filedeps>
+        <filedep name="/student/uploadblockpy.ashx" />
+    </filedeps>
+</preserve>

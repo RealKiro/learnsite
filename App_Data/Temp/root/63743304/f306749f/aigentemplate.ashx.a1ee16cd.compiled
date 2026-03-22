@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/aigentemplate.ashx" hash="33c60594" filehash="3b819e3dbd15" flags="110000" assembly="App_Web_5qa_rpu0" type="aigentemplate">
+    <filedeps>
+        <filedep name="/teacher/aigentemplate.ashx" />
+    </filedeps>
+</preserve>

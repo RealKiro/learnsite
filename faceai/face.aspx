@@ -1,0 +1,76 @@
+﻿<%@ page language="C#" autoeventwireup="true" inherits="faceai_face, LearnSite" %>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+  <meta charset="UTF-8" />
+  <script type="application/x-javascript" src="../faceai/face-api.js"></script>
+  <link rel="stylesheet" href="../faceai/index.css">
+</head>
+<body>
+  <div class="main">
+    <div  class="container">
+      <h1 id="hc">➀ <a href="face.aspx?lid=<%=Lid %>">人脸识别探秘</a></h1>
+      <h1 id="hd"> → ➁ <a href="meme.aspx?lid=<%=Lid %>">魔法表情包</a></h1>
+      <h1 id="he"> → ➂ <a href="webcam.aspx?lid=<%=Lid %>">扫脸应用</a></h1>
+    </div>
+  <input id="uploadimg" type="file" accept="image/*" />
+  <div class="container">
+    <div class="left">
+        <img class="upimgIcon" id="#faceimgone" src="upimg.png" title="图片上传"/>
+    </div>
+    <div class="right">
+        <img class="upimgIcon"  id="#faceimgtwo"  src="upimg.png" title="图片上传"/>
+    </div>
+  </div>
+    <div class="container">
+      <div class="left">
+        <img id="faceimgone" class="faceimg" src="images/liu/1.jpg" />
+        <canvas id="overlayone" class="overlay" />  
+      </div>
+      <div class="right">
+        <img id="faceimgtwo" class="faceimg" src="images/liu/4.jpg" />
+        <canvas id="overlaytwo" class="overlay" />  
+      </div>
+    </div>
+    <div class="container">
+      <div class="showarea">
+        <div class="left">
+          <button class="start-btn" onclick="faceDetector()">人脸检测</button>
+          <input type="checkbox" id="scales"  checked  title="轮廓" />
+        </div>
+        <div class="right">
+          <span id="result"></span>
+        </div>
+    </div>
+    </div>
+    <div class="container">
+      <div class="left">
+        <img id="facemesh" src="facemesh.png" />
+      </div>
+      <div class="right">
+        <strong>人脸识别常用算法</strong>
+        <p class="word">
+          &emsp;&emsp;为了达到定位五官关键点的目的，我们将使用一种面部特征点估计的算法，这一算法的基本思路是找到68个人脸上普遍存在的点（称为特征点）。
+          <br>下巴轮廓17个点 [0-16]
+          <br>左眉毛5个点 [17-21]
+          <br>右眉毛5个点 [22-26]
+          <br>鼻梁4个点 [27-30]
+          <br>鼻尖5个点 [31-35]
+          <br>左眼6个点 [36-41]
+          <br>右眼6个点 [42-47]
+          <br>外嘴唇12个点 [48-59]
+          <br>内嘴唇8个点 [60-67]
+          <br>&emsp;&emsp;我们就可以通过计算这<strong> 68个特征点的欧氏距离（欧几里得距离）</strong>，距离差别越小，说明是同一张人脸的可能性越大。通常距离小于0.5，即可判断为同一人。
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="text/javascript"  src="../faceai/jquery.min.js"></script>
+  <script type="text/javascript"  src="../faceai/index.js"></script>
+</body>
+
+</html>

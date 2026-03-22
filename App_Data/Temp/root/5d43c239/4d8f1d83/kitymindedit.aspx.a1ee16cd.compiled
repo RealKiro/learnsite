@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/kitymindedit.aspx" hash="fffffff94ae4f160" filehash="5441201ece2d9a6a" flags="110000" assembly="App_Web_kgua2dk_" type="ASP.teacher_kitymindedit_aspx">
+    <filedeps>
+        <filedep name="/teacher/kitymindedit.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

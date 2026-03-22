@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/pythonedit.aspx" hash="fffffff94ae4f160" filehash="7f0e45a214f2c2cd" flags="110000" assembly="App_Web_otgurzff" type="ASP.teacher_pythonedit_aspx">
+    <filedeps>
+        <filedep name="/teacher/pythonedit.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

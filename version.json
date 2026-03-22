@@ -1,0 +1,5 @@
+{
+  "version": "v3.1.4",
+  "changelog": "【游戏管理】游戏管理页面全面重构，现代卡片布局，支持游戏显示/隐藏、编辑、删除、预览\n【游戏中心】学生游戏中心升级，学分兑换游戏功能，自动创建 GamePurchase 表\n【接口新增】CheckAIStatus.ashx / CheckDiscussStatus.ashx 实时查询 AI对话、小组讨论开关状态\n【数据库】Room 表新增 Rdiscuss、Rai、Rgame 三个字段\n【页面】showcourse.aspx 课程总览页重构，myfinger.aspx 侧边栏新增游戏快捷入口",
+  "downloadUrl": "https://gitee.com/你的用户名/learnsite-update/repository/archive/v3.1.4.zip"
+}

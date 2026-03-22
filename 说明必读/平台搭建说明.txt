@@ -1,0 +1,49 @@
+﻿LearnSite信息技术学习平台
+
+作者：温州水乡
+Code license: GNU General Public License v2  
+LearnSite信息技术学习平台搭建说明： LearnSite学习平台②群 392339019  
+--------------------------------------------------------------------------------------------
+
+网站搭建步骤：(安装平台所需操作系统： windows2008或windows2019服务器版)
+
+1、下载网站平台最新压缩包
+
+2、解压到一个硬盘分区
+
+3、把网站目录属性-->安全中添加everyone可修改(必需)。
+
+4、搭建iis，支持ASP.NET v2_0_50727  (IIS 中Asp.net选择ASP.NET v2_0_50727,文档添加index.aspx)
+
+5、安装sql2012 express数据库服务器，下载网址如下
+（https://download.microsoft.com/download/1/7/6/176567A5-F80B-4CEF-B54E-EC36B6F921DC/SQLEXPRADV_x64_CHS.exe）
+
+6、在sql2012 express管理器，先创建learnsite数据库名称
+
+7、web.config中请更改192.168.1.7为你的数据库服务器名称
+这段中的learnsite更改为你创建的数据库名称和Zhou!12345更改为你的数据库密码：
+
+<add name="SqlServer" providerName="System.Data.SqlClient" connectionString="Data Source=192.168.1.7;Initial Catalog=learnsite;uid=sa;pwd=Zhou!12345;"/>
+
+8、打开网站首页，会跳转到更新页面，点击创建数据表按钮后，再点击执行更新。
+			
+9、打开网站：从学生平台首页，进入教师平台 然后登录后台
+
+用管理员账号admin密码12345登录管理员平台
+
+  （1）系统设置：网站名称，学期等
+
+  （2）班级管理：创建班级
+  
+  （3）教师管理：添加教师账号，选择所教班级
+
+  （4）新生导入：导入学生 （学号为数字且一般不要大于12位）
+
+  （5）退出后用教师账号登录教师平台
+
+  （6）添加学案，并在学案中添加课堂活动（一个活动可提交一个作业）
+
+
+
+
+

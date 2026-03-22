@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/manager/copygood.aspx" hash="fffffff94ae4f160" filehash="427febc7b4bcea5f" flags="110000" assembly="App_Web_copygood.aspx.a9b56182.cqbwhxay" type="ASP.manager_copygood_aspx">
+    <filedeps>
+        <filedep name="/manager/copygood.aspx" />
+        <filedep name="/manager/Manage.master" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,125 @@
+﻿<%@ page language="C#" autoeventwireup="true" inherits="student_mpptx, LearnSite" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head id="Head1" runat="server">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../plugins/canvas-ppt/favicon.png">
+    <title>MPPTX在线演示文稿</title>
+    <style>
+        .start-loading-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 240px;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            font-size: 36px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .start-loading-box img {
+            display: block;
+            width: 160px;
+            margin-bottom: 20px;
+        }
+
+        @keyframes loading {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-point {
+            position: absolute;
+            top: -20px;
+            width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            background: linear-gradient(to bottom right, #f4ae38, #b74bce);
+            transform-origin: 0 100px;
+            animation: loading 1s infinite;
+        }
+    </style>
+  <script type="module"  src="../../plugins/canvas-ppt/assets/js/index.js"></script>
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/@vue.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/spark-md5.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/mitt.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/tinycolor2.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/@babel.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/crypto-js.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/svg-pathdata.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/svg-arc-to-cubic-bezier.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/file-saver.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/jszip.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/pptxgenjs.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/resize-observer-polyfill.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/vue-types.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/@ctrl.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/@ant-design.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/dom-align.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/lodash-es.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/dayjs.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/async-validator.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/compute-scroll-into-view.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/scroll-into-view-if-needed.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/ant-design-vue.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/@xmldom.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/x2js.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/d3-color.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/analyze-pptx.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/tslib.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/zrender.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/echarts.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/axios.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/idb.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/vue.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/lodash.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/perfect-freehand.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/mwhiteboard.js">
+  <link rel="modulepreload"  href="../../plugins/canvas-ppt/assets/js/clipboard.js">
+  <link rel="stylesheet" href="../../plugins/canvas-ppt/assets/css/ant-design-vue.css">
+  <link rel="stylesheet" href="../../plugins/canvas-ppt/assets/css/index.css">
+  <link rel="stylesheet" href="../../plugins/canvas-ppt/assets/css/animate.css">
+</head>
+<body>
+    <div id="app"></div>
+    <div class="start-loading-box">
+        <div class="loading-point"></div>
+        <img src="../../plugins/canvas-ppt/favicon-192x192.png" alt="" />
+        欢迎使用MPPTX在线演示文稿
+    </div>
+
+<script type="text/javascript" >
+    var id = "<%=Id %>";
+    var ppturl = "<%=Ppturl %>";
+    function returnurl() {
+        if (confirm('是否要离开此页面？') == true) {
+            window.location.href = "<%=Fpage %>"
+        }
+    }
+    function readppt() {
+        if (ppturl != "") {
+            ppt.command.loadppt(ppturl);
+        }
+    }
+    window.onload = function () {
+        document.getElementById("pptId").innerText = id;
+    }
+
+    setTimeout(readppt, 1000);
+
+</script>
+</body>
+</html>

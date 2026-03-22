@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/ware.aspx" hash="fffffff94ae4f160" filehash="97b03af6f3f7c6ca" flags="110000" assembly="App_Web_ei1omlpp" type="ASP.student_ware_aspx">
+    <filedeps>
+        <filedep name="/student/Scm.master" />
+        <filedep name="/student/ware.aspx" />
+    </filedeps>
+</preserve>

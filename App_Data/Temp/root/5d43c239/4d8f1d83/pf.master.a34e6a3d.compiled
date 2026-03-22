@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/profile/Pf.master" hash="fffffff94ae4f160" filehash="f66c195ed2" flags="110000" assembly="App_Web_pf.master.a34e6a3d.jjg2elqz" type="ASP.profile_pf_master">
+    <filedeps>
+        <filedep name="/profile/Pf.master" />
+    </filedeps>
+</preserve>

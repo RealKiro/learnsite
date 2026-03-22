@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/test_reset_api.aspx" hash="fffffff94ae4f160" filehash="ffffeef406773cf1" flags="110000" assembly="App_Web_7nc76oai" type="ASP.teacher_test_reset_api_aspx">
+    <filedeps>
+        <filedep name="/teacher/test_reset_api.aspx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python代码查看器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
+            background: #1e1e1e; 
+            color: #d4d4d4;
+            overflow: hidden;
+        }
+        .viewer-container { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+        }
+        .viewer-header { 
+            background: #2d2d30; 
+            padding: 12px 20px; 
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .viewer-title { 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: #cccccc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .viewer-title svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: #6366f1;
+            stroke-width: 2;
+        }
+        .viewer-info {
+            font-size: 12px;
+            color: #858585;
+        }
+        .viewer-body { 
+            flex: 1; 
+            display: flex;
+            overflow: hidden;
+        }
+        .code-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #3e3e42;
+        }
+        .code-header {
+            background: #252526;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: #858585;
+            border-bottom: 1px solid #3e3e42;
+        }
+        .code-content { 
+            flex: 1;
+            overflow: auto; 
+            padding: 16px 20px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        .code-content::-webkit-scrollbar { width: 12px; }
+        .code-content::-webkit-scrollbar-track { background: #1e1e1e; }
+        .code-content::-webkit-scrollbar-thumb { background: #424242; border-radius: 6px; }
+        .code-content::-webkit-scrollbar-thumb:hover { background: #4e4e4e; }
+        
+        .line-numbers {
+            float: left;
+            text-align: right;
+            padding-right: 16px;
+            margin-right: 16px;
+            border-right: 1px solid #3e3e42;
+            color: #858585;
+            user-select: none;
+            min-width: 40px;
+        }
+        .code-lines {
+            overflow: hidden;
+        }
+        .code-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* 语法高亮 */
+        .keyword { color: #569cd6; font-weight: 600; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; font-style: italic; }
+        .number { color: #b5cea8; }
+        .function { color: #dcdcaa; }
+        .builtin { color: #4ec9b0; }
+        
+        .output-panel {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            background: #252526;
+        }
+        .output-header {
+            background: #2d2d30;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: #858585;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .output-header svg {
+            width: 14px;
+            height: 14px;
+            stroke: #858585;
+            fill: none;
+            stroke-width: 2;
+        }
+        .output-content {
+            flex: 1;
+            overflow: auto;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #cccccc;
+        }
+        .output-empty {
+            color: #858585;
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #3e3e42;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: #858585;
+            font-size: 14px;
+        }
+        
+        .error {
+            padding: 20px;
+            text-align: center;
+            color: #f48771;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">加载中...</div>
+    </div>
+    
+    <div id="viewer" class="viewer-container" style="display:none;">
+        <div class="viewer-header">
+            <div class="viewer-title">
+                <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                Python代码查看器
+            </div>
+            <div class="viewer-info" id="viewerInfo"></div>
+        </div>
+        <div class="viewer-body">
+            <div class="code-panel">
+                <div class="code-header">源代码</div>
+                <div class="code-content" id="codeContent">
+                    <div class="line-numbers" id="lineNumbers"></div>
+                    <div class="code-lines" id="codeLines"></div>
+                </div>
+            </div>
+            <div class="output-panel">
+                <div class="output-header">
+                    <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    输出/说明
+                </div>
+                <div class="output-content" id="outputContent">
+                    <div class="output-empty">此查看器仅用于查看代码，不支持运行。<br>如需运行代码，请在Python编辑器中打开。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="error" class="error" style="display:none;"></div>
+
+    <script>
+        // 获取URL参数
+        function getUrlParam(name) {
+            var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return decodeURIComponent(r[2]);
+            return null;
+        }
+
+        // 简单的Python语法高亮
+        function highlightPython(code) {
+            // Python关键字
+            var keywords = ['def', 'class', 'if', 'elif', 'else', 'for', 'while', 'in', 'return', 
+                           'import', 'from', 'as', 'try', 'except', 'finally', 'with', 'lambda',
+                           'and', 'or', 'not', 'is', 'None', 'True', 'False', 'pass', 'break', 'continue'];
+            
+            // 内置函数
+            var builtins = ['print', 'len', 'range', 'str', 'int', 'float', 'list', 'dict', 'set',
+                           'input', 'open', 'type', 'isinstance', 'enumerate', 'zip', 'map', 'filter'];
+            
+            var lines = code.split('\n');
+            var highlighted = [];
+            
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                var result = line;
+                
+                // 注释
+                if (line.trim().startsWith('#')) {
+                    result = '<span class="comment">' + escapeHtml(line) + '</span>';
+                } else {
+                    // 字符串
+                    result = result.replace(/(["'])(?:(?=(\\?))\2.)*?\1/g, function(match) {
+                        return '<span class="string">' + escapeHtml(match) + '</span>';
+                    });
+                    
+                    // 关键字
+                    keywords.forEach(function(kw) {
+                        var regex = new RegExp('\\b' + kw + '\\b', 'g');
+                        result = result.replace(regex, '<span class="keyword">' + kw + '</span>');
+                    });
+                    
+                    // 内置函数
+                    builtins.forEach(function(fn) {
+                        var regex = new RegExp('\\b' + fn + '\\b', 'g');
+                        result = result.replace(regex, '<span class="builtin">' + fn + '</span>');
+                    });
+                    
+                    // 数字
+                    result = result.replace(/\b\d+\.?\d*\b/g, '<span class="number">$&</span>');
+                    
+                    // 函数定义
+                    result = result.replace(/def\s+(\w+)/g, 'def <span class="function">$1</span>');
+                }
+                
+                highlighted.push(result);
+            }
+            
+            return highlighted;
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 加载代码
+        function loadCode() {
+            var wid = getUrlParam('id');
+            var sid = getUrlParam('sid');
+            var qid = getUrlParam('qid');
+            
+            if (!wid && (!sid || !qid)) {
+                showError('缺少必要参数（需要id或sid+qid）');
+                return;
+            }
+
+            console.log('[Python Viewer] 参数:', { wid: wid, sid: sid, qid: qid });
+
+            // 如果有wid，直接加载
+            if (wid) {
+                loadCodeByWid(wid);
+            }
+            // 如果有sid和qid，通过getexamwork.ashx查找作品
+            else if (sid && qid) {
+                loadCodeBySidQid(sid, qid);
+            }
+        }
+        
+        function loadCodeByWid(wid) {
+            console.log('[Python Viewer] 通过Wid加载:', wid);
+            
+            fetch('getproject.ashx?id=' + wid + '&type=code')
+                .then(function(response) {
+                    console.log('[Python Viewer] 响应状态:', response.status);
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.text();
+                })
+                .then(function(code) {
+                    console.log('[Python Viewer] 原始响应长度:', code.length);
+                    console.log('[Python Viewer] 原始响应前100字符:', code.substring(0, 100));
+                    
+                    // 检查是否是错误消息
+                    if (code.indexOf('// 未找到代码内容') >= 0 || code.indexOf('// 加载失败') >= 0 || code.indexOf('// 数据库连接失败') >= 0) {
+                        showError(code);
+                        return;
+                    }
+                    
+                    // 尝试解码（可能是base64编码）
+                    var originalCode = code;
+                    try {
+                        if (code && !code.match(/[\n\r ]/) && code.match(/^[A-Za-z0-9+\/=]+$/)) {
+                            console.log('[Python Viewer] 检测到Base64编码，尝试解码...');
+                            code = atob(code);
+                            // 可能还需要 decodeURIComponent
+                            if (code.indexOf('%') >= 0) {
+                                code = decodeURIComponent(code);
+                            }
+                            console.log('[Python Viewer] 解码后长度:', code.length);
+                        }
+                    } catch(e) { 
+                        console.warn('[Python Viewer] 解码失败，使用原始内容:', e);
+                        code = originalCode;
+                    }
+                    
+                    if (!code || code.trim() === '') {
+                        showError('代码内容为空（作品ID: ' + wid + '）');
+                        return;
+                    }
+                    
+                    displayCode(code);
+                })
+                .catch(function(error) {
+                    console.error('[Python Viewer] 加载失败:', error);
+                    showError('加载代码失败: ' + error.message);
+                });
+        }
+        
+        function loadCodeBySidQid(sid, qid) {
+            console.log('[Python Viewer] 通过Sid+Qid查找作品:', { sid: sid, qid: qid });
+            
+            fetch('../teacher/getexamwork.ashx?sid=' + sid + '&qid=' + qid + '&qtype=python')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log('[Python Viewer] getexamwork返回:', data);
+                    
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+                    
+                    if (data.wid && data.wid > 0) {
+                        // 找到作品，使用wid加载
+                        loadCodeByWid(data.wid);
+                    } else {
+                        showError('未找到该学生的Python作品');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('[Python Viewer] 查找作品失败:', error);
+                    showError('查找作品失败: ' + error.message);
+                });
+        }
+
+        function displayCode(code) {
+            if (!code || code.trim() === '') {
+                showError('代码内容为空');
+                return;
+            }
+
+            var lines = code.split('\n');
+            var highlighted = highlightPython(code);
+            
+            // 生成行号
+            var lineNumbersHtml = '';
+            for (var i = 1; i <= lines.length; i++) {
+                lineNumbersHtml += i + '\n';
+            }
+            document.getElementById('lineNumbers').textContent = lineNumbersHtml;
+            
+            // 显示代码
+            var codeLinesHtml = '';
+            for (var i = 0; i < highlighted.length; i++) {
+                codeLinesHtml += '<div class="code-line">' + highlighted[i] + '</div>';
+            }
+            document.getElementById('codeLines').innerHTML = codeLinesHtml;
+            
+            // 显示信息
+            document.getElementById('viewerInfo').textContent = '共 ' + lines.length + ' 行';
+            
+            // 显示查看器
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('viewer').style.display = 'flex';
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            var errorDiv = document.getElementById('error');
+            
+            // 特殊处理：代码为空的情况
+            if (message.indexOf('代码内容为空') >= 0) {
+                errorDiv.innerHTML = '<div style="text-align:center;padding:40px 20px;">' +
+                    '<svg viewBox="0 0 24 24" style="width:64px;height:64px;stroke:#f59e0b;fill:none;stroke-width:2;margin-bottom:16px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+                    '<div style="font-size:18px;font-weight:600;color:#1e293b;margin-bottom:8px;">学生未保存代码</div>' +
+                    '<div style="font-size:14px;color:#64748b;line-height:1.6;max-width:400px;margin:0 auto;">' +
+                    '该学生可能在Python编辑器中编辑了代码，但没有点击"保存"按钮。<br>' +
+                    '请提醒学生在编辑器中点击保存后再提交考试。' +
+                    '</div>' +
+                    '</div>';
+            } else {
+                errorDiv.textContent = message;
+            }
+            
+            errorDiv.style.display = 'block';
+        }
+
+        // 页面加载时执行
+        window.addEventListener('load', loadCode);
+    </script>
+</body>
+</html>

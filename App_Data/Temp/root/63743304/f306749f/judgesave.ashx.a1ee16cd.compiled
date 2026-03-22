@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/judgesave.ashx" hash="33c60594" filehash="ffffebb93f80f271" flags="110000" assembly="App_Web_5qa_rpu0" type="judgesave">
+    <filedeps>
+        <filedep name="/teacher/judgesave.ashx" />
+    </filedeps>
+</preserve>

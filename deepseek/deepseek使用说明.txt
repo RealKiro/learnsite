@@ -1,0 +1,21 @@
+内网代理服务，可以使用一个开发者api key 供多个用户访问，需要安装python环境。
+
+需要安装以下框架和库
+pip install Flask -i https://mirrors.aliyun.com/pypi/simple/
+pip install Flask-Cors -i https://mirrors.aliyun.com/pypi/simple/
+pip install gevent -i https://mirrors.aliyun.com/pypi/simple/
+pip install edge-tts -i https://mirrors.aliyun.com/pypi/simple/
+pip install opencv-python -i https://mirrors.aliyun.com/pypi/simple/
+pip install paddlepaddle  -i https://mirrors.aliyun.com/pypi/simple/
+pip install paddleocr -i https://mirrors.aliyun.com/pypi/simple/
+pip install translate -i https://mirrors.aliyun.com/pypi/simple/
+HostIp设置，修改为服务器IP地址如
+HostIp = "192.168.1.4"
+
+高级防火墙入口端口，允许http协议访问5000端口
+
+然后进入deepseek目录，运行python deepseek.py
+
+学案里添加主题创作里的人工智能对话页面，在教师平台上课页面，使用模拟学生进入学生平台测试
+
+也可以直接在浏览器输入http://服务器IP/deepseek/deepseek.html静态页面，对话测试。

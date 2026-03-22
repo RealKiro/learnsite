@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo API 测试页面</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .logo-display {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+        }
+        .logo-display img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .logo-display svg {
+            width: 40px;
+            height: 40px;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .info-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8fafc;
+            border-left: 3px solid #667eea;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #64748b;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Logo API 测试页面</h1>
+    
+    <div class="test-section">
+        <h2>1. API 测试</h2>
+        <button onclick="testAPI()">测试 API</button>
+        <button onclick="testAPIWithConsole()">测试 API（显示详细日志）</button>
+        <div id="apiStatus"></div>
+        <div id="apiResponse"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Logo 显示测试</h2>
+        <div class="logo-display" id="logoDisplay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
+            加载中...
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 配置信息</h2>
+        <div id="configInfo">
+            <div class="info-item">
+                <span class="info-label">API地址:</span>
+                <code>manager/getsiteconfig.ashx</code>
+            </div>
+            <div class="info-item">
+                <span class="info-label">配置文件:</span>
+                <code>website.xml</code>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Logo字段:</span>
+                <code>SiteLogo</code>
+            </div>
+            <div class="info-item">
+                <span class="info-label">网站名称字段:</span>
+                <code>SiteName</code>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 浏览器控制台</h2>
+        <div class="status info">
+            请按 F12 打开浏览器开发者工具，查看控制台输出的详细日志
+        </div>
+    </div>
+
+    <script>
+        // 自动加载Logo
+        (function() {
+            loadLogo();
+        })();
+        
+        function loadLogo() {
+            console.log('=== 开始加载Logo ===');
+            var logoElement = document.getElementById('logoDisplay');
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'manager/getsiteconfig.ashx', true);
+            
+            xhr.onreadystatechange = function() {
+                console.log('readyState:', xhr.readyState, 'status:', xhr.status);
+                
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('API响应成功');
+                        console.log('响应内容:', xhr.responseText);
+                        
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            console.log('解析后的数据:', data);
+                            
+                            if (data.success) {
+                                var html = '';
+                                if (data.logo && data.logo.length > 0) {
+                                    console.log('找到Logo:', data.logo);
+                                    html += '<img src="' + data.logo + '" alt="Logo" onerror="console.error(\'Logo图片加载失败\');this.style.display=\'none\'" />';
+                                } else {
+                                    console.log('未配置Logo，使用默认图标');
+                                    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+                                    html += '<path d="M12 2L2 7l10 5 10-5-10-5z"/>';
+                                    html += '<path d="M2 17l10 5 10-5"/>';
+                                    html += '<path d="M2 12l10 5 10-5"/>';
+                                    html += '</svg>';
+                                }
+                                html += (data.siteName || '信息科技学习平台');
+                                logoElement.innerHTML = html;
+                                console.log('Logo更新成功');
+                            } else {
+                                console.error('API返回 success=false');
+                                logoElement.innerHTML = '<span style="color:#ef4444">API返回失败</span>';
+                            }
+                        } catch(e) {
+                            console.error('JSON解析错误:', e);
+                            logoElement.innerHTML = '<span style="color:#ef4444">数据解析失败</span>';
+                        }
+                    } else {
+                        console.error('HTTP错误:', xhr.status);
+                        logoElement.innerHTML = '<span style="color:#ef4444">API请求失败 (状态码: ' + xhr.status + ')</span>';
+                    }
+                }
+            };
+            
+            xhr.onerror = function() {
+                console.error('XHR请求错误');
+                logoElement.innerHTML = '<span style="color:#ef4444">网络错误</span>';
+            };
+            
+            xhr.send();
+            console.log('=== API请求已发送 ===');
+        }
+        
+        function testAPI() {
+            var statusDiv = document.getElementById('apiStatus');
+            var responseDiv = document.getElementById('apiResponse');
+            
+            statusDiv.innerHTML = '<div class="status info">正在测试...</div>';
+            responseDiv.innerHTML = '';
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'manager/getsiteconfig.ashx', true);
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            statusDiv.innerHTML = '<div class="status success">✓ API测试成功</div>';
+                            responseDiv.innerHTML = '<h3>API响应:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                        } catch(e) {
+                            statusDiv.innerHTML = '<div class="status error">✗ JSON解析失败: ' + e.message + '</div>';
+                            responseDiv.innerHTML = '<h3>原始响应:</h3><pre>' + xhr.responseText + '</pre>';
+                        }
+                    } else {
+                        statusDiv.innerHTML = '<div class="status error">✗ HTTP错误: ' + xhr.status + '</div>';
+                    }
+                }
+            };
+            
+            xhr.onerror = function() {
+                statusDiv.innerHTML = '<div class="status error">✗ 网络错误</div>';
+            };
+            
+            xhr.send();
+        }
+        
+        function testAPIWithConsole() {
+            console.clear();
+            console.log('%c=== API详细测试开始 ===', 'color: #667eea; font-size: 16px; font-weight: bold');
+            testAPI();
+            console.log('%c请查看上方的网络请求详情', 'color: #667eea; font-size: 14px');
+        }
+    </script>
+</body>
+</html>

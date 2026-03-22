@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Templates>
+  <Template id="1ca0768707634d548bb92c243641c743" name="新授课学案模板" type="builtin" createTime="2026-02-26 16:36:26" creator="系统"><![CDATA[<h2 style="text-align:center;color:#1e293b;">【学案名称】</h2><hr/><h3>一、学习目标</h3><ol><li>知识与技能：</li><li>过程与方法：</li><li>情感态度与价值观：</li></ol><h3>二、学习重难点</h3><p><strong>重点：</strong></p><p><strong>难点：</strong></p><h3>三、课前预习</h3><p>请同学们预习以下内容：</p><ol><li></li></ol><h3>四、课堂探究</h3><h4>探究活动一：</h4><p></p><h4>探究活动二：</h4><p></p><h3>五、课堂练习</h3><ol><li></li></ol><h3>六、课堂小结</h3><p></p><h3>七、课后作业</h3><ol><li></li></ol>]]></Template>
+  <Template id="22133416595b4bda8ba486e1ddde0a69" name="复习课学案模板" type="builtin" createTime="2026-02-26 16:36:26" creator="系统"><![CDATA[<h2 style="text-align:center;color:#1e293b;">【复习课主题】</h2><hr/><h3>一、复习目标</h3><ol><li></li></ol><h3>二、知识梳理</h3><h4>知识点一：</h4><p></p><h4>知识点二：</h4><p></p><h4>知识点三：</h4><p></p><h3>三、典型例题</h3><h4>例题1：</h4><p></p><p><strong>解析：</strong></p><h4>例题2：</h4><p></p><p><strong>解析：</strong></p><h3>四、巩固练习</h3><ol><li></li></ol><h3>五、拓展提高</h3><ol><li></li></ol><h3>六、总结归纳</h3><p></p>]]></Template>
+  <Template id="8bd22e230dd74266b00ac29a3e6cc805" name="实践课学案模板" type="builtin" createTime="2026-02-26 16:36:26" creator="系统"><![CDATA[<h2 style="text-align:center;color:#1e293b;">【实践课主题】</h2><hr/><h3>一、实践目标</h3><ol><li></li></ol><h3>二、实践准备</h3><p><strong>工具与材料：</strong></p><ul><li></li></ul><p><strong>环境要求：</strong></p><p></p><h3>三、实践步骤</h3><h4>步骤一：</h4><p></p><h4>步骤二：</h4><p></p><h4>步骤三：</h4><p></p><h3>四、注意事项</h3><ul><li></li></ul><h3>五、成果展示</h3><p>请将你的实践成果记录在下方：</p><p></p><h3>六、实践反思</h3><p>通过本次实践，你有什么收获和体会？</p><p></p>]]></Template>
+  <Template id="82081e0aeab84c66bdaa63a4273e6320" name="信息科技课学案模板" type="builtin" createTime="2026-02-26 16:36:26" creator="系统"><![CDATA[<h2 style="text-align:center;color:#1e293b;">【课题名称】</h2><hr/><h3>一、学习目标</h3><ol><li>了解：</li><li>掌握：</li><li>能够：</li></ol><h3>二、知识讲解</h3><h4>1. 基本概念</h4><p></p><h4>2. 操作方法</h4><p></p><h3>三、操作任务</h3><h4>任务一：基础操作</h4><p><strong>要求：</strong></p><ol><li></li></ol><h4>任务二：进阶操作</h4><p><strong>要求：</strong></p><ol><li></li></ol><h4>任务三：创意拓展（选做）</h4><p><strong>要求：</strong></p><ol><li></li></ol><h3>四、学习评价</h3><p>请对自己本节课的学习情况进行评价：</p><ul><li>基础操作完成情况：☆☆☆☆☆</li><li>进阶操作完成情况：☆☆☆☆☆</li><li>创意拓展完成情况：☆☆☆☆☆</li></ul><h3>五、课堂小结</h3><p></p>]]></Template>
+  <Template id="bd2caf788261494092474ef2812d53fd" name="乡村教师模板" type="upload" createTime="2026-02-26 18:04:30" creator="lry"><![CDATA[<style type="text/css">
+<!--
+.xcstyle2 {color: #254665;font-size: 22px;}
+.xcstyle3 {color: #2F2C28;font-family: 微软雅黑;font-size: 16px;line-height:130%;margin:4px;text-indent:2em;}
+.xcblue {width:200px;border-bottom-style:solid;border-bottom-width:2px;color: #254665;}
+
+-->
+</style>
+<table width="800" border="0">
+  <tr>
+    <td><p align="center"><strong>年级 </strong>：七年级 <strong>　科目 </strong>：信息技术 <strong>　来源：</strong>乡村教师</p>
+    <div align="center"><strong>章节：第一章第一节 　课题 </strong>：《自选图形的应用》</div></td>
+  </tr>
+   <tr>
+    <td><img src="/images/sucai/prepare.gif" width="57" height="70">“在线资源”--“七年级上学期”，下载“第八课、自选图形素材包”到桌面并解压</td>
+  </tr>
+  <tr>
+    <td height="15"></td>
+  </tr>
+  <tr>
+    <td><span class="xcstyle2">【学习目标】：</span></td>
+  </tr>  
+  <tr>
+    <td class="xcblue">
+	<p class="xcstyle3">1 、学会设置自选图形。</p>
+      <p class="xcstyle3">2 、灵活应用自选图形的各个选项。</p>
+      <p class="xcstyle3">3 、学会绘制任意多边形。</p>
+    </td>
+  </tr>
+  <tr>
+    <td><span class="xcstyle2">【重点难点】：</span></td>
+  </tr>
+  <tr>
+    <td class="xcblue">
+	<p class="xcstyle3">重点： 学会图片和艺术字的插入和设置。 </p>
+      <p class="xcstyle3">难点： 学会图片的插入和设置。</p>
+</td>
+  </tr>    
+  <tr>
+    <td><span class="xcstyle2"><img src="/images/sucai/talking.jpg" width="80" height="41"></span></td>
+  </tr> 
+  <tr>
+    <td>
+      <p><strong>一、自选图形的设置 </strong></p>
+      <p>1 、选择自选图形 </p>
+      <p>在“插入”选项卡的“插图”组中，单击“形状”，挑选需要的形状并在文档中画出形状。 </p>
+      <p>2 、设置自选图形 </p>
+    <p>选中图形后，在“绘图工具—格式”选项卡上“形状样式”组中使用“形状填充”、“形状轮廓”、“形状效果”进行设置。</p>    </td>
+  </tr>
+  <tr>
+    <td><p><strong>二、自选图形的旋转 </strong></p>
+      <p>在“绘图工具—格式”选项卡上的“排列”组中，单击“旋转”，可进行固定角度的旋转。 </p>
+    <p>单击图形上方的“自由旋转”可进行任意角度的旋转。 </p></td>
+  </tr> 
+  <tr>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>
+</table>]]></Template>
+</Templates>

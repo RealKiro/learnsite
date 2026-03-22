@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/resourcecreate.aspx" hash="fffffff94ae4f160" filehash="53e074029451b87c" flags="110000" assembly="App_Web_ht9mqts9" type="ASP.teacher_resourcecreate_aspx">
+    <filedeps>
+        <filedep name="/teacher/resourcecreate.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

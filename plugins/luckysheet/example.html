@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>在线电子表格</title>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/pluginsCss.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/plugins.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/luckysheet.css'/>
+    <link rel='stylesheet' href='../../Plugins/luckysheet/css/iconfont.css'/>
+    <script src="../../Plugins/luckysheet/js/plugin.js"></script>
+    <script src="../../Plugins/luckysheet/js/luckysheet.umd.js"></script>
+    <script src="../../Plugins/luckysheet/js/luckyexcel.umd.js"></script>
+</head>
+<body>
+<div id="lucky" style="margin:0px;padding:0px;position:absolute;width:100%;height:100%;left: 0px;top: 100px; font-size:16px;"></div>
+</body>
+<script type="text/javascript">
+    var datajson = "#codefile#";
+    //console.log(datajson);
+	datajson=decodeURIComponent(datajson);
+    //console.log(datajson);
+	var dataexcel=JSON.parse(datajson);
+	delete dataexcel.updateUrl;
+	delete dataexcel.loadUrl;
+    console.log(dataexcel);
+
+    options = {
+        userInfo: '访客',
+        container: 'lucky',
+        title: "",
+        lang: 'zh',
+        showsheetbar: false,
+        myFolderUrl: "#",
+        data: dataexcel
+    }
+    window.luckysheet.create(dataexcel);
+
+    /*
+    导出的json字符串可以直接当作`luckysheet.create(options)`初始化工作簿时的参数`options`使用，使用场景在用户自己操作表格后想要手动保存全部的参数，再去别处初始化这个表格使用，类似一个luckysheet专有格式的导入导出
+    */
+</script>
+
+</html>

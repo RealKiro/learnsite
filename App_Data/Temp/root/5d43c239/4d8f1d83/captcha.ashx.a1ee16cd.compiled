@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/captcha.ashx" hash="33c60594" filehash="fffff1d91bfe7231" flags="110000" assembly="App_Web_b2qdm5h8" type="CaptchaHandler">
+    <filedeps>
+        <filedep name="/teacher/captcha.ashx" />
+    </filedeps>
+</preserve>

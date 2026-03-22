@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/graphadd.aspx" hash="fffffff94ae4f160" filehash="fb966fdaa7f677d8" flags="110000" assembly="App_Web_kgua2dk_" type="ASP.teacher_graphadd_aspx">
+    <filedeps>
+        <filedep name="/teacher/graphadd.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

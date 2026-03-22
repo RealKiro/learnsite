@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/termview.aspx" hash="fffffff94ae4f160" filehash="bf42355fb633fa7c" flags="110000" assembly="App_Web__5sv-k73" type="ASP.teacher_termview_aspx">
+    <filedeps>
+        <filedep name="/teacher/Teach.master" />
+        <filedep name="/teacher/termview.aspx" />
+    </filedeps>
+</preserve>

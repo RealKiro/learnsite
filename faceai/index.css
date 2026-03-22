@@ -1,0 +1,276 @@
+a{  
+  color: #1f5069;
+  opacity: 0.8;
+  text-decoration: none;
+}
+a:visited{
+  opacity: 1;
+}
+a:hover{
+  opacity: 1;
+}
+.main{
+  min-width: 980px;
+}
+.container {
+    margin: 10px;
+    display: flex;
+    min-width: 1200px;
+  }
+  .showarea{
+    width: 100%;
+    display: flex;
+    border: 1px solid #eee;
+    padding: 10px;
+  }
+  #facemesh {
+    display: block;
+  }
+  .center{
+    text-align: center;
+    padding: 4px;
+  }
+
+  h1{
+    text-align: center;
+    color: #1f5069;  
+    border: solid 2px #fff;
+    padding: 9px 0;
+    font-size:x-large;
+  }
+
+ .left {
+    width: 50%;
+    min-width: 414px;
+    position: relative;
+  }
+
+
+  .right {
+    width: 50%;
+    min-width: 414px;
+    position: relative;
+  }
+
+  .word {
+    line-height: 150%;
+    text-align: left;
+  }
+
+  .faceimg {
+    max-height: 500px;
+    max-width: 600px;
+    box-shadow:0 2px 2px rgba(0,0,0,0.3);
+    border: 1px solid #eee;
+  }
+
+  .faceimgonly{    
+    height: 500px;
+    box-shadow:0 2px 2px rgba(0,0,0,0.3);
+    border: 1px solid #eee;
+  }
+
+  .start-btn {
+    color: rgb(43, 144, 226);
+    border: solid 2px #fff;
+    width: 130px;
+    font-size: 18px;
+    padding: 9px 0;
+    cursor: pointer;
+    background: rgb(43, 144, 226);
+    color: white;
+  }
+
+  .start-btn:hover {
+    border: solid 2px rgb(43, 144, 226);
+    background: rgb(43, 144, 226);
+    color: white;
+  }
+ 
+  .save-btn {
+    color: rgb(43, 144, 226);
+    border: solid 2px #fff;
+    width: 130px;
+    font-size: 18px;
+    padding: 9px 0;
+    cursor: pointer;
+    background: rgb(43, 144, 226);
+    color: white;
+  }
+
+  .save-btn:hover {
+    border: solid 2px rgb(43, 144, 226);
+    background: rgb(43, 144, 226);
+    color: white;
+  }
+
+  #pass{
+    font-size: 32px;
+    height: 46px;
+  }
+
+  #result {
+    font-size: 32px;
+    padding: 10px;
+    width: 100%;
+    line-height: 48px;
+    background: rgb(138, 200, 250);
+  }
+  .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+  }
+
+  #uploadimg{
+    display: none;
+  }
+  .upimgIcon{
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      opacity: 0.3;
+  }
+  .upimgIcon:hover{
+    opacity: 1;
+  }
+  #landmarks{
+    width: 120px;
+    overflow-x: hidden;
+    height: 400px;
+    opacity: 0.8;
+    background-color: #e2e2e2;
+    border: 2px solid #c4c4c4;
+    box-shadow:0 2px 2px rgba(0,0,0,0.3);
+    padding: 4px;
+    margin-bottom: 10px;
+  }
+
+  .half{
+    width: 160px;
+    top:0px;
+    padding: 0px;
+  }
+  .cartoon{
+    margin: auto;
+    padding: 4px;
+    opacity: 0.6;
+    width: 120px;
+  }
+  .cartoon:hover{
+    opacity: 1;
+  }
+  
+  /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+  ::-webkit-scrollbar
+  {
+    width: 4px;
+    height: 10px;
+    background-color: #edebeb;
+  }
+    
+  /*定义滚动条轨道 内阴影+圆角*/
+  ::-webkit-scrollbar-track
+  {
+    background-color: #dddcdc;
+  }
+    
+  /*定义滑块 内阴影+圆角*/
+  ::-webkit-scrollbar-thumb
+  {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #bdbcbc;
+  }
+
+  /* 新样式 */
+  .datacategory{  
+    padding: 2px;
+    width: 170px;
+    color: #000000;
+    font-weight: bold;
+    font-size: 15px;
+    display: inline-block;
+    border:1px solid #ffffff;
+  }
+  .datacategory:focus{ 
+    border:1px solid #b4b3b3;
+    outline: none; 
+  }
+  .counter{
+    width: 100px;
+    margin-left: 20px;
+  }
+  
+  .dataCollector{
+     margin-left: 60px;
+  }
+  
+  .dataup{  
+    margin: 10px;
+  }
+
+  .facestore{
+    border:1px solid #e5e5e5;
+    padding: 0px;
+    margin-right: 10px;
+    border-radius:8px;
+    width: 500px;
+  }
+  .facevideo{
+    width: 640px; border:1px solid #e5e5e5; border-radius:8px;
+  }
+  .category{
+    font-size: 13px; 
+    background: #f3f2f2;
+    text-align: center;
+    box-shadow:0 2px 2px rgba(0,0,0,0.3);
+  }
+  .outpic{
+    width: 500px;
+    height: 530px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+  }
+
+.piclist{  
+  width:90px;
+  max-height: 100px;
+  margin: 10px;
+  text-align: center;
+}
+.spname{
+  font-size: 13px; 
+  height: 18px;
+  padding: 4px;
+  margin: 4px;
+}
+
+.thumb{
+  margin: 4px;
+  padding: 4px;
+  width:80px;
+  max-height: 80px;
+  border:1px solid #e5e5e5;
+  box-shadow:0 1px 1px rgba(0,0,0,0.1);
+  background-color:transparent;
+}
+
+.thumb:hover{
+  background-color: rgb(240, 148, 28);
+}
+
+.status{
+  font-size: 16px;
+  padding: 4px;
+  background: #f3f2f2;
+  text-align: center;
+  box-shadow:0 2px 2px rgba(0,0,0,0.3);
+  height: 33px;
+}
+
+.fileinput{
+  display: none;
+}

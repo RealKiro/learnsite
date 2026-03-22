@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/autonomic.aspx" hash="fffffff94ae4f160" filehash="7db15a9255cf87c5" flags="110000" assembly="App_Web_hlxs6vyi" type="ASP.student_autonomic_aspx">
+    <filedeps>
+        <filedep name="/student/autonomic.aspx" />
+        <filedep name="/student/Stud.master" />
+    </filedeps>
+</preserve>

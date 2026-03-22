@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/quiz/quizadd.aspx" hash="fffffff94ae4f160" filehash="154b7db1c8685640" flags="110000" assembly="App_Web_2at3hjat" type="ASP.quiz_quizadd_aspx">
+    <filedeps>
+        <filedep name="/quiz/quizadd.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

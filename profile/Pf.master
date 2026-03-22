@@ -1,0 +1,1180 @@
+﻿<%@ master language="C#" autoeventwireup="true" inherits="Student_Profile_Pf, LearnSite" %>
+
+<script runat="server">
+    protected string GetFaviconLinkTag()
+    {
+        string icoPath = Server.MapPath("~/favicon.ico");
+        if (System.IO.File.Exists(icoPath))
+            return "<link rel=\"icon\" type=\"image/x-icon\" href=\"" + ResolveUrl("~/favicon.ico") + "?v=" + System.IO.File.GetLastWriteTime(icoPath).Ticks + "\" />";
+        string pngPath = Server.MapPath("~/favicon.png");
+        if (System.IO.File.Exists(pngPath))
+            return "<link rel=\"icon\" type=\"image/png\" href=\"" + ResolveUrl("~/favicon.png") + "?v=" + System.IO.File.GetLastWriteTime(pngPath).Ticks + "\" />";
+        return "";
+    }
+
+    protected string PfSiteTitle()
+    {
+        try
+        {
+            string xmlPath = Server.MapPath("~/website.xml");
+            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            doc.Load(xmlPath);
+            System.Xml.XmlNode node = doc.SelectSingleNode("//add[@key='SiteTitle']");
+            if (node != null && node.Attributes["value"] != null)
+                return node.Attributes["value"].Value;
+        }
+        catch { }
+        return "LearnSite";
+    }
+
+    protected string PfSiteLogo()
+    {
+        string[] exts = { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
+        foreach (string ext in exts)
+        {
+            string path = Server.MapPath("~/images/site-logo" + ext);
+            if (System.IO.File.Exists(path))
+                return ResolveUrl("~/images/site-logo" + ext) + "?v=" + System.IO.File.GetLastWriteTime(path).Ticks;
+        }
+        return "";
+    }
+
+    protected string pfName = "";
+    protected string pfInitial = "\u751F";
+    protected string pfClass = "";
+
+    // 等级相关
+    protected int pfSid = 0;
+    protected int pfGscore = 0;
+    protected int pfAllscore = 0;
+    protected string pfGroupLevelName = "见习组员";
+    protected string pfGroupLevelIcon = "🌱";
+    protected int pfGroupLevelNum = 1;
+    protected string pfCreditLevelName = "学习新手";
+    protected string pfCreditLevelIcon = "🌱";
+    protected int pfCreditLevelNum = 1;
+
+    private static System.Reflection.BindingFlags pfFlags =
+        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic
+        | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static;
+
+    private string PfGetProp(object model, string propName)
+    {
+        if (model == null) return "";
+        System.Reflection.PropertyInfo p = model.GetType().GetProperty(propName);
+        if (p == null) return "";
+        object v = p.GetValue(model, null);
+        if (v == null) return "";
+        string s = v.ToString();
+        if (s.Contains("%")) { try { s = HttpUtility.UrlDecode(s, System.Text.Encoding.UTF8); } catch { } }
+        return s;
+    }
+
+    private void PfLoadUser()
+    {
+        try
+        {
+            HttpCookie sc = Request.Cookies[LearnSite.Common.CookieHelp.stuCookieNname];
+            if (sc == null || string.IsNullOrEmpty(sc.Value)) return;
+            string cookieVal = sc.Value;
+            if (cookieVal.Contains("%")) { try { cookieVal = HttpUtility.UrlDecode(cookieVal, System.Text.Encoding.UTF8); } catch { } }
+            Type ct = typeof(LearnSite.Common.CookieHelp).Assembly.GetType("LearnSite.Model.Cook");
+            if (ct == null) return;
+            object m = Activator.CreateInstance(ct);
+            System.Reflection.MethodInfo mi = ct.GetMethod("ToModel", pfFlags);
+            if (mi != null) mi.Invoke(m, new object[] { cookieVal });
+            string n = PfGetProp(m, "Sname");
+            if (!string.IsNullOrEmpty(n)) { pfName = n; pfInitial = n.Substring(0, 1); }
+            pfSid = PfGetPropInt(m, "Sid");
+            string g = PfGetProp(m, "Sgrade");
+            string c = PfGetProp(m, "Sclass");
+            if (!string.IsNullOrEmpty(g) && g != "0" && !string.IsNullOrEmpty(c) && c != "0")
+                pfClass = g + "\u5E74\u7EA7" + c + "\u73ED";
+            else if (!string.IsNullOrEmpty(c) && c != "0")
+                pfClass = c + "\u73ED";
+        }
+        catch { }
+    }
+
+    // ===== Dynamic Nav =====
+    protected class PfNavItem
+    {
+        public string Icon = "";
+        public string Text = "";
+        public string Url = "";
+    }
+    protected System.Collections.Generic.List<PfNavItem> pfTopNavItems = null;
+    protected System.Collections.Generic.List<PfNavItem> pfSideNavItems = null;
+
+    private void PfLoadNavConfig()
+    {
+        try
+        {
+            string xmlPath = Server.MapPath("~/App_Data/navsetting.xml");
+            if (!System.IO.File.Exists(xmlPath)) return;
+            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            doc.Load(xmlPath);
+            // Top nav (shared with student)
+            System.Xml.XmlNodeList stuItems = doc.SelectNodes("//studentNav/item");
+            if (stuItems != null && stuItems.Count > 0)
+            {
+                pfTopNavItems = new System.Collections.Generic.List<PfNavItem>();
+                foreach (System.Xml.XmlNode node in stuItems)
+                {
+                    PfNavItem ni = new PfNavItem();
+                    System.Xml.XmlNode iconNode = node.SelectSingleNode("icon");
+                    System.Xml.XmlNode textNode = node.SelectSingleNode("text");
+                    System.Xml.XmlNode urlNode = node.SelectSingleNode("url");
+                    if (iconNode != null) ni.Icon = iconNode.InnerText;
+                    if (textNode != null) ni.Text = textNode.InnerText;
+                    if (urlNode != null) ni.Url = urlNode.InnerText;
+                    pfTopNavItems.Add(ni);
+                }
+            }
+            // Sidebar nav
+            System.Xml.XmlNodeList pfItems = doc.SelectNodes("//profileSideNav/item");
+            if (pfItems != null && pfItems.Count > 0)
+            {
+                pfSideNavItems = new System.Collections.Generic.List<PfNavItem>();
+                foreach (System.Xml.XmlNode node in pfItems)
+                {
+                    PfNavItem ni = new PfNavItem();
+                    System.Xml.XmlNode iconNode = node.SelectSingleNode("icon");
+                    System.Xml.XmlNode textNode = node.SelectSingleNode("text");
+                    System.Xml.XmlNode urlNode = node.SelectSingleNode("url");
+                    if (iconNode != null) ni.Icon = iconNode.InnerText;
+                    if (textNode != null) ni.Text = textNode.InnerText;
+                    if (urlNode != null) ni.Url = urlNode.InnerText;
+                    pfSideNavItems.Add(ni);
+                }
+            }
+        }
+        catch { }
+    }
+
+    protected bool PfHasCustomTopNav() { return pfTopNavItems != null && pfTopNavItems.Count > 0; }
+    protected bool PfHasCustomSideNav() { return pfSideNavItems != null && pfSideNavItems.Count > 0; }
+
+    protected string PfGetNavActiveClass(string url)
+    {
+        string currentPath = Request.Url.AbsolutePath.ToLower();
+        if (string.IsNullOrEmpty(url)) return "";
+        string urlLower = url.ToLower().Replace("\\", "/");
+        int lastSlash = urlLower.LastIndexOf('/');
+        string fileName = lastSlash >= 0 ? urlLower.Substring(lastSlash + 1) : urlLower;
+        if (currentPath.EndsWith(fileName)) return "pf-active";
+        return "";
+    }
+
+    protected string PfGetTopNavActiveClass(string url)
+    {
+        string currentPath = Request.Url.AbsolutePath.ToLower();
+        if (string.IsNullOrEmpty(url)) return "";
+        string urlLower = url.ToLower().Replace("\\", "/");
+        int lastSlash = urlLower.LastIndexOf('/');
+        string fileName = lastSlash >= 0 ? urlLower.Substring(lastSlash + 1) : urlLower;
+        if (currentPath.EndsWith(fileName)) return "active";
+        return "";
+    }
+
+    protected string PfCurrentPage()
+    {
+        string p = Request.Url.AbsolutePath.ToLower();
+        if (p.Contains("mygroup")) return "mygroup";
+        if (p.Contains("mysign")) return "mysign";
+        if (p.Contains("mypwd")) return "mypwd";
+        if (p.Contains("myclass")) return "myclass";
+        if (p.Contains("myphoto")) return "myphoto";
+        if (p.Contains("mysex")) return "mysex";
+        if (p.Contains("mychange")) return "mychange";
+        if (p.Contains("grouplevel")) return "grouplevel";
+        if (p.Contains("creditlevel")) return "creditlevel";
+        if (p.Contains("mybadge")) return "mybadge";
+        if (p.Contains("badgestore")) return "badgestore";
+        if (p.Contains("badgeshop")) return "badgeshop";
+        if (p.Contains("badgeexchange")) return "badgeexchange";
+        if (p.Contains("mypet")) return "mypet";
+        return "";
+    }
+
+    protected bool GetFooterEnabled()
+    {
+        try
+        {
+            string xmlPath = Server.MapPath("~/App_Data/footersetting.xml");
+            if (System.IO.File.Exists(xmlPath))
+            {
+                System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+                doc.Load(xmlPath);
+                System.Xml.XmlNode node = doc.SelectSingleNode("//footerEnabled");
+                if (node != null && node.InnerText.Trim().ToLower() == "false") return false;
+            }
+        }
+        catch { }
+        return true;
+    }
+
+    private string PfGetConnStr()
+    {
+        string cs = null;
+        try
+        {
+            Type dbType = typeof(LearnSite.Common.CookieHelp).Assembly.GetType("LearnSite.DBUtility.DbHelperSQL");
+            if (dbType != null)
+            {
+                System.Reflection.FieldInfo connField = dbType.GetField("connectionString",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                if (connField != null)
+                    cs = connField.GetValue(null) as string;
+            }
+        }
+        catch { }
+        if (string.IsNullOrEmpty(cs))
+        {
+            try { cs = System.Configuration.ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString; }
+            catch { }
+        }
+        if (cs != null && cs.ToLower().IndexOf("connection timeout") < 0 && cs.ToLower().IndexOf("connect timeout") < 0)
+            cs = cs.TrimEnd(';') + ";Connection Timeout=5;";
+        return cs;
+    }
+
+    private int PfGetPropInt(object model, string propName)
+    {
+        string s = PfGetProp(model, propName);
+        if (string.IsNullOrEmpty(s)) return 0;
+        int result;
+        if (int.TryParse(s, out result)) return result;
+        return 0;
+    }
+
+    private void PfLoadScores()
+    {
+        if (pfSid <= 0) return;
+        string connStr = PfGetConnStr();
+        if (string.IsNullOrEmpty(connStr)) return;
+        try
+        {
+            using (System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(connStr))
+            {
+                conn.Open();
+                string sql = "SELECT ISNULL(Sgscore,0), ISNULL(Sallscore,0) FROM Students WHERE Sid=@sid";
+                using (System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@sid", pfSid);
+                    using (System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            pfGscore = reader.GetInt32(0);
+                            pfAllscore = reader.GetInt32(1);
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+
+        // 从XML配置计算小组等级
+        PfCalcLevelFromXml(Server.MapPath("~/App_Data/grouplevel.xml"), pfGscore,
+            ref pfGroupLevelName, ref pfGroupLevelIcon, ref pfGroupLevelNum,
+            "见习组员", "🌱");
+
+        // 从XML配置计算学分等级
+        PfCalcLevelFromXml(Server.MapPath("~/App_Data/creditlevel.xml"), pfAllscore,
+            ref pfCreditLevelName, ref pfCreditLevelIcon, ref pfCreditLevelNum,
+            "学习新手", "🌱");
+    }
+
+    private void PfCalcLevelFromXml(string xmlPath, int score,
+        ref string levelName, ref string levelIcon, ref int levelNum,
+        string defaultName, string defaultIcon)
+    {
+        try
+        {
+            if (System.IO.File.Exists(xmlPath))
+            {
+                System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+                doc.Load(xmlPath);
+                System.Xml.XmlNodeList nodes = doc.SelectNodes("//levels/level");
+                if (nodes != null && nodes.Count > 0)
+                {
+                    // 按 threshold 降序匹配
+                    string matchedName = "";
+                    string matchedIcon = "";
+                    int matchedNum = 1;
+                    for (int i = nodes.Count - 1; i >= 0; i--)
+                    {
+                        System.Xml.XmlNode node = nodes[i];
+                        int threshold = 0;
+                        if (node.Attributes["threshold"] != null)
+                            int.TryParse(node.Attributes["threshold"].Value, out threshold);
+                        if (score >= threshold)
+                        {
+                            matchedName = node.Attributes["name"] != null ? node.Attributes["name"].Value : defaultName;
+                            matchedIcon = node.Attributes["icon"] != null ? node.Attributes["icon"].Value : defaultIcon;
+                            matchedNum = i + 1;
+                            break;
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(matchedName))
+                    {
+                        levelName = matchedName;
+                        levelIcon = matchedIcon;
+                        levelNum = matchedNum;
+                        return;
+                    }
+                    // 如果没匹配到，取第一个
+                    System.Xml.XmlNode first = nodes[0];
+                    levelName = first.Attributes["name"] != null ? first.Attributes["name"].Value : defaultName;
+                    levelIcon = first.Attributes["icon"] != null ? first.Attributes["icon"].Value : defaultIcon;
+                    levelNum = 1;
+                    return;
+                }
+            }
+        }
+        catch { }
+        // XML 不存在时使用硬编码默认值
+        PfCalcLevelDefault(score, ref levelName, ref levelIcon, ref levelNum, xmlPath.Contains("grouplevel"));
+    }
+
+    private void PfCalcLevelDefault(int score, ref string name, ref string icon, ref int num, bool isGroup)
+    {
+        if (isGroup)
+        {
+            if (score >= 150) { name = "明星组员"; icon = "👑"; num = 6; }
+            else if (score >= 100) { name = "资深组员"; icon = "💎"; num = 5; }
+            else if (score >= 60) { name = "高级组员"; icon = "🌟"; num = 4; }
+            else if (score >= 30) { name = "中级组员"; icon = "⭐"; num = 3; }
+            else if (score >= 10) { name = "初级组员"; icon = "🌿"; num = 2; }
+            else { name = "见习组员"; icon = "🌱"; num = 1; }
+        }
+        else
+        {
+            if (score >= 350) { name = "学习大师"; icon = "👑"; num = 6; }
+            else if (score >= 200) { name = "学习精英"; icon = "🏆"; num = 5; }
+            else if (score >= 100) { name = "学习达人"; icon = "🌟"; num = 4; }
+            else if (score >= 50) { name = "优秀学子"; icon = "🌳"; num = 3; }
+            else if (score >= 20) { name = "勤奋学生"; icon = "🌿"; num = 2; }
+            else { name = "学习新手"; icon = "🌱"; num = 1; }
+        }
+    }
+
+    protected string PfRenderIcon(string icon)
+    {
+        if (string.IsNullOrEmpty(icon)) return "";
+        if (icon.Contains("/") || icon.Contains(".png") || icon.Contains(".jpg") || icon.Contains(".gif") || icon.Contains(".svg") || icon.Contains(".webp"))
+            return "<img src=\"" + icon + "\" style=\"width:16px;height:16px;object-fit:contain;vertical-align:middle;\" />";
+        return Server.HtmlEncode(icon);
+    }
+
+    protected string PfRenderNavIcon(string icon)
+    {
+        if (string.IsNullOrEmpty(icon)) return "";
+        if (icon.TrimStart().StartsWith("<")) return icon;
+        return "<img src=\"" + Server.HtmlEncode(icon) + "\" />";
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        LitFavicon.Text = GetFaviconLinkTag();
+        Page.Title = PfSiteTitle() + " - \u4E2A\u4EBA\u8BBE\u7F6E";
+        PfLoadUser();
+        PfLoadScores();
+        PfLoadNavConfig();
+    }
+</script>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title>个人设置</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <asp:Literal ID="LitFavicon" runat="server" />
+    <link href="../App_Themes/Student/StyleSheet.css" rel="stylesheet" type="text/css" />
+    <link href="../js/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="../js/pub-footer.css?v=final" rel="stylesheet" type="text/css" />
+    <script src="../js/jquery-1.8.2.min.js" type="text/javascript"></script>
+    <link href="../js/tinybox.css?v=20260212b" rel="stylesheet" type="text/css" />
+    <script src="../js/tinybox.js?v=20260212b" type="text/javascript"></script>
+    <script type="text/javascript">
+        function showChat() {
+            var urlat = "../student/chat.aspx";
+            TINY.box.show({ iframe: urlat, boxid: 'frameless', width: 880, height: 560, fixed: true, mask: 1, animate: 0, close: true })
+        }
+    </script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box !important; }
+        .pf-wrap, .pf-wrap *, .pf-wrap *::before, .pf-wrap *::after { margin-right: unset; margin-left: unset; margin: 0; }
+        html, body { height: 100%; width: 100%; margin: 0 !important; overflow: hidden; }
+        body { font-family: 'Microsoft YaHei','Segoe UI',-apple-system,Arial,sans-serif !important; background: #f0f2f5 !important; background-image: none !important; color: #1e293b !important; }
+        #form1 { width: 100%; height: 100%; margin: 0 !important; padding: 0; }
+        .pf-wrap { display: flex !important; flex-direction: column; height: 100vh; width: 100%; }
+
+        /* ===== Header ===== */
+        .pf-header {
+            height: 80px; background: #fff; border-bottom: 1px solid #e8ecf1;
+            display: flex !important; align-items: center; padding: 0 48px; flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.04); position: relative; z-index: 1000; width: 100%;
+        }
+        .pf-brand { display: flex !important; align-items: center; gap: 10px; flex-shrink: 0; text-decoration: none !important; margin-right: 40px !important; }
+        .pf-brand-logo { width: 36px; height: 36px; display: flex !important; align-items: center; justify-content: center; flex-shrink: 0; }
+        .pf-brand-logo img { width: 36px; height: 36px; object-fit: contain; }
+        .pf-brand-name { font-size: 16px; font-weight: 700; color: #1e293b !important; white-space: nowrap; }
+        .pf-topnav { display: flex !important; align-items: center; gap: 6px; flex: 1; justify-content: center; }
+        .pf-topnav-item {
+            display: flex !important; align-items: center; gap: 7px; padding: 10px 24px; border-radius: 8px;
+            font-size: 14.5px; font-weight: 500; color: #64748b !important; text-decoration: none !important;
+            transition: all .15s; cursor: pointer; white-space: nowrap; line-height: 1.2;
+            background: none !important; background-color: transparent !important; background-image: none !important;
+        }
+        .pf-topnav-item:hover { background-color: #f1f5f9 !important; color: #334155 !important; }
+        .pf-topnav-item svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .pf-topnav-item img { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; }
+        .pf-header-right { display: flex !important; align-items: center; gap: 12px; flex-shrink: 0; margin-left: 40px !important; }
+        .pf-chat-btn { width: 36px; height: 36px; border-radius: 8px; background: #f1f5f9; border: none !important; display: flex !important; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; color: #64748b; }
+        .pf-chat-btn:hover { background: #e2e8f0; color: #334155; }
+        .pf-chat-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* User dropdown */
+        .pf-user-wrap { position: relative !important; display: flex !important; align-items: center; }
+        .pf-user-trigger { display: flex !important; align-items: center; gap: 10px; padding: 0 14px 0 0; cursor: pointer; user-select: none; background: none !important; border: none !important; }
+        .pf-avatar-circle { width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1, #a78bfa); border-radius: 50% !important; display: flex !important; align-items: center; justify-content: center; color: #fff !important; font-size: 16px; font-weight: 700; flex-shrink: 0; overflow: hidden; line-height: 40px; }
+        .pf-user-name-top { font-size: 14px; font-weight: 600; color: #1e293b !important; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
+        .pf-user-arrow { width: 16px; height: 16px; stroke: #94a3b8; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; flex-shrink: 0; }
+        .pf-user-trigger.open .pf-user-arrow { transform: rotate(180deg); }
+        .pf-dropdown { display: none; position: absolute !important; top: calc(100% + 10px); right: 0; width: 220px; z-index: 9999; }
+        .pf-dropdown.show { display: block !important; }
+        .pf-dd-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+        .pf-dd-top { padding: 16px 18px; border-bottom: 1px solid #f3f4f6; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
+        .pf-dd-top .dd-name { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.3; }
+        .pf-dd-top .dd-role { display: inline-block; font-size: 11px; color: #fff; margin-top: 6px; background: rgba(255,255,255,.2); padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+        .pf-dd-list { padding: 6px 0; }
+        .pf-dd-item { display: flex !important; align-items: center; gap: 10px; padding: 10px 18px; font-size: 14px; color: #374151 !important; text-decoration: none !important; cursor: pointer; transition: all .15s; }
+        .pf-dd-item:hover { background: #f9fafb; color: #111827 !important; transform: translateX(4px); }
+        .pf-dd-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+        .pf-dd-item.back-home { color: #4f46e5 !important; font-weight: 500; }
+        .pf-dd-item.back-home:hover { background: #eef2ff; }
+        .pf-dd-item.logout { color: #dc2626 !important; }
+        .pf-dd-item.logout:hover { background: #fef2f2; }
+        .pf-dd-divider { height: 1px; background: #f3f4f6; margin: 0; }
+
+        /* 消息通知红点 */
+        .pf-dd-item.notice-item { position: relative; }
+        .pf-notice-dot {
+            display: none; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;
+            position: absolute; top: 12px; right: 16px;
+            animation: pfDotPulse 2s infinite;
+        }
+        .pf-notice-dot.show { display: block; }
+        @keyframes pfDotPulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+
+        /* 通知弹窗 */
+        .pf-notice-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15,23,42,.4); z-index: 99999;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity .25s ease, visibility 0s .25s;
+        }
+        .pf-notice-overlay.show { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .25s ease, visibility 0s; }
+        .pf-notice-modal {
+            width: 620px; max-width: 94vw; max-height: 82vh;
+            background: #fff; border-radius: 18px;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.1);
+            transform: scale(.9) translateY(20px); opacity: 0;
+            transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+        }
+        .pf-notice-overlay.show .pf-notice-modal { transform: scale(1) translateY(0); opacity: 1; }
+        .pf-notice-modal-head {
+            padding: 24px 28px 20px; flex-shrink: 0;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            color: #fff; position: relative; overflow: hidden;
+        }
+        .pf-notice-modal-head::before {
+            content: ''; position: absolute; top: -50px; right: -30px; width: 140px; height: 140px;
+            background: rgba(255,255,255,.07); border-radius: 50%;
+        }
+        .pf-notice-modal-head::after {
+            content: ''; position: absolute; bottom: -40px; left: 30px; width: 100px; height: 100px;
+            background: rgba(255,255,255,.05); border-radius: 50%;
+        }
+        .pf-notice-modal-title {
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; z-index: 1;
+        }
+        .pf-notice-modal-title h3 {
+            font-size: 18px; font-weight: 700; margin: 0;
+            display: flex; align-items: center; gap: 10px; color: #fff;
+        }
+        .pf-notice-modal-title h3 svg {
+            width: 22px; height: 22px; stroke: #fff; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .pf-notice-close {
+            width: 34px; height: 34px; border-radius: 50%; border: none;
+            background: rgba(255,255,255,.18); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; transition: all .25s;
+        }
+        .pf-notice-close:hover { background: rgba(255,255,255,.3); transform: rotate(90deg); }
+        .pf-notice-close svg {
+            width: 15px; height: 15px; stroke: currentColor; fill: none;
+            stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .pf-notice-modal-subtitle {
+            font-size: 13px; color: rgba(255,255,255,.7); margin-top: 6px;
+            position: relative; z-index: 1;
+        }
+        .pf-notice-modal-body {
+            flex: 1; overflow-y: auto; padding: 20px 24px 24px; background: #f8f9fb;
+        }
+        .pf-notice-modal-body::-webkit-scrollbar { width: 5px; }
+        .pf-notice-modal-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        .pf-notice-modal-body::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        /* 通知卡片 */
+        .pf-notice-card {
+            padding: 16px 20px; margin-bottom: 12px;
+            background: #fff; border-radius: 12px;
+            border-left: 3px solid #6366f1;
+            box-shadow: 0 1px 4px rgba(0,0,0,.04);
+            transition: all .2s ease; position: relative;
+        }
+        .pf-notice-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(99,102,241,.1);
+            border-left-color: #8b5cf6;
+        }
+        .pf-notice-card:last-child { margin-bottom: 0; }
+        .pf-notice-card-title {
+            font-size: 15px; font-weight: 600; color: #1e293b;
+            margin-bottom: 8px; line-height: 1.4;
+        }
+        .pf-notice-card-content {
+            font-size: 13.5px; color: #64748b; line-height: 1.7;
+            white-space: pre-wrap; word-break: break-word;
+        }
+        .pf-notice-card-footer {
+            display: flex; align-items: center; gap: 16px;
+            margin-top: 12px; font-size: 12px; color: #94a3b8;
+        }
+        .pf-notice-card-footer span { display: flex; align-items: center; gap: 4px; }
+        /* 状态 */
+        .pf-notice-state { text-align: center; padding: 56px 24px 48px; }
+        .pf-notice-state-icon { margin-bottom: 18px; }
+        .pf-notice-state-icon svg {
+            width: 52px; height: 52px; stroke-width: 1.2; stroke-linecap: round;
+            stroke-linejoin: round; fill: none;
+        }
+        .pf-notice-state-text { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+        .pf-notice-state-text.error { color: #f87171; }
+        .pf-notice-retry-btn {
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
+            padding: 10px 24px; border-radius: 24px; border: none;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            font-size: 13px; font-weight: 500; color: #fff; cursor: pointer;
+            transition: all .2s; font-family: inherit;
+            box-shadow: 0 2px 8px rgba(99,102,241,.25);
+        }
+        .pf-notice-retry-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,.35); }
+        .pf-notice-retry-btn svg {
+            width: 14px; height: 14px; stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        @keyframes pfSpin { to { transform: rotate(360deg); } }
+        .pf-notice-loading-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid #e8e5ff; border-top-color: #6366f1;
+            border-radius: 50%; animation: pfSpin .8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @media (max-width: 480px) {
+            .pf-notice-modal { max-width: 100vw; max-height: 100vh; border-radius: 0; }
+        }
+
+        /* ===== Info Bar (below header) ===== */
+        .pf-info-bar { padding: 16px 48px 0; flex-shrink: 0; }
+        .pf-info-bar-inner {
+            max-width: 1600px; margin: 0 auto; display: flex !important; align-items: center;
+            gap: 24px; padding: 20px 28px; animation: pfFade .4s ease;
+            background: #fff; border-radius: 16px;
+            border: 1px solid #e5e7eb; position: relative; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.03);
+        }
+        .pf-info-bar-inner::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa, #c084fc);
+        }
+
+        /* Avatar */
+        .pf-bar-avatar { flex-shrink: 0; position: relative; z-index: 1; }
+        .pf-bar-avatar-ring {
+            width: 56px; height: 56px; border-radius: 50% !important; padding: 2.5px;
+            background: linear-gradient(135deg, #6366f1, #a78bfa, #c084fc);
+            box-shadow: 0 2px 12px rgba(99,102,241,.18);
+        }
+        .pf-bar-avatar-ring-inner {
+            width: 100%; height: 100%; border-radius: 50% !important; overflow: hidden;
+            background: #fff; display: flex !important; align-items: center; justify-content: center;
+        }
+        .pf-bar-avatar-ring-inner img {
+            width: 51px !important; height: 51px !important; max-width: 51px !important; max-height: 51px !important;
+            border-radius: 50% !important; object-fit: cover; border: none !important;
+        }
+
+        /* Meta */
+        .pf-bar-meta { display: flex !important; flex-direction: column; gap: 6px; min-width: 0; position: relative; z-index: 1; }
+        .pf-bar-name { font-size: 17px; font-weight: 700; color: #1e293b; line-height: 1.2; display: flex; align-items: center; gap: 8px; }
+        .pf-bar-rank { font-size: 12px; color: #64748b; }
+        .pf-bar-details { display: flex !important; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .pf-bar-tag {
+            display: inline-flex !important; align-items: center; gap: 5px; padding: 5px 14px;
+            border-radius: 20px; font-size: 12.5px; font-weight: 500; line-height: 1.3;
+            background: #f8fafc; border: 1px solid #e2e8f0; color: #475569;
+        }
+        .pf-bar-tag .tag-label { color: #94a3b8; font-weight: 400; }
+        .pf-bar-tag-link { text-decoration: none !important; cursor: pointer; transition: all .15s; }
+        .pf-bar-tag-link:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        .pf-bar-tag-group { background: linear-gradient(135deg, #ecfdf5, #d1fae5) !important; border-color: #6ee7b7 !important; color: #047857 !important; font-weight: 600; }
+        .pf-bar-tag-credit { background: linear-gradient(135deg, #fef3c7, #fde68a) !important; border-color: #fbbf24 !important; color: #92400e !important; font-weight: 600; }
+        .pf-bar-divider { width: 1px; height: 32px; background: #e5e7eb; margin: 0 4px; flex-shrink: 0; position: relative; z-index: 1; }
+        .pf-bar-spacer { flex: 1; }
+
+        /* Recommend btn */
+        .pf-bar-recommend {
+            display: inline-flex !important; align-items: center; gap: 8px; padding: 10px 24px;
+            border-radius: 10px; background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+            border: none !important; color: #fff !important; font-size: 13.5px; font-weight: 600;
+            text-decoration: none !important; transition: all .2s; white-space: nowrap; cursor: pointer;
+            letter-spacing: .3px; position: relative; z-index: 1;
+            box-shadow: 0 2px 8px rgba(99,102,241,.22);
+        }
+        .pf-bar-recommend:hover { background: linear-gradient(135deg, #4f46e5, #7c3aed) !important; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,.3); }
+        .pf-bar-recommend:active { transform: translateY(0); box-shadow: 0 1px 4px rgba(99,102,241,.15); }
+        .pf-bar-recommend svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+        /* ===== Body ===== */
+        .pf-body { flex: 1; overflow-y: auto; padding: 24px 48px; position: relative; z-index: 1; }
+        .pf-body::-webkit-scrollbar { width: 6px; }
+        .pf-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+        .pf-grid { display: grid; grid-template-columns: 200px 1fr; gap: 24px; max-width: 1600px; margin: 0 auto; align-items: start; animation: pfFade .4s ease; }
+        @keyframes pfFade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+        /* Sidebar */
+        .pf-sidebar { position: sticky; top: 0; display: flex; flex-direction: column; gap: 16px; max-height: calc(100vh - 220px); overflow-y: auto; }
+        .pf-sidebar::-webkit-scrollbar { width: 4px; }
+        .pf-sidebar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+        .pf-sidebar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .pf-card { background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.02); overflow: hidden; }
+        .pf-card-head { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; display: flex !important; align-items: center; gap: 10px; }
+        .pf-card-head .pf-icon { width: 32px; height: 32px; border-radius: 8px; display: flex !important; align-items: center; justify-content: center; flex-shrink: 0; }
+        .pf-icon svg { width: 16px; height: 16px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .pf-icon-indigo { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); }
+        .pf-icon-indigo svg { stroke: #4f46e5; }
+        .pf-card-head h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin: 0; }
+
+        /* Sidebar nav */
+        .pf-sidenav { padding: 8px; }
+        .pf-sidenav a {
+            display: flex !important; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px;
+            font-size: 13.5px; font-weight: 500; color: #64748b !important; text-decoration: none !important;
+            transition: all .12s; line-height: 1.2;
+        }
+        .pf-sidenav a:hover { background: #f1f5f9; color: #334155 !important; }
+        .pf-sidenav a.pf-active { background: #eef2ff !important; color: #4f46e5 !important; font-weight: 600; }
+        .pf-sidenav a svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+        .pf-sidenav a img { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; flex-shrink: 0; }
+
+        /* Footer adjustments for master page */
+        .pf-wrap .site-footer {
+            flex-shrink: 0;
+            margin-top: 0;
+        }
+
+        /* Hide old */
+        .pf-wrap .studmasterhead, .pf-wrap .banner, .pf-wrap .menu, .pf-wrap .path, .pf-wrap .chatimg, .pf-wrap .robotimg { display: none !important; }
+        .pf-wrap .stu { width: 100% !important; overflow: visible !important; height: auto !important; }
+        .pf-wrap .divinfo, .pf-wrap .divinfo1, .pf-wrap .divinfo2 { float: none !important; width: auto !important; border: none !important; background: none !important; height: auto !important; display: none !important; }
+        .pf-wrap .pfdiv { width: auto !important; margin: 0 !important; text-align: left !important; border: none !important; background: none !important; }
+        .pf-wrap .indexhead { display: none !important; }
+
+        @media (max-width: 1200px) {
+            .pf-header { padding: 0 28px; }
+            .pf-info-bar { padding: 0 28px; }
+            .pf-body { padding: 24px 28px; }
+            .pf-brand { margin-right: 20px !important; }
+            .pf-header-right { margin-left: 20px !important; }
+            .pf-topnav-item { padding: 7px 14px; font-size: 13px; }
+        }
+        @media (max-width: 1024px) {
+            .pf-brand-name { display: none; }
+            .pf-topnav-item { padding: 6px 10px; font-size: 13px; }
+            .pf-topnav-item svg { display: none; }
+        }
+        @media (max-width: 768px) {
+            .pf-header { padding: 0 12px; }
+            .pf-info-bar { padding: 8px 12px 0; }
+            .pf-info-bar-inner { gap: 14px; padding: 16px 18px; }
+            .pf-bar-avatar-ring { width: 42px; height: 42px; }
+            .pf-bar-avatar-ring-inner img { width: 37px !important; height: 37px !important; max-width: 37px !important; max-height: 37px !important; }
+            .pf-bar-tag { padding: 3px 8px; font-size: 11px; }
+            .pf-bar-divider { display: none; }
+            .pf-bar-recommend { padding: 8px 16px; font-size: 12px; }
+            .pf-body { padding: 16px 12px; }
+            .pf-topnav-item { padding: 6px 8px; font-size: 12px; }
+            .pf-user-name-top { display: none; }
+            .pf-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div class="pf-wrap">
+
+        <!-- ===== Header ===== -->
+        <header class="pf-header">
+            <a href="../student/myinfo.aspx" class="pf-brand">
+                <div class="pf-brand-logo">
+                    <% string sLogoUrl = PfSiteLogo(); %>
+                    <% if (!string.IsNullOrEmpty(sLogoUrl)) { %>
+                        <img src="<%= sLogoUrl %>" alt="Logo" />
+                    <% } else { %>
+                        <svg viewBox="0 0 32 32" width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#6366f1"/><text x="16" y="22" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">L</text></svg>
+                    <% } %>
+                </div>
+                <span class="pf-brand-name"><%= PfSiteTitle() %></span>
+            </a>
+
+            <nav class="pf-topnav">
+                <% if (PfHasCustomTopNav()) { %>
+                    <% foreach (PfNavItem ni in pfTopNavItems) { %>
+                    <a href="<%= ni.Url %>" class="pf-topnav-item">
+                        <%= PfRenderNavIcon(ni.Icon) %><%= Server.HtmlEncode(ni.Text) %></a>
+                    <% } %>
+                <% } else { %>
+                <a href="../student/myinfo.aspx" class="pf-topnav-item">
+                    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>我的学案</a>
+                <a href="../student/mywork.aspx" class="pf-topnav-item">
+                    <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>我的作品</a>
+                <a href="../student/myfinger.aspx" class="pf-topnav-item">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M7 16h10"/></svg>打字宝典</a>
+                <a href="../student/myquiz.aspx" class="pf-topnav-item">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>常识积累</a>
+                <a href="../student/myfile.aspx" class="pf-topnav-item">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>在线资源</a>
+                <a href="../student/groupshare.aspx" class="pf-topnav-item">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>我的网盘</a>
+                <a href="../student/excellentwork.aspx" class="pf-topnav-item">
+                    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>优秀作品</a>
+                <% } %>
+            </nav>
+
+            <div class="pf-header-right">
+                <button type="button" class="pf-chat-btn" onclick="showChat()" title="小组讨论">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </button>
+                <div class="pf-user-wrap" id="pfUserWrap">
+                    <div class="pf-user-trigger" id="pfUserTrigger" onclick="togglePfDropdown()">
+                        <div class="pf-avatar-circle"><%= Server.HtmlEncode(pfInitial) %></div>
+                        <span class="pf-user-name-top"><%= !string.IsNullOrEmpty(pfName) ? Server.HtmlEncode(pfName) : "\u5B66\u751F" %></span>
+                        <svg class="pf-user-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="pf-dropdown" id="pfDropdown">
+                        <div class="pf-dd-card">
+                            <div class="pf-dd-top">
+                                <div class="dd-name"><%= !string.IsNullOrEmpty(pfName) ? Server.HtmlEncode(pfName) : "\u5B66\u751F" %></div>
+                                <div class="dd-role"><%= !string.IsNullOrEmpty(pfClass) ? Server.HtmlEncode(pfClass) : "\u5B66\u751F\u7528\u6237" %></div>
+                            </div>
+                            <div class="pf-dd-list">
+                                <a href="javascript:void(0)" onclick="openPfNotice()" class="pf-dd-item notice-item">
+                                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                    消息通知
+                                    <span class="pf-notice-dot" id="pfNoticeDot"></span>
+                                </a>
+                                <a href="../profile/mygroup.aspx" class="pf-dd-item">
+                                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    我的小组
+                                </a>
+                                <a href="../profile/mypwd.aspx" class="pf-dd-item">
+                                    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    修改密码
+                                </a>
+                                <a href="../profile/myphoto.aspx" class="pf-dd-item">
+                                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    修改头像
+                                </a>
+                                <a href="javascript:void(0)" onclick="showChat()" class="pf-dd-item">
+                                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    小组讨论
+                                </a>
+                            </div>
+                            <div class="pf-dd-divider"></div>
+                            <div class="pf-dd-list">
+                            <a href="../student/myinfo.aspx" class="pf-dd-item back-home">
+                                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                                返回学案
+                            </a>
+                            <a href="javascript:void(0)" class="pf-dd-item logout" onclick="doPfLogout()">
+                                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                退出登录
+                            </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===== Info Bar ===== -->
+        <div class="pf-info-bar">
+            <div class="pf-info-bar-inner">
+                <div class="pf-bar-avatar">
+                    <div class="pf-bar-avatar-ring">
+                        <div class="pf-bar-avatar-ring-inner">
+                            <asp:Image ID="Imageface" runat="server" style="border-width:0px;" />
+                        </div>
+                    </div>
+                </div>
+                <div class="pf-bar-meta">
+                    <div class="pf-bar-name">
+                        <asp:Label ID="sname" runat="server"></asp:Label>
+                        <span class="pf-bar-rank" id="DivRank"><asp:Label ID="LabelRank" runat="server"></asp:Label></span>
+                    </div>
+                    <div class="pf-bar-details">
+                        <span class="pf-bar-tag"><span class="tag-label">学号</span><asp:Label ID="snum" runat="server"></asp:Label></span>
+                        <span class="pf-bar-tag"><span class="tag-label">班级</span><asp:Label ID="sclass" runat="server"></asp:Label></span>
+                        <span class="pf-bar-tag"><span class="tag-label">小组</span><asp:Label ID="sleadername" runat="server"></asp:Label></span>
+                        <a href="../profile/grouplevel.aspx" class="pf-bar-tag pf-bar-tag-link pf-bar-tag-group" title="查看小组等级详情"><span class="tag-label">小组等级</span><%= PfRenderIcon(pfGroupLevelIcon) %> Lv.<%= pfGroupLevelNum %> <%= pfGroupLevelName %></a>
+                        <a href="../profile/creditlevel.aspx" class="pf-bar-tag pf-bar-tag-link pf-bar-tag-credit" title="查看学分等级详情"><span class="tag-label">学分等级</span><%= PfRenderIcon(pfCreditLevelIcon) %> Lv.<%= pfCreditLevelNum %> <%= pfCreditLevelName %></a>
+                    </div>
+                </div>
+                <div class="pf-bar-spacer"></div>
+                <div class="pf-bar-divider"></div>
+                <a href="../profile/mychange.aspx" class="pf-bar-recommend"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>推荐组长</a>
+                <asp:HyperLink ID="HyperLink1" runat="server" NavigateUrl="~/profile/mychange.aspx" style="display:none !important;" />
+            </div>
+        </div>
+
+        <!-- ===== Body ===== -->
+        <div class="pf-body">
+            <div class="pf-grid">
+                <!-- LEFT sidebar -->
+                <aside class="pf-sidebar">
+                    <div class="pf-card">
+                        <div class="pf-card-head">
+                            <span class="pf-icon pf-icon-indigo"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                            <h3>个人设置</h3>
+                        </div>
+                        <nav class="pf-sidenav">
+                            <% if (PfHasCustomSideNav()) { %>
+                                <% foreach (PfNavItem ni in pfSideNavItems) { %>
+                            <a href="<%= ni.Url %>" class="<%= PfGetNavActiveClass(ni.Url) %>"><%= PfRenderNavIcon(ni.Icon) %><%= Server.HtmlEncode(ni.Text) %></a>
+                                <% } %>
+                            <% } else { %>
+                            <a href="../profile/mygroup.aspx" data-page="mygroup"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>小组</a>
+                            <a href="../profile/mysign.aspx" data-page="mysign"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>签到</a>
+                            <a href="../profile/mypwd.aspx" data-page="mypwd"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>密码</a>
+                            <a href="../profile/myclass.aspx" data-page="myclass"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>班级</a>
+                            <a href="../profile/myphoto.aspx" data-page="myphoto"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>相片</a>
+                            <a href="../profile/mysex.aspx" data-page="mysex"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>性别</a>
+                            <a href="../profile/grouplevel.aspx" data-page="grouplevel"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>小组等级</a>
+                            <a href="../profile/creditlevel.aspx" data-page="creditlevel"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>学分等级</a>
+                            <a href="../profile/mybadge.aspx" data-page="mybadge"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>我的徽章</a>
+                            <a href="../profile/badgestore.aspx" data-page="badgestore"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>徽章图鉴</a>
+                            <a href="../profile/badgeshop.aspx" data-page="badgeshop"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>学分商城</a>
+                            <a href="../profile/badgeexchange.aspx" data-page="badgeexchange"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>兑换记录</a>
+                            <a href="../profile/mypet.aspx" data-page="mypet"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>宠物乐园</a>
+                            <% } %>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- RIGHT content -->
+                <div>
+                    <asp:ContentPlaceHolder ID="Cstu" runat="server"></asp:ContentPlaceHolder>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden controls -->
+        <div style="display:none !important;">
+            <asp:Menu ID="Menu1" runat="server" CssClass="nav" MaximumDynamicDisplayLevels="1" Orientation="Horizontal" Width="880px" SkipLinkText="">
+                <Items>
+                    <asp:MenuItem NavigateUrl="~/profile/mygroup.aspx" Text="小组" Value="小组合作" />
+                    <asp:MenuItem NavigateUrl="~/profile/mysign.aspx" Text="签到" Value="签到记录" />
+                    <asp:MenuItem Text="密码" Value="密码修改" NavigateUrl="~/profile/mypwd.aspx" />
+                    <asp:MenuItem Text="班级" Value="班级修改" NavigateUrl="~/profile/myclass.aspx" />
+                    <asp:MenuItem Text="相片" Value="相片修改" NavigateUrl="~/profile/myphoto.aspx" />
+                    <asp:MenuItem Text="性别" Value="性别修改" NavigateUrl="~/profile/mysex.aspx" />
+                    <asp:MenuItem Text="返回" Value="返回首页" NavigateUrl="~/student/myinfo.aspx" ImageUrl="~/images/separate2.png" />
+                </Items>
+            </asp:Menu>
+        </div>
+        <% if (GetFooterEnabled()) { %>
+        <!-- ========== Footer ========== -->
+        <div class="site-footer">
+            <div class="site-footer-inner">
+                <!-- 主要内容区域 -->
+                <div class="site-footer-main">
+                    <!-- 左侧品牌区 -->
+                    <div class="site-footer-brand">
+                        <a href="../index.aspx" class="site-footer-logo">
+                            <% string fLogoUrl = PfSiteLogo(); %>
+                            <% if (!string.IsNullOrEmpty(fLogoUrl)) { %>
+                            <span class="site-footer-logo-icon"><img src="<%= fLogoUrl %>" alt="Logo" /></span>
+                            <% } else { %>
+                            <span class="site-footer-logo-icon site-footer-logo-text">L</span>
+                            <% } %>
+                            <span><%= Server.HtmlEncode(PfSiteTitle()) %></span>
+                        </a>
+                        <p class="site-footer-desc">
+                            专业在线学习平台，致力于为学生和教师提供优质的教学体验和学习资源。
+                        </p>
+                        <div class="site-footer-social">
+                            <a href="#" class="site-footer-social-link" title="GitHub">
+                                <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                            </a>
+                            <a href="#" class="site-footer-social-link" title="Twitter">
+                                <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                            </a>
+                            <a href="#" class="site-footer-social-link" title="Email">
+                                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            </a>
+                            <a href="#" class="site-footer-social-link" title="RSS">
+                                <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 链接列 -->
+                    <div class="site-footer-links">
+                        <!-- 产品列 -->
+                        <div class="site-footer-column">
+                            <h3 class="site-footer-column-title">产品</h3>
+                            <ul class="site-footer-column-list">
+                                <li class="site-footer-column-item">
+                                    <a href="../default.aspx" class="site-footer-column-link">在线课程</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../student/mywork.aspx" class="site-footer-column-link">作业系统</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../student/myquiz.aspx" class="site-footer-column-link">考试测评</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../student/myfile.aspx" class="site-footer-column-link">学习资源</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 支持列 -->
+                        <div class="site-footer-column">
+                            <h3 class="site-footer-column-title">支持</h3>
+                            <ul class="site-footer-column-list">
+                                <li class="site-footer-column-item">
+                                    <a href="../help/index.aspx" class="site-footer-column-link">帮助中心</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../help/docs.aspx" class="site-footer-column-link">使用文档</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../help/faq.aspx" class="site-footer-column-link">常见问题</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../help/contact.aspx" class="site-footer-column-link">联系我们</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 关于列 -->
+                        <div class="site-footer-column">
+                            <h3 class="site-footer-column-title">关于</h3>
+                            <ul class="site-footer-column-list">
+                                <li class="site-footer-column-item">
+                                    <a href="../about/index.aspx" class="site-footer-column-link">关于我们</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../about/join.aspx" class="site-footer-column-link">加入我们</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../about/privacy.aspx" class="site-footer-column-link">隐私政策</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../about/terms.aspx" class="site-footer-column-link">服务条款</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部栏 -->
+                <div class="site-footer-bottom">
+                    <div class="site-footer-bottom-left">
+                        <span class="site-footer-copyright">© {year} LearnSite. All rights reserved</span>
+                    </div>
+                    <div class="site-footer-bottom-right">
+                        <span class="site-footer-powered"><a href="https://github.com/learnsite" target="_blank" rel="noopener">LearnSite</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+    </div><!-- /pf-wrap -->
+
+    <!-- 消息通知弹窗 -->
+    <div class="pf-notice-overlay" id="pfNoticeOverlay" onclick="if(event.target===this)closePfNotice()">
+        <div class="pf-notice-modal">
+            <div class="pf-notice-modal-head">
+                <div class="pf-notice-modal-title">
+                    <h3><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>消息通知</h3>
+                    <button type="button" class="pf-notice-close" onclick="closePfNotice()" title="关闭"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                <div class="pf-notice-modal-subtitle">查看最新的通知消息</div>
+            </div>
+            <div class="pf-notice-modal-body" id="pfNoticeBody">
+                <div class="pf-notice-state"><div class="pf-notice-loading-spinner"></div><div class="pf-notice-state-text">正在加载通知...</div></div>
+            </div>
+        </div>
+    </div>
+
+    </form>
+
+    <script type="text/javascript">
+        function togglePfDropdown() {
+            document.getElementById('pfUserTrigger').classList.toggle('open');
+            document.getElementById('pfDropdown').classList.toggle('show');
+        }
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('pfUserWrap');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('pfUserTrigger').classList.remove('open');
+                document.getElementById('pfDropdown').classList.remove('show');
+            }
+        });
+        function doPfLogout() {
+            window.location.href = '../student/myinfo.aspx?logout=1';
+        }
+        (function(){
+            var cur = '<%= PfCurrentPage() %>';
+            if (!cur) return;
+            var links = document.querySelectorAll('.pf-sidenav a');
+            links.forEach(function(a){
+                if (a.getAttribute('data-page') === cur) a.classList.add('pf-active');
+            });
+        })();
+    </script>
+    <script src="../js/pub-footer.js"></script>
+    <script type="text/javascript">
+        // 消息通知功能
+        (function(){
+            var KEY = 'stu_notice_last_read_nid';
+            function getLastReadNid(){ return parseInt(localStorage.getItem(KEY) || '0', 10); }
+            function setLastReadNid(nid){ localStorage.setItem(KEY, nid); }
+
+            var loadingHtml = '<div class="pf-notice-state"><div class="pf-notice-loading-spinner"></div><div class="pf-notice-state-text">正在加载通知...</div></div>';
+            var emptyHtml = '<div class="pf-notice-state"><div class="pf-notice-state-icon"><svg viewBox="0 0 24 24" stroke="#c7d2fe"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="pf-notice-state-text">暂无通知消息</div></div>';
+            var errorHtml = '<div class="pf-notice-state"><div class="pf-notice-state-icon"><svg viewBox="0 0 24 24" stroke="#fca5a5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="pf-notice-state-text error">加载失败，请重试</div><button type="button" class="pf-notice-retry-btn" onclick="openPfNotice()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重新加载</button></div>';
+
+            function parseNotices(text){
+                try {
+                    if(!text) return null;
+                    text = text.replace(/^\s+|\s+$/g, '');
+                    return JSON.parse(text);
+                } catch(e) {
+                    try { var m = text.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); } catch(e2){}
+                    return null;
+                }
+            }
+
+            function checkNotice(){
+                $.ajax({
+                    url: '../student/getnotices.aspx', dataType: 'text', cache: false, timeout: 10000,
+                    success: function(text){
+                        var data = parseNotices(text);
+                        if(data && data.notices && data.notices.length > 0){
+                            var maxNid = 0;
+                            for(var i=0;i<data.notices.length;i++){
+                                if(data.notices[i].nid > maxNid) maxNid = data.notices[i].nid;
+                            }
+                            if(maxNid > getLastReadNid()){
+                                $('#pfNoticeDot').addClass('show');
+                            } else {
+                                $('#pfNoticeDot').removeClass('show');
+                            }
+                        }
+                    }
+                });
+            }
+            checkNotice();
+
+            window.openPfNotice = function(){
+                document.getElementById('pfUserTrigger').classList.remove('open');
+                document.getElementById('pfDropdown').classList.remove('show');
+                $('#pfNoticeOverlay').addClass('show');
+                $('#pfNoticeBody').html(loadingHtml);
+                $.ajax({
+                    url: '../student/getnotices.aspx', dataType: 'text', cache: false, timeout: 15000,
+                    success: function(text){
+                        var data = parseNotices(text);
+                        if(!data || !data.notices || data.notices.length === 0){
+                            $('#pfNoticeBody').html(emptyHtml);
+                            return;
+                        }
+                        var html = '', maxNid = 0;
+                        for(var i=0;i<data.notices.length;i++){
+                            var n = data.notices[i];
+                            if(n.nid > maxNid) maxNid = n.nid;
+                            html += '<div class="pf-notice-card">';
+                            html += '<div class="pf-notice-card-title">' + escHtml(n.title) + '</div>';
+                            html += '<div class="pf-notice-card-content">' + escHtml(n.content) + '</div>';
+                            html += '<div class="pf-notice-card-footer"><span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escHtml(n.author) + '</span><span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + escHtml(n.date) + '</span></div>';
+                            html += '</div>';
+                        }
+                        $('#pfNoticeBody').html(html);
+                        if(maxNid > 0){ setLastReadNid(maxNid); }
+                        $('#pfNoticeDot').removeClass('show');
+                    },
+                    error: function(xhr){
+                        // 尝试从错误响应中解析JSON
+                        if(xhr && xhr.responseText){
+                            var data = parseNotices(xhr.responseText);
+                            if(data && data.notices !== undefined){
+                                if(data.notices.length === 0){ $('#pfNoticeBody').html(emptyHtml); }
+                                else {
+                                    var html = '', maxNid = 0;
+                                    for(var i=0;i<data.notices.length;i++){
+                                        var n = data.notices[i];
+                                        if(n.nid > maxNid) maxNid = n.nid;
+                                        html += '<div class="pf-notice-card">';
+                                        html += '<div class="pf-notice-card-title">' + escHtml(n.title) + '</div>';
+                                        html += '<div class="pf-notice-card-content">' + escHtml(n.content) + '</div>';
+                                        html += '<div class="pf-notice-card-footer"><span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escHtml(n.author) + '</span><span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + escHtml(n.date) + '</span></div>';
+                                        html += '</div>';
+                                    }
+                                    $('#pfNoticeBody').html(html);
+                                    if(maxNid > 0){ setLastReadNid(maxNid); }
+                                    $('#pfNoticeDot').removeClass('show');
+                                }
+                                return;
+                            }
+                        }
+                        $('#pfNoticeBody').html(errorHtml);
+                    }
+                });
+            };
+
+            window.closePfNotice = function(){ $('#pfNoticeOverlay').removeClass('show'); };
+
+            function escHtml(s){
+                if(!s) return '';
+                return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            }
+        })();
+    </script>
+</body>
+</html>

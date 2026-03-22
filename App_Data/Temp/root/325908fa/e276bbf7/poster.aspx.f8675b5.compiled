@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/fabriceditor/poster.aspx" hash="fffffff94ae4f160" filehash="3bbaca3f25cc" flags="110000" assembly="App_Web_6e7ayefk" type="ASP.fabriceditor_poster_aspx">
+    <filedeps>
+        <filedep name="/fabriceditor/poster.aspx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/typediag.ashx" hash="33c60594" filehash="fffff062bf403d12" flags="110000" assembly="App_Web_7nc76oai" type="TypeDiag">
+    <filedeps>
+        <filedep name="/teacher/typediag.ashx" />
+    </filedeps>
+</preserve>

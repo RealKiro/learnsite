@@ -1,0 +1,52 @@
+﻿.truechar {color: #777;}
+.typechar { border-bottom: 2px solid #aaa;}
+.falsechar { background-color:#D53B3B;}
+.typecontent
+{
+    padding: 10px;
+    width: 880px;
+    height: 220px;
+    font-family: Arial;
+    font-size: 24px;
+    background-color: #888;
+    overflow: auto;
+    line-height: 30px;
+    text-align: left;
+	letter-spacing: 5px;
+	outline:none;
+	resize:none;
+}
+.textareacss
+{
+    padding: 10px;
+    line-height: 30px;
+    border: 1px solid #E0E0E0;
+    width: 880px;
+    height: 220px;
+    background-color: #F8EEC7;
+    overflow: hidden;
+    font-size: 24px;
+    font-family: Arial;
+	letter-spacing: 5px;
+	outline:none;
+	resize:none;
+}
+.text7
+{
+    border: 1px solid #999;
+    width: 90px;
+    background-color: #999;
+    font-size: 18px;
+    text-align: center;
+    user-select: none;
+}
+
+.text3
+{
+    border: 1px solid #999;
+    width: 90px;
+    background-color: #999;
+    font-size: 18px;
+    text-align: center;
+    user-select: none;
+}

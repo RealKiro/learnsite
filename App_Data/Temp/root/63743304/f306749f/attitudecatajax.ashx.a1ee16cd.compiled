@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/attitudecatajax.ashx" hash="33c60594" filehash="ffffc075d855bf96" flags="110000" assembly="App_Web_5qa_rpu0" type="attitudecatajax">
+    <filedeps>
+        <filedep name="/teacher/attitudecatajax.ashx" />
+    </filedeps>
+</preserve>

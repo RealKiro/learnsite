@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<!-- saved from url=(0088)http://localhost/store/5/HTML%E6%A0%87%E7%AD%BE%E6%B3%A1%E6%B3%A1%E6%B8%B8%E6%88%8F.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML标签泡泡游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            width: 95%;
+            max-width: 900px;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            max-height: 95vh;
+        }
+        
+        h1 {
+            color: #5d5fef;
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #f0f4ff, #e6ebff);
+            padding: 12px 18px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            color: #5d5fef;
+            font-size: 0.95rem;
+        }
+        
+        .question-container {
+            margin: 20px 0;
+            min-height: 70px;
+            transition: all 0.3s ease;
+        }
+        
+        .question {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .bubbles-container {
+            position: relative;
+            height: 280px;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 18px;
+            background: rgba(240, 244, 255, 0.7);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.5s ease;
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            user-select: none;
+            font-size: 1rem;
+            z-index: 1;
+        }
+        
+        .bubble::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            background: inherit;
+            filter: blur(10px);
+            opacity: 0.6;
+            z-index: -1;
+            transition: all 0.4s ease;
+        }
+        
+        .bubble:hover {
+            transform: scale(1.15);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+            filter: brightness(1.1);
+        }
+        
+        .bubble.selected {
+            transform: scale(1.25);
+            box-shadow: 0 0 0 4px white, 0 0 0 8px rgba(93, 95, 239, 0.6), 0 15px 30px rgba(0, 0, 0, 0.3);
+            filter: brightness(1.2);
+            z-index: 10;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .bubble.selected::before {
+            opacity: 0.8;
+            filter: blur(15px);
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 4px white, 0 0 0 8px rgba(93, 95, 239, 0.6), 0 15px 30px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 0 4px white, 0 0 0 12px rgba(93, 95, 239, 0.4), 0 15px 30px rgba(0, 0, 0, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 0 4px white, 0 0 0 8px rgba(93, 95, 239, 0.6), 0 15px 30px rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #5d5fef, #6e8efb);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(93, 95, 239, 0.4);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #4a4cda, #5d7df9);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(93, 95, 239, 0.6);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+            transform: scale(0.9);
+        }
+        
+        .result-container.show {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        .result-title {
+            font-size: 2rem;
+            color: #5d5fef;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8faff;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-height: 280px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+        }
+        
+        .result-item {
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: background 0.2s;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            min-height: 70px;
+        }
+        
+        .result-item:hover {
+            background: rgba(240, 244, 255, 0.7);
+        }
+        
+        .result-question {
+            font-weight: 500;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            font-size: 0.85rem;
+        }
+        
+        .result-answer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .correct {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .incorrect {
+            color: #F44336;
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e0e7ff;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #5d5fef, #6e8efb);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 5px;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-15px) rotate(3deg);
+            }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-delay-1 {
+            animation-delay: 0.5s;
+        }
+        
+        .floating-delay-2 {
+            animation-delay: 1s;
+        }
+        
+        .floating-delay-3 {
+            animation-delay: 1.5s;
+        }
+        
+        .floating-delay-4 {
+            animation-delay: 2s;
+        }
+        
+        .game-content {
+            transition: all 0.5s ease;
+        }
+        
+        .game-content.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+        }
+        
+        .tag-description {
+            font-size: 0.95rem;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        .result-icon {
+            margin-left: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .correct-icon {
+            color: #4CAF50;
+        }
+        
+        .incorrect-icon {
+            color: #F44336;
+        }
+        
+        @media (max-width: 700px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .question {
+                font-size: 1.1rem;
+            }
+            
+            .bubbles-container {
+                height: 250px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+                max-height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-content">
+            <h1>HTML标签泡泡游戏</h1>
+            
+            <div class="game-info">
+                <div class="score-display">得分: <span id="score">0</span>/10</div>
+                <div class="progress-display">问题: <span id="current">1</span>/10</div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="question" id="question">点击开始按钮开始游戏</div>
+                <div class="tag-description" id="tag-description"></div>
+            </div>
+            
+            <div class="bubbles-container" id="bubbles-container">
+                <!-- 泡泡将通过JS动态生成 -->
+            </div>
+            
+            <div class="controls">
+                <button id="start-btn">开始游戏</button>
+                <button id="next-btn" disabled="">下一题</button>
+            </div>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <div class="result-title">游戏结束!</div>
+            <div class="score" id="final-score">0/10</div>
+            <div class="result-details" id="result-details">
+                <!-- 结果详情将通过JS动态生成 -->
+            </div>
+            <button id="restart-btn">再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 游戏元素
+            const startBtn = document.getElementById('start-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const questionElement = document.getElementById('question');
+            const tagDescriptionElement = document.getElementById('tag-description');
+            const bubblesContainer = document.getElementById('bubbles-container');
+            const scoreElement = document.getElementById('score');
+            const currentElement = document.getElementById('current');
+            const progressElement = document.getElementById('progress');
+            const resultContainer = document.getElementById('result-container');
+            const finalScoreElement = document.getElementById('final-score');
+            const resultDetailsElement = document.getElementById('result-details');
+            const gameContent = document.querySelector('.game-content');
+            
+            // 游戏数据 - 修改了问题描述格式
+            const htmlTags = [
+                { tag: 'div', name: '分区标签', description: '分区标签' },
+                { tag: 'p', name: '段落', description: '段落标签' },
+                { tag: 'a', name: '链接', description: '超链接标签' },
+                { tag: 'img', name: '图像', description: '图像标签' },
+                { tag: 'h1', name: '一级标题', description: '一级标题标签' },
+                { tag: 'html', name: 'HTML根元素', description: 'HTML根元素标签' },
+                { tag: 'head', name: '头部', description: '头部标签' },
+                { tag: 'title', name: '标题', description: '标题标签' },
+                { tag: 'body', name: '主体', description: '主体标签' },
+                { tag: 'video', name: '视频', description: '视频标签' },
+                { tag: 'audio', name: '音频', description: '音频标签' }
+            ];
+            
+            let currentQuestion = 0;
+            let score = 0;
+            let selectedBubble = null;
+            let questions = [];
+            let userAnswers = [];
+            
+            // 初始化游戏
+            function initGame() {
+                // 复制标签数组并打乱顺序
+                questions = [...htmlTags];
+                shuffleArray(questions);
+                
+                currentQuestion = 0;
+                score = 0;
+                userAnswers = [];
+                
+                // 更新UI
+                scoreElement.textContent = score;
+                currentElement.textContent = currentQuestion + 1;
+                progressElement.style.width = '0%';
+                
+                // 隐藏结果，显示游戏界面
+                resultContainer.classList.remove('show');
+                gameContent.classList.remove('hidden');
+                startBtn.disabled = true;
+                nextBtn.disabled = true;
+                
+                // 显示第一个问题
+                showQuestion();
+            }
+            
+            // 显示当前问题 - 修改问题格式
+            function showQuestion() {
+                if (currentQuestion >= 10) { // 总共10个问题
+                    endGame();
+                    return;
+                }
+                
+                const question = questions[currentQuestion];
+                questionElement.textContent = `哪个标签是${question.description}？`;
+                tagDescriptionElement.textContent = `提示: 这个标签的名称是 "${question.name}"`;
+                
+                // 更新进度
+                currentElement.textContent = currentQuestion + 1;
+                progressElement.style.width = `${(currentQuestion / 10) * 100}%`;
+                
+                // 创建泡泡
+                createBubbles();
+                
+                // 重置选择
+                selectedBubble = null;
+                nextBtn.disabled = true;
+            }
+            
+            // 创建泡泡 - 使用更智能的布局算法避免重叠
+            function createBubbles() {
+                bubblesContainer.innerHTML = '';
+                
+                // 复制标签数组并打乱顺序
+                const allTags = [...htmlTags];
+                shuffleArray(allTags);
+                
+                // 创建泡泡
+                const bubbles = [];
+                const containerWidth = bubblesContainer.offsetWidth;
+                const containerHeight = bubblesContainer.offsetHeight;
+                
+                allTags.forEach((tag, index) => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `bubble floating floating-delay-${index % 5}`;
+                    bubble.textContent = `<${tag.tag}>`;
+                    bubble.dataset.tag = tag.tag;
+                    
+                    // 设置泡泡大小 - 更小以适应紧凑布局
+                    const size = Math.random() * 30 + 55; // 55-85px
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    
+                    // 随机颜色 - 更漂亮的渐变
+                    const colors = [
+                        'linear-gradient(135deg, #FF9A9E, #FAD0C4, #FFD1FF)',
+                        'linear-gradient(135deg, #A1C4FD, #C2E9FB, #8EC5FC)',
+                        'linear-gradient(135deg, #FFECD2, #FCB69F, #FAD0C4)',
+                        'linear-gradient(135deg, #84FAB0, #8FD3F4, #96E6A1)',
+                        'linear-gradient(135deg, #D4FC79, #96E6A1, #84FAB0)',
+                        'linear-gradient(135deg, #A6C0FE, #F68084, #FF9A9E)',
+                        'linear-gradient(135deg, #D4FFEC, #8FD3F4, #C2E9FB)',
+                        'linear-gradient(135deg, #FFD1FF, #FAD0C4, #FFECD2)',
+                        'linear-gradient(135deg, #E0C3FC, #8EC5FC, #A1C4FD)',
+                        'linear-gradient(135deg, #FBC2EB, #A6C1EE, #C2E9FB)'
+                    ];
+                    bubble.style.background = colors[index % colors.length];
+                    
+                    // 添加点击事件
+                    bubble.addEventListener('click', selectBubble);
+                    
+                    bubbles.push(bubble);
+                });
+                
+                // 使用力导向布局算法放置泡泡，避免重叠
+                placeBubbles(bubbles, containerWidth, containerHeight);
+                
+                // 将泡泡添加到容器
+                bubbles.forEach(bubble => {
+                    bubblesContainer.appendChild(bubble);
+                });
+            }
+            
+            // 使用力导向算法放置泡泡，避免重叠
+            function placeBubbles(bubbles, containerWidth, containerHeight) {
+                const maxIterations = 100;
+                const padding = 15;
+                
+                // 初始随机位置
+                bubbles.forEach(bubble => {
+                    const size = parseInt(bubble.style.width);
+                    const x = Math.random() * (containerWidth - size - padding * 2) + padding;
+                    const y = Math.random() * (containerHeight - size - padding * 2) + padding;
+                    bubble.style.left = `${x}px`;
+                    bubble.style.top = `${y}px`;
+                });
+                
+                // 迭代调整位置
+                for (let iter = 0; iter < maxIterations; iter++) {
+                    let hasOverlap = false;
+                    
+                    for (let i = 0; i < bubbles.length; i++) {
+                        const bubbleA = bubbles[i];
+                        const sizeA = parseInt(bubbleA.style.width);
+                        const xA = parseFloat(bubbleA.style.left);
+                        const yA = parseFloat(bubbleA.style.top);
+                        
+                        for (let j = i + 1; j < bubbles.length; j++) {
+                            const bubbleB = bubbles[j];
+                            const sizeB = parseInt(bubbleB.style.width);
+                            const xB = parseFloat(bubbleB.style.left);
+                            const yB = parseFloat(bubbleB.style.top);
+                            
+                            // 计算两个泡泡中心之间的距离
+                            const dx = xA + sizeA/2 - (xB + sizeB/2);
+                            const dy = yA + sizeA/2 - (yB + sizeB/2);
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            // 计算最小安全距离
+                            const minDistance = (sizeA + sizeB) / 2 + 8;
+                            
+                            // 如果泡泡重叠，调整位置
+                            if (distance < minDistance) {
+                                hasOverlap = true;
+                                
+                                // 计算排斥力
+                                const force = (minDistance - distance) / distance * 0.5;
+                                const fx = dx * force;
+                                const fy = dy * force;
+                                
+                                // 应用排斥力
+                                bubbleA.style.left = `${Math.max(padding, Math.min(containerWidth - sizeA - padding, xA + fx))}px`;
+                                bubbleA.style.top = `${Math.max(padding, Math.min(containerHeight - sizeA - padding, yA + fy))}px`;
+                                bubbleB.style.left = `${Math.max(padding, Math.min(containerWidth - sizeB - padding, xB - fx))}px`;
+                                bubbleB.style.top = `${Math.max(padding, Math.min(containerHeight - sizeB - padding, yB - fy))}px`;
+                            }
+                        }
+                    }
+                    
+                    // 如果没有重叠，提前结束
+                    if (!hasOverlap) break;
+                }
+            }
+            
+            // 选择泡泡
+            function selectBubble(e) {
+                // 移除之前的选择
+                if (selectedBubble) {
+                    selectedBubble.classList.remove('selected');
+                }
+                
+                // 设置新的选择
+                selectedBubble = e.target;
+                selectedBubble.classList.add('selected');
+                
+                // 启用下一题按钮
+                nextBtn.disabled = false;
+            }
+            
+            // 检查答案
+            function checkAnswer() {
+                if (!selectedBubble) return;
+                
+                const selectedTag = selectedBubble.dataset.tag;
+                const correctTag = questions[currentQuestion].tag;
+                
+                // 记录用户答案
+                userAnswers.push({
+                    question: questions[currentQuestion],
+                    userAnswer: selectedTag,
+                    isCorrect: selectedTag === correctTag
+                });
+                
+                // 更新分数
+                if (selectedTag === correctTag) {
+                    score++;
+                    scoreElement.textContent = score;
+                }
+                
+                currentQuestion++;
+                
+                if (currentQuestion < 10) {
+                    showQuestion();
+                } else {
+                    endGame();
+                }
+            }
+            
+            // 结束游戏
+            function endGame() {
+                // 更新进度条
+                progressElement.style.width = '100%';
+                
+                // 显示结果
+                finalScoreElement.textContent = `${score}/10`;
+                
+                // 生成结果详情 - 使用网格布局
+                resultDetailsElement.innerHTML = '';
+                userAnswers.forEach((answer, index) => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    
+                    const questionText = document.createElement('div');
+                    questionText.className = 'result-question';
+                    questionText.textContent = `${index + 1}. 哪个标签是${answer.question.description}？`;
+                    
+                    const answerContainer = document.createElement('div');
+                    answerContainer.className = 'result-answer';
+                    
+                    const answerText = document.createElement('div');
+                    answerText.innerHTML = `答案: <strong>&lt;${answer.userAnswer}&gt;</strong>`;
+                    answerText.className = answer.isCorrect ? 'correct' : 'incorrect';
+                    
+                    // 添加对错图标
+                    const icon = document.createElement('span');
+                    icon.className = `result-icon ${answer.isCorrect ? 'correct-icon' : 'incorrect-icon'}`;
+                    icon.innerHTML = answer.isCorrect ? '✓' : '✗';
+                    
+                    answerContainer.appendChild(answerText);
+                    answerContainer.appendChild(icon);
+                    
+                    resultItem.appendChild(questionText);
+                    resultItem.appendChild(answerContainer);
+                    resultDetailsElement.appendChild(resultItem);
+                });
+                
+                // 显示结果界面
+                gameContent.classList.add('hidden');
+                setTimeout(() => {
+                    resultContainer.classList.add('show');
+                }, 300);
+				
+				const message = { name: "标签游戏成绩", value: score };
+				// 向父页面发送消息
+				window.parent.postMessage(JSON.stringify(message), "*");
+            }
+            
+            // 工具函数：打乱数组
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            
+            // 事件监听
+            startBtn.addEventListener('click', initGame);
+            nextBtn.addEventListener('click', checkAnswer);
+            restartBtn.addEventListener('click', initGame);
+        });
+    </script>
+
+</body></html>

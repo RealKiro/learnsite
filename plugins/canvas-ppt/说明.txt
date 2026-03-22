@@ -1,0 +1,4 @@
+加载文档方法 ppt.command.loadppt("old.mpptx")
+
+保存文档 pptupload.ashx?Id=666
+传递信息Id方法 <span id="pptId" style="display: none;">666</span>

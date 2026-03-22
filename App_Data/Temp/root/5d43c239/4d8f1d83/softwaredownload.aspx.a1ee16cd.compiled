@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/softwaredownload.aspx" hash="fffffff94ae4f160" filehash="9a99dc1a2d42dc28" flags="110000" assembly="App_Web_ht9mqts9" type="ASP.teacher_softwaredownload_aspx">
+    <filedeps>
+        <filedep name="/teacher/softwaredownload.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,15 @@
+﻿	<div id="ImageContainer" ></div>
+	<script type="text/javascript" src="../../plugins/psd/psd.min.js"></script>
+	<script type="text/javascript">
+		var PSD = require('psd');
+		// Load from URL
+		PSD.fromURL("example.psd").then(function (psd) {
+		    var png = psd.image.toPng();
+		    if (png.width > 600) {
+		        png.height = png.height * 600 / png.width;
+		        png.width = 600;
+		    }
+		    document.getElementById('ImageContainer').appendChild(png);
+		    //console.log(psd.tree().export());
+		});
+	</script>

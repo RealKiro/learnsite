@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/Stud.master" hash="fffffff94ae4f160" filehash="177ce83f3e22" flags="110000" assembly="App_Web_zgidwflv" type="ASP.student_stud_master">
+    <filedeps>
+        <filedep name="/student/Stud.master" />
+    </filedeps>
+</preserve>

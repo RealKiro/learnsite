@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/softdownload.aspx" hash="fffffff94ae4f160" filehash="fffff0ba0eb5aad1" flags="110000" assembly="App_Web_0wv3szp1" type="ASP.teacher_softdownload_aspx">
+    <filedeps>
+        <filedep name="/teacher/softdownload.aspx" />
+    </filedeps>
+</preserve>

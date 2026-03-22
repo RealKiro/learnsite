@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/FingerHandler.ashx" hash="33c60594" filehash="196b95388fb2" flags="110000" assembly="App_Web_4tvqywjb" type="FingerHandler">
+    <filedeps>
+        <filedep name="/student/FingerHandler.ashx" />
+    </filedeps>
+</preserve>

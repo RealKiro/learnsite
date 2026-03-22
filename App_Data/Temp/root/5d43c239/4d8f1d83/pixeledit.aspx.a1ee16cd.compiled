@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/pixeledit.aspx" hash="fffffff94ae4f160" filehash="d91a1fb6f7d77c9f" flags="110000" assembly="App_Web_kgua2dk_" type="ASP.teacher_pixeledit_aspx">
+    <filedeps>
+        <filedep name="/teacher/pixeledit.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

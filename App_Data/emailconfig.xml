@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  LearnSite 邮件配置文件
+  用于配置邮箱验证码发送功能的SMTP服务器信息
+
+  配置说明：
+  1. QQ邮箱配置示例：
+     - smtpServer: smtp.qq.com
+     - smtpPort: 587 或 465
+     - fromEmail: 你的QQ邮箱 (例如: 123456789@qq.com)
+     - fromPassword: QQ邮箱授权码（不是QQ密码！）
+     获取授权码：登录QQ邮箱 -> 设置 -> 账户 -> POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV服务 -> 开启SMTP服务 -> 生成授权码
+
+  2. 163邮箱配置示例：
+     - smtpServer: smtp.163.com
+     - smtpPort: 465
+     - fromEmail: 你的163邮箱
+     - fromPassword: 163邮箱授权码
+
+  3. Gmail配置示例：
+     - smtpServer: smtp.gmail.com
+     - smtpPort: 587
+     - fromEmail: 你的Gmail邮箱
+     - fromPassword: Gmail应用专用密码
+
+  注意事项：
+  - fromPassword 是授权码/应用专用密码，不是邮箱登录密码！
+  - 请妥善保管此文件，不要泄露 fromPassword
+  - 配置完成后，删除本注释或保持原样
+-->
+<emailConfig>
+  <!-- SMTP服务器地址 (必填) -->
+  <smtpServer>smtp.qq.com</smtpServer>
+
+  <!-- SMTP服务器端口 (必填，常用: 587或465) -->
+  <smtpPort>587</smtpPort>
+
+  <!-- 发件人邮箱地址 (必填) -->
+  <fromEmail>your-email@qq.com</fromEmail>
+
+  <!-- 发件人邮箱授权码 (必填，不是登录密码！) -->
+  <fromPassword></fromPassword>
+
+  <!-- 发件人显示名称 (选填) -->
+  <fromName>信息科技学习平台</fromName>
+</emailConfig>

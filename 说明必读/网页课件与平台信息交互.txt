@@ -1,0 +1,5 @@
+﻿网页课件在最后提交按钮里添加以下代码，向父页面传递交互结果：
+
+const message = { name: "标签游戏成绩", value: score };
+// 向父页面发送消息  score为交互成绩，数值类型
+window.parent.postMessage(JSON.stringify(message), "*");

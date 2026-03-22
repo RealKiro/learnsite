@@ -1,0 +1,1195 @@
+﻿<%@ master language="C#" autoeventwireup="true" inherits="Student_Stud, LearnSite" %>
+
+<script runat="server">
+    protected string GetFaviconLinkTag()
+    {
+        string[] names = { "favicon.ico", "favicon.png", "favicon.svg", "images/favicon.ico", "images/favicon.png", "images/favicon.svg" };
+        string[] types = { "image/x-icon", "image/png", "image/svg+xml", "image/x-icon", "image/png", "image/svg+xml" };
+        for (int i = 0; i < names.Length; i++)
+        {
+            string fp = Server.MapPath("~/" + names[i]);
+            if (System.IO.File.Exists(fp))
+                return "<link rel=\"icon\" type=\"" + types[i] + "\" href=\"" + ResolveUrl("~/" + names[i]) + "?v=" + System.IO.File.GetLastWriteTime(fp).Ticks + "\" />";
+        }
+        return "";
+    }
+
+    protected string GetSiteTitle()
+    {
+        try
+        {
+            string xmlPath = Server.MapPath("~/website.xml");
+            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            doc.Load(xmlPath);
+            System.Xml.XmlNode node = doc.SelectSingleNode("//add[@key='SiteTitle']");
+            if (node != null && node.Attributes["value"] != null)
+                return node.Attributes["value"].Value;
+        }
+        catch { }
+        return "LearnSite";
+    }
+
+    protected string GetSiteLogoUrl()
+    {
+        string[] exts = { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
+        foreach (string ext in exts)
+        {
+            string path = Server.MapPath("~/images/site-logo" + ext);
+            if (System.IO.File.Exists(path))
+                return ResolveUrl("~/images/site-logo" + ext) + "?v=" + System.IO.File.GetLastWriteTime(path).Ticks;
+        }
+        return "";
+    }
+
+    protected string GetCurrentPageName()
+    {
+        string p = Request.Url.AbsolutePath.ToLower();
+        if (p.Contains("myinfo") || p.Contains("showcourse")) return "myinfo";
+        if (p.Contains("mywork") || p.Contains("masterwork") || p.Contains("downwork")) return "mywork";
+        if (p.Contains("myfinger") || p.Contains("allfinger") || p.Contains("alltyper")) return "myfinger";
+        if (p.Contains("myquiz") || p.Contains("quizstart") || p.Contains("quizview")) return "myquiz";
+        if (p.Contains("myfile") || p.Contains("downfile")) return "myfile";
+        if (p.Contains("groupshare")) return "groupshare";
+        if (p.Contains("excellentwork")) return "excellentwork";
+        return "";
+    }
+
+    private static System.Reflection.BindingFlags sFlags =
+        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic
+        | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static;
+
+    protected string sUserName = "";
+    protected string sUserInitial = "\u751F";
+    protected string sUserClass = "";
+
+    // ===== Dynamic Nav =====
+    protected class StuNavItem
+    {
+        public string Icon = "";
+        public string Text = "";
+        public string Url = "";
+    }
+    protected System.Collections.Generic.List<StuNavItem> stuNavItems = null;
+
+    private void LoadNavConfig()
+    {
+        try
+        {
+            string xmlPath = Server.MapPath("~/App_Data/navsetting.xml");
+            if (!System.IO.File.Exists(xmlPath)) return;
+            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            doc.Load(xmlPath);
+            System.Xml.XmlNodeList items = doc.SelectNodes("//studentNav/item");
+            if (items == null || items.Count == 0) return;
+            stuNavItems = new System.Collections.Generic.List<StuNavItem>();
+            foreach (System.Xml.XmlNode node in items)
+            {
+                StuNavItem ni = new StuNavItem();
+                System.Xml.XmlNode iconNode = node.SelectSingleNode("icon");
+                System.Xml.XmlNode textNode = node.SelectSingleNode("text");
+                System.Xml.XmlNode urlNode = node.SelectSingleNode("url");
+                if (iconNode != null) ni.Icon = iconNode.InnerText;
+                if (textNode != null) ni.Text = textNode.InnerText;
+                if (urlNode != null) ni.Url = urlNode.InnerText;
+                stuNavItems.Add(ni);
+            }
+        }
+        catch { }
+    }
+
+    protected bool HasCustomNav()
+    {
+        return stuNavItems != null && stuNavItems.Count > 0;
+    }
+
+    protected string RenderNavIcon(string icon)
+    {
+        if (string.IsNullOrEmpty(icon)) return "";
+        if (icon.TrimStart().StartsWith("<")) return icon;
+        return "<img src=\"" + Server.HtmlEncode(icon) + "\" />";
+    }
+
+    protected string GetNavActiveClass(string url)
+    {
+        string currentPath = Request.Url.AbsolutePath.ToLower();
+        // Extract the page name from the url for matching
+        if (string.IsNullOrEmpty(url)) return "";
+        string urlLower = url.ToLower().Replace("\\", "/");
+        // Get just the filename
+        int lastSlash = urlLower.LastIndexOf('/');
+        string fileName = lastSlash >= 0 ? urlLower.Substring(lastSlash + 1) : urlLower;
+        if (currentPath.EndsWith(fileName)) return "active";
+        return "";
+    }
+
+    private string GetPropStr(object model, string propName)
+    {
+        if (model == null) return "";
+        System.Reflection.PropertyInfo p = model.GetType().GetProperty(propName);
+        if (p == null) return "";
+        object v = p.GetValue(model, null);
+        if (v == null) return "";
+        string s = v.ToString();
+        // Cookie 值可能被 URL 编码，需解码中文
+        if (s.Contains("%")) { try { s = HttpUtility.UrlDecode(s, System.Text.Encoding.UTF8); } catch { } }
+        return s;
+    }
+
+    private int GetPropInt(object model, string propName)
+    {
+        string s = GetPropStr(model, propName);
+        if (string.IsNullOrEmpty(s)) return 0;
+        int result;
+        if (int.TryParse(s, out result)) return result;
+        return 0;
+    }
+
+    private string GetConnStr()
+    {
+        string cs = null;
+        try
+        {
+            Type dbType = typeof(LearnSite.Common.CookieHelp).Assembly.GetType("LearnSite.DBUtility.DbHelperSQL");
+            if (dbType != null)
+            {
+                System.Reflection.FieldInfo connField = dbType.GetField("connectionString",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                if (connField != null)
+                    cs = connField.GetValue(null) as string;
+            }
+        }
+        catch { }
+        if (string.IsNullOrEmpty(cs))
+        {
+            try
+            {
+                cs = System.Configuration.ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString;
+            }
+            catch { }
+        }
+        if (cs != null && cs.ToLower().IndexOf("connection timeout") < 0 && cs.ToLower().IndexOf("connect timeout") < 0)
+            cs = cs.TrimEnd(';') + ";Connection Timeout=5;";
+        return cs;
+    }
+
+    private void LoadStudentUserInfo()
+    {
+        // 首先从 Cookie 加载基本信息
+        string cookieName = "";
+        string cookieGrade = "";
+        string cookieClass = "";
+        string cookieSnum = "";
+        int cookieSid = 0;
+        bool hasCookie = false;
+        
+        try
+        {
+            HttpCookie sc = Request.Cookies[LearnSite.Common.CookieHelp.stuCookieNname];
+            if (sc != null && !string.IsNullOrEmpty(sc.Value))
+            {
+                hasCookie = true;
+                // Cookie 值本身也可能 URL 编码
+                string cookieVal = sc.Value;
+                if (cookieVal.Contains("%")) { try { cookieVal = HttpUtility.UrlDecode(cookieVal, System.Text.Encoding.UTF8); } catch { } }
+                Type ct = typeof(LearnSite.Common.CookieHelp).Assembly.GetType("LearnSite.Model.Cook");
+                if (ct != null)
+                {
+                    object m = Activator.CreateInstance(ct);
+                    System.Reflection.MethodInfo mi = ct.GetMethod("ToModel", sFlags);
+                    if (mi != null) mi.Invoke(m, new object[] { cookieVal });
+                    
+                    cookieName = GetPropStr(m, "Sname");
+                    cookieGrade = GetPropStr(m, "Sgrade");
+                    cookieClass = GetPropStr(m, "Sclass");
+                    cookieSnum = GetPropStr(m, "Snum");
+                    cookieSid = GetPropInt(m, "Sid");
+                    
+                    // 如果 Cookie 中有姓名，先设置默认值
+                    if (!string.IsNullOrEmpty(cookieName))
+                    {
+                        sUserName = cookieName;
+                        sUserInitial = cookieName.Substring(0, 1);
+                    }
+                    
+                    // 设置班级信息
+                    if (!string.IsNullOrEmpty(cookieGrade) && cookieGrade != "0" && !string.IsNullOrEmpty(cookieClass) && cookieClass != "0")
+                        sUserClass = cookieGrade + "\u5E74\u7EA7" + cookieClass + "\u73ED";
+                    else if (!string.IsNullOrEmpty(cookieClass) && cookieClass != "0")
+                        sUserClass = cookieClass + "\u73ED";
+                }
+            }
+        }
+        catch { }
+        
+        // 尝试从数据库获取更完整的信息（优先使用 Sid，如果没有则使用学号）
+        bool dbLoaded = false;
+        if (hasCookie && (cookieSid > 0 || !string.IsNullOrEmpty(cookieSnum)))
+        {
+            try
+            {
+                string connStr = GetConnStr();
+                if (!string.IsNullOrEmpty(connStr))
+                {
+                    using (System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(connStr))
+                    {
+                        conn.Open();
+                        string sql = "";
+                        System.Data.SqlClient.SqlCommand cmd = null;
+                        
+                        // 优先使用 Sid 查询
+                        if (cookieSid > 0)
+                        {
+                            sql = "SELECT Sname, Sgrade, Sclass FROM Students WHERE Sid=@sid";
+                            cmd = new System.Data.SqlClient.SqlCommand(sql, conn);
+                            cmd.Parameters.AddWithValue("@sid", cookieSid);
+                        }
+                        // 如果没有 Sid，尝试使用学号查询
+                        else if (!string.IsNullOrEmpty(cookieSnum))
+                        {
+                            sql = "SELECT Sname, Sgrade, Sclass FROM Students WHERE Snum=@snum";
+                            cmd = new System.Data.SqlClient.SqlCommand(sql, conn);
+                            cmd.Parameters.AddWithValue("@snum", cookieSnum);
+                        }
+                        
+                        if (cmd != null)
+                        {
+                            using (cmd)
+                            {
+                                using (System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader())
+                                {
+                                    if (reader.Read())
+                                    {
+                                        dbLoaded = true;
+                                        // 从数据库获取真实信息
+                                        if (!reader.IsDBNull(0))
+                                        {
+                                            string dbName = reader.GetString(0);
+                                            if (!string.IsNullOrEmpty(dbName))
+                                            {
+                                                sUserName = dbName;
+                                                sUserInitial = dbName.Substring(0, 1);
+                                            }
+                                        }
+                                        
+                                        // 更新班级信息
+                                        if (!reader.IsDBNull(1) && !reader.IsDBNull(2))
+                                        {
+                                            int dbGrade = reader.GetInt32(1);
+                                            int dbClass = reader.GetInt32(2);
+                                            if (dbGrade > 0 && dbClass > 0)
+                                                sUserClass = dbGrade + "\u5E74\u7EA7" + dbClass + "\u73ED";
+                                            else if (dbClass > 0)
+                                                sUserClass = dbClass + "\u73ED";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { } // 如果数据库查询失败，使用 Cookie 中的信息
+        }
+        
+        // 如果既没有从数据库加载，也没有从 Cookie 加载到姓名，保持默认值
+        // 此时 sUserName 为空，前端会显示"学生"
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        LitFavicon.Text = GetFaviconLinkTag();
+        Page.Title = GetSiteTitle() + " - \u5B66\u751F\u5E73\u53F0";
+        LoadNavConfig();
+    }
+
+    protected override void OnPreRender(EventArgs e)
+    {
+        base.OnPreRender(e);
+        LoadStudentUserInfo();
+    }
+
+    protected bool GetFooterEnabled()
+    {
+        try
+        {
+            string xmlPath = Server.MapPath("~/App_Data/footersetting.xml");
+            if (System.IO.File.Exists(xmlPath))
+            {
+                System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+                doc.Load(xmlPath);
+                System.Xml.XmlNode node = doc.SelectSingleNode("//footerEnabled");
+                if (node != null && node.InnerText.Trim().ToLower() == "false") return false;
+            }
+        }
+        catch { }
+        return true;
+    }
+</script>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <asp:Literal ID="LitFavicon" runat="server" />
+    <link href="../js/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="../App_Themes/Student/StyleSheet.css?ver=622" rel="stylesheet" type="text/css" />
+    <link href="../js/pub-footer.css?v=final" rel="stylesheet" type="text/css" />
+    <script src="../js/jquery-1.8.2.min.js" type="text/javascript"></script>
+    <link href="../js/tinybox.css?v=20260212b" rel="stylesheet" type="text/css" />
+    <script src="../js/tinybox.js?v=20260212b" type="text/javascript"></script>
+    <script type="text/javascript">
+        // 页面加载时检查网盘状态并更新所有网盘按钮和导航链接
+        (function() {
+            fetch('../student/CheckNetdiskStatus.ashx')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.enabled) {
+                        // 禁用所有网盘按钮
+                        var shareButtons = document.querySelectorAll('#share, .sharedisk');
+                        shareButtons.forEach(function(btn) {
+                            btn.disabled = true;
+                            btn.value = '网盘未开启';
+                            btn.style.background = '#e5e7eb';
+                            btn.style.color = '#9ca3af';
+                            btn.style.cursor = 'not-allowed';
+                            btn.style.opacity = '0.6';
+                            btn.style.borderColor = '#d1d5db';
+                        });
+                        
+                        // 禁用导航菜单中的网盘链接
+                        var netdiskNavs = document.querySelectorAll('.stu-nav-netdisk');
+                        netdiskNavs.forEach(function(nav) {
+                            nav.style.opacity = '0.5';
+                            nav.style.cursor = 'not-allowed';
+                            nav.style.pointerEvents = 'none';
+                            nav.title = '网盘未开启';
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('检查网盘状态失败:', err);
+                });
+        })();
+        
+        // 检查小组讨论开关状态并更新按钮
+        (function() {
+            fetch('../student/CheckDiscussStatus.ashx')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (!data.enabled) {
+                        // 隐藏顶部小组讨论按钮
+                        var chatBtn = document.getElementById('stuChatBtn');
+                        if (chatBtn) {
+                            chatBtn.style.display = 'none';
+                        }
+                        // 禁用下拉菜单中的小组讨论项
+                        var menuItem = document.getElementById('stuDiscussMenuItem');
+                        if (menuItem) {
+                            menuItem.style.opacity = '0.4';
+                            menuItem.style.cursor = 'not-allowed';
+                            menuItem.style.pointerEvents = 'none';
+                            menuItem.title = '小组讨论已关闭';
+                        }
+                    }
+                })
+                .catch(function(err) {
+                    console.error('检查小组讨论状态失败:', err);
+                });
+        })();
+
+        function showShare() {
+            // 检查网盘开关状态
+            fetch('../student/CheckNetdiskStatus.ashx')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.enabled) {
+                        window.location.href = "../student/groupshare.aspx";
+                    } else {
+                        // 禁用状态下不执行任何操作
+                        return;
+                    }
+                })
+                .catch(err => {
+                    console.error('检查网盘状态失败:', err);
+                    // 出错时默认允许访问
+                    window.location.href = "../student/groupshare.aspx";
+                });
+        }
+        function showChat() {
+            fetch('../student/CheckDiscussStatus.ashx')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.enabled) {
+                        var urlat = "../student/chat.aspx";
+                        TINY.box.show({ iframe: urlat, boxid: 'frameless', width: 880, height: 560, fixed: true, mask: 1, animate: 0, close: true });
+                    }
+                    // 已关闭时不执行任何操作
+                })
+                .catch(function(err) {
+                    console.error('检查小组讨论状态失败:', err);
+                    // 出错时默认允许访问
+                    var urlat = "../student/chat.aspx";
+                    TINY.box.show({ iframe: urlat, boxid: 'frameless', width: 880, height: 560, fixed: true, mask: 1, animate: 0, close: true });
+                });
+        }
+    </script>
+    <script src="../js/ruffle.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = { "autoplay": "on" };
+    </script>
+    <style>
+        /* ===== Reset & Base ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box !important; margin-right: auto; margin-left: auto; }
+        .stu-layout, .stu-layout *, .stu-layout *::before, .stu-layout *::after {
+            margin-right: unset; margin-left: unset; margin: 0;
+        }
+        /* 修复：全局 * 的 margin-left/right:auto 会导致弹窗内 flex 子项和块元素宽度塌缩 */
+        .stu-notice-overlay,
+        .stu-notice-overlay *,
+        .stu-notice-overlay *::before,
+        .stu-notice-overlay *::after { margin-right: 0; margin-left: 0; }
+        .stu-notice-overlay .stu-notice-loading-spinner { margin: 0 auto 16px; }
+        html, body { height: 100%; width: 100%; margin: 0 !important; overflow: hidden; }
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', -apple-system, Arial, sans-serif !important;
+            background: #f0f2f5 !important;
+            background-image: none !important;
+            color: #1e293b !important;
+        }
+        #form1 { width: 100%; height: 100%; margin: 0 !important; padding: 0; }
+        .stu-layout { display: flex !important; flex-direction: column; height: 100vh; width: 100%; position: relative; }
+
+        /* ===== Top Header ===== */
+        .stu-header {
+            height: 80px; background: #fff;
+            border-bottom: 1px solid #e8ecf1;
+            display: flex !important; align-items: center;
+            padding: 0 48px; flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.04);
+            position: relative; z-index: 1000; width: 100%;
+        }
+
+        /* Header Left: Logo */
+        .stu-brand {
+            display: flex !important; align-items: center; gap: 10px;
+            flex-shrink: 0; text-decoration: none !important; margin-right: 40px !important;
+        }
+        .stu-brand-logo {
+            width: 36px; height: 36px;
+            display: flex !important; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .stu-brand-logo img { width: 36px; height: 36px; object-fit: contain; }
+        .stu-brand-name {
+            font-size: 16px; font-weight: 700; color: #1e293b !important;
+            white-space: nowrap;
+        }
+
+        /* Header Center: Nav */
+        .stu-nav {
+            display: flex !important; align-items: center; gap: 6px;
+            flex: 1; justify-content: center;
+        }
+        .stu-nav-item {
+            display: flex !important; align-items: center; gap: 7px;
+            padding: 10px 24px; border-radius: 8px;
+            font-size: 14.5px; font-weight: 500; color: #64748b !important;
+            text-decoration: none !important; transition: all .15s; cursor: pointer;
+            white-space: nowrap; line-height: 1.2;
+            background: none !important; background-color: transparent !important;
+            background-image: none !important;
+        }
+        .stu-nav-item:hover { background-color: #f1f5f9 !important; color: #334155 !important; }
+        .stu-nav-item.active {
+            background-color: #eef2ff !important; color: #4f46e5 !important; font-weight: 600;
+        }
+        .stu-nav-item svg {
+            width: 17px; height: 17px; stroke: currentColor;
+            fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .stu-nav-item img { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; }
+
+        /* Header Right: User */
+        .stu-header-right {
+            display: flex !important; align-items: center; gap: 12px;
+            flex-shrink: 0; margin-left: 40px !important;
+        }
+        .stu-chat-btn {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: #f1f5f9; border: none !important;
+            display: flex !important; align-items: center; justify-content: center;
+            cursor: pointer; transition: all .15s; color: #64748b;
+        }
+        .stu-chat-btn:hover { background: #e2e8f0; color: #334155; }
+        .stu-chat-btn svg {
+            width: 18px; height: 18px; stroke: currentColor;
+            fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* User dropdown */
+        .stu-user-wrap { position: relative !important; display: flex !important; align-items: center; }
+        .stu-user-trigger {
+            display: flex !important; align-items: center; gap: 10px;
+            padding: 0 14px 0 0; cursor: pointer;
+            user-select: none; background: none !important;
+            border: none !important;
+        }
+        .stu-avatar {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #6366f1, #a78bfa);
+            border-radius: 50% !important;
+            display: flex !important; align-items: center; justify-content: center;
+            color: #fff !important; font-size: 16px; font-weight: 700;
+            flex-shrink: 0; overflow: hidden; line-height: 40px;
+        }
+        .stu-user-name {
+            font-size: 14px; font-weight: 600; color: #1e293b !important;
+            max-width: 100px; overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; line-height: 1.2;
+        }
+        .stu-user-arrow {
+            width: 16px; height: 16px; stroke: #94a3b8;
+            fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+            transition: transform .2s; flex-shrink: 0;
+        }
+        .stu-user-trigger.open .stu-user-arrow { transform: rotate(180deg); }
+
+        /* Dropdown panel */
+        .stu-dropdown {
+            display: none; position: absolute !important;
+            top: calc(100% + 10px); right: 0; width: 220px;
+            z-index: 9999;
+        }
+        .stu-dropdown.show { display: block !important; }
+        .stu-dd-card {
+            background: #fff; border: 1px solid #e5e7eb;
+            border-radius: 10px; overflow: hidden;
+        }
+        .stu-dd-top {
+            padding: 16px 18px; 
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .stu-dd-top .dd-name {
+            font-size: 15px; font-weight: 700; color: #fff; line-height: 1.3;
+        }
+        .stu-dd-top .dd-role {
+            display: inline-block;
+            font-size: 11px; 
+            color: #fff; 
+            margin-top: 6px;
+            background: rgba(255,255,255,.2);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .stu-dd-list { padding: 6px 0; }
+        .stu-dd-item {
+            display: flex !important; 
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            font-size: 14px; 
+            color: #374151 !important;
+            text-decoration: none !important; 
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .stu-dd-item:hover { 
+            background: #f9fafb; 
+            color: #111827 !important; 
+            transform: translateX(4px);
+        }
+        .stu-dd-item svg { 
+            width: 16px; 
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+        .stu-dd-item.back-home { color: #4f46e5 !important; font-weight: 500; }
+        .stu-dd-item.back-home:hover { background: #eef2ff; }
+        .stu-dd-divider { height: 1px; background: #f3f4f6; margin: 0; }
+        .stu-dd-item.logout { color: #dc2626 !important; }
+        .stu-dd-item.logout:hover { background: #fef2f2; }
+
+        /* 消息通知红点 */
+        .stu-dd-item.notice-item { position: relative; }
+        .stu-notice-dot {
+            display: none; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;
+            position: absolute; top: 12px; right: 16px;
+            animation: stuDotPulse 2s infinite;
+        }
+        .stu-notice-dot.show { display: block; }
+        @keyframes stuDotPulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+
+        /* 通知弹窗 */
+        .stu-notice-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15,23,42,.4); z-index: 99999;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity .25s ease, visibility 0s .25s;
+        }
+        .stu-notice-overlay.show { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .25s ease, visibility 0s; }
+        .stu-notice-modal {
+            width: 620px; max-width: 94vw; max-height: 82vh;
+            background: #fff; border-radius: 18px;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.1);
+            transform: scale(.9) translateY(20px); opacity: 0;
+            transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+        }
+        .stu-notice-overlay.show .stu-notice-modal { transform: scale(1) translateY(0); opacity: 1; }
+        .stu-notice-modal-head {
+            padding: 24px 28px 20px; flex-shrink: 0;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            color: #fff; position: relative; overflow: hidden;
+        }
+        .stu-notice-modal-head::before {
+            content: ''; position: absolute; top: -50px; right: -30px; width: 140px; height: 140px;
+            background: rgba(255,255,255,.07); border-radius: 50%;
+        }
+        .stu-notice-modal-head::after {
+            content: ''; position: absolute; bottom: -40px; left: 30px; width: 100px; height: 100px;
+            background: rgba(255,255,255,.05); border-radius: 50%;
+        }
+        .stu-notice-modal-title {
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; z-index: 1;
+        }
+        .stu-notice-modal-title h3 {
+            font-size: 18px; font-weight: 700; margin: 0;
+            display: flex; align-items: center; gap: 10px; color: #fff;
+        }
+        .stu-notice-modal-title h3 svg {
+            width: 22px; height: 22px; stroke: #fff; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .stu-notice-close {
+            width: 34px; height: 34px; border-radius: 50%; border: none;
+            background: rgba(255,255,255,.18); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; transition: all .25s;
+        }
+        .stu-notice-close:hover { background: rgba(255,255,255,.3); transform: rotate(90deg); }
+        .stu-notice-close svg {
+            width: 15px; height: 15px; stroke: currentColor; fill: none;
+            stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .stu-notice-modal-subtitle {
+            font-size: 13px; color: rgba(255,255,255,.7); margin-top: 6px;
+            position: relative; z-index: 1;
+        }
+        .stu-notice-modal-body {
+            flex: 1; overflow-y: auto; padding: 20px 24px 24px; background: #f8f9fb;
+        }
+        .stu-notice-modal-body::-webkit-scrollbar { width: 5px; }
+        .stu-notice-modal-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        .stu-notice-modal-body::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        /* 通知卡片 */
+        .stu-notice-card {
+            padding: 16px 20px; margin-bottom: 12px;
+            background: #fff; border-radius: 12px;
+            border-left: 3px solid #6366f1;
+            box-shadow: 0 1px 4px rgba(0,0,0,.04);
+            transition: all .2s ease; position: relative;
+        }
+        .stu-notice-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(99,102,241,.1);
+            border-left-color: #8b5cf6;
+        }
+        .stu-notice-card:last-child { margin-bottom: 0; }
+        .stu-notice-card-title {
+            font-size: 15px; font-weight: 600; color: #1e293b;
+            margin-bottom: 8px; line-height: 1.4;
+        }
+        .stu-notice-card-content {
+            font-size: 13.5px; color: #64748b; line-height: 1.7;
+            white-space: pre-wrap; word-break: break-word;
+        }
+        .stu-notice-card-footer {
+            display: flex; align-items: center; gap: 16px;
+            margin-top: 12px; font-size: 12px; color: #94a3b8;
+        }
+        .stu-notice-card-footer span { display: flex; align-items: center; gap: 4px; }
+        /* 状态 */
+        .stu-notice-state { text-align: center; padding: 56px 24px 48px; }
+        .stu-notice-state-icon { margin-bottom: 18px; }
+        .stu-notice-state-icon svg {
+            width: 52px; height: 52px; stroke-width: 1.2; stroke-linecap: round;
+            stroke-linejoin: round; fill: none;
+        }
+        .stu-notice-state-text { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+        .stu-notice-state-text.error { color: #f87171; }
+        .stu-notice-retry-btn {
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
+            padding: 10px 24px; border-radius: 24px; border: none;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            font-size: 13px; font-weight: 500; color: #fff; cursor: pointer;
+            transition: all .2s; font-family: inherit;
+            box-shadow: 0 2px 8px rgba(99,102,241,.25);
+        }
+        .stu-notice-retry-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,.35); }
+        .stu-notice-retry-btn svg {
+            width: 14px; height: 14px; stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        @keyframes stuSpin { to { transform: rotate(360deg); } }
+        .stu-notice-loading-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid #e8e5ff; border-top-color: #6366f1;
+            border-radius: 50%; animation: stuSpin .8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @media (max-width: 480px) {
+            .stu-notice-modal { max-width: 100vw; max-height: 100vh; border-radius: 0; }
+        }
+
+        /* ===== Content Area ===== */
+        .stu-content {
+            flex: 1; overflow-y: auto; overflow-x: auto;
+            padding: 24px 48px 0;
+            position: relative; z-index: 1;
+        }
+        .stu-content::-webkit-scrollbar { width: 6px; }
+        .stu-content::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        
+        /* Footer adjustments for master page */
+        .stu-layout .site-footer {
+            flex-shrink: 0;
+            margin-top: 0;
+        }
+
+        /* Override old theme layout styles */
+        .stu-layout .studmasterhead,
+        .stu-layout .banner,
+        .stu-layout .menu,
+        .stu-layout .path,
+        .stu-layout .chatimg,
+        .stu-layout .robotimg { display: none !important; }
+        .stu-layout .placeauto { width: 100% !important; max-width: 100% !important; }
+        .stu-layout .st, .stu-layout .stu { width: 100% !important; overflow: visible !important; height: auto !important; }
+        .stu-layout .left { float: none !important; width: 100% !important; }
+        .stu-layout .right { float: none !important; width: 100% !important; }
+        .stu-layout #student { font-family: inherit !important; font-size: inherit !important; text-align: left !important; padding: 0 !important; }
+        .stu-layout .ccontent { width: 100% !important; }
+        .stu-layout .divnull { width: auto !important; }
+        .stu-layout .divinfo { width: auto !important; height: auto !important; }
+        .stu-layout .divinfo1, .stu-layout .divinfo2 { float: none !important; width: auto !important; border: none !important; background: none !important; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 1200px) {
+            .stu-header { padding: 0 28px; }
+            .stu-content { padding: 24px 28px; }
+            .stu-brand { margin-right: 20px !important; }
+            .stu-header-right { margin-left: 20px !important; }
+            .stu-nav-item { padding: 7px 14px; font-size: 13px; }
+        }
+        @media (max-width: 1024px) {
+            .stu-brand-name { display: none; }
+            .stu-brand { margin-right: 12px !important; }
+            .stu-header-right { margin-left: 12px !important; }
+            .stu-nav-item { padding: 6px 10px; font-size: 13px; }
+            .stu-nav-item svg { display: none; }
+        }
+        @media (max-width: 768px) {
+            .stu-header { padding: 0 12px; }
+            .stu-content { padding: 16px 12px; }
+            .stu-nav-item { padding: 6px 8px; font-size: 12px; }
+            .stu-user-name { display: none; }
+        }
+        
+        /* ===== 顶部导航栏已恢复显示 ===== */
+        /* 导航栏现在正常显示，不再隐藏 */
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div class="stu-layout">
+
+        <!-- ========== Top Header ========== -->
+        <header class="stu-header">
+            <!-- Left: Logo -->
+            <a href="../student/myinfo.aspx" class="stu-brand">
+                <div class="stu-brand-logo">
+                    <% string sLogoUrl = GetSiteLogoUrl(); %>
+                    <% if (!string.IsNullOrEmpty(sLogoUrl)) { %>
+                        <img src="<%= sLogoUrl %>" alt="Logo" />
+                    <% } else { %>
+                        <svg viewBox="0 0 32 32" width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#6366f1"/><text x="16" y="22" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">L</text></svg>
+                    <% } %>
+                </div>
+                <span class="stu-brand-name"><%= GetSiteTitle() %></span>
+            </a>
+
+            <!-- Center: Navigation -->
+            <nav class="stu-nav">
+                <% if (HasCustomNav()) { %>
+                    <% foreach (StuNavItem ni in stuNavItems) { %>
+                    <a href="<%= ni.Url %>" class="stu-nav-item <%= GetNavActiveClass(ni.Url) %>">
+                        <%= RenderNavIcon(ni.Icon) %>
+                        <%= Server.HtmlEncode(ni.Text) %>
+                    </a>
+                    <% } %>
+                <% } else { %>
+                <a href="../student/myinfo.aspx" class="stu-nav-item <%= GetCurrentPageName()=="myinfo"?"active":"" %>">
+                    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    我的学案
+                </a>
+                <a href="../student/mywork.aspx" class="stu-nav-item <%= GetCurrentPageName()=="mywork"?"active":"" %>">
+                    <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    我的作品
+                </a>
+                <a href="../student/myfinger.aspx" class="stu-nav-item <%= GetCurrentPageName()=="myfinger"?"active":"" %>">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M7 16h10"/></svg>
+                    打字宝典
+                </a>
+                <a href="../student/myquiz.aspx" class="stu-nav-item <%= GetCurrentPageName()=="myquiz"?"active":"" %>">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    常识积累
+                </a>
+                <a href="../student/myfile.aspx" class="stu-nav-item <%= GetCurrentPageName()=="myfile"?"active":"" %>">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    在线资源
+                </a>
+                <a href="../student/groupshare.aspx" class="stu-nav-item stu-nav-netdisk <%= GetCurrentPageName()=="groupshare"?"active":"" %>">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    我的网盘
+                </a>
+                <a href="../student/excellentwork.aspx" class="stu-nav-item <%= GetCurrentPageName()=="excellentwork"?"active":"" %>">
+                    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    优秀作品
+                </a>
+                <% } %>
+            </nav>
+
+            <!-- Right: User -->
+            <div class="stu-header-right">
+                <button type="button" class="stu-chat-btn" id="stuChatBtn" onclick="showChat()" title="小组讨论">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </button>
+                <div class="stu-user-wrap" id="stuUserWrap">
+                    <div class="stu-user-trigger" id="stuUserTrigger" onclick="toggleStuDropdown()">
+                        <div class="stu-avatar"><%= Server.HtmlEncode(sUserInitial) %></div>
+                        <span class="stu-user-name"><%= !string.IsNullOrEmpty(sUserName) ? Server.HtmlEncode(sUserName) : "\u5B66\u751F" %></span>
+                        <svg class="stu-user-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="stu-dropdown" id="stuDropdown">
+                        <div class="stu-dd-card">
+                            <div class="stu-dd-top">
+                                <div class="dd-name"><%= !string.IsNullOrEmpty(sUserName) ? Server.HtmlEncode(sUserName) : "\u5B66\u751F" %></div>
+                                <div class="dd-role"><%= !string.IsNullOrEmpty(sUserClass) ? Server.HtmlEncode(sUserClass) : "\u5B66\u751F\u7528\u6237" %></div>
+                            </div>
+                            <div class="stu-dd-list">
+                                <a href="javascript:void(0)" onclick="openStuNotice()" class="stu-dd-item notice-item">
+                                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                    消息通知
+                                    <span class="stu-notice-dot" id="stuNoticeDot"></span>
+                                </a>
+                                <a href="../profile/mygroup.aspx" class="stu-dd-item">
+                                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    我的小组
+                                </a>
+                                <a href="../profile/mypwd.aspx" class="stu-dd-item">
+                                    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    修改密码
+                                </a>
+                                <a href="../profile/myphoto.aspx" class="stu-dd-item">
+                                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    修改头像
+                                </a>
+                                <a href="javascript:void(0)" onclick="showChat()" class="stu-dd-item stu-discuss-item" id="stuDiscussMenuItem">
+                                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    小组讨论
+                                </a>
+                            </div>
+                            <div class="stu-dd-divider"></div>
+                            <div class="stu-dd-list">
+                                <a href="javascript:void(0)" class="stu-dd-item logout" onclick="doStuLogout()">
+                                    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                    退出登录
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ========== Content ========== -->
+        <div class="stu-content">
+            <asp:contentplaceholder id="Cphs" runat="server">
+            </asp:contentplaceholder>
+        </div>
+
+        <%if(GetFooterEnabled()){%>
+        <!-- ========== Footer ========== -->
+        <div class="site-footer">
+            <div class="site-footer-inner">
+                <!-- 主要内容区域 -->
+                <div class="site-footer-main">
+                    <!-- 左侧品牌区 -->
+                    <div class="site-footer-brand">
+                        <a href="../index.aspx" class="site-footer-logo">
+                            <% string fLogoUrl = GetSiteLogoUrl(); %>
+                            <% if (!string.IsNullOrEmpty(fLogoUrl)) { %>
+                            <span class="site-footer-logo-icon"><img src="<%= fLogoUrl %>" alt="Logo" /></span>
+                            <% } else { %>
+                            <span class="site-footer-logo-icon site-footer-logo-text">L</span>
+                            <% } %>
+                            <span><%= Server.HtmlEncode(GetSiteTitle()) %></span>
+                        </a>
+                        <p class="site-footer-desc">
+                            专业在线学习平台，致力于为学生和教师提供优质的教学体验和学习资源。
+                        </p>
+                        <div class="site-footer-social">
+                            <a href="#" class="site-footer-social-link" title="GitHub">
+                                <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                            </a>
+                            <a href="#" class="site-footer-social-link" title="Twitter">
+                                <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                            </a>
+                            <a href="#" class="site-footer-social-link" title="Email">
+                                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            </a>
+                            <a href="#" class="site-footer-social-link" title="RSS">
+                                <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 链接列 -->
+                    <div class="site-footer-links">
+                        <!-- 产品列 -->
+                        <div class="site-footer-column">
+                            <h3 class="site-footer-column-title">产品</h3>
+                            <ul class="site-footer-column-list">
+                                <li class="site-footer-column-item">
+                                    <a href="../default.aspx" class="site-footer-column-link">在线课程</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../student/mywork.aspx" class="site-footer-column-link">作业系统</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../student/myquiz.aspx" class="site-footer-column-link">考试测评</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../student/myfile.aspx" class="site-footer-column-link">学习资源</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 支持列 -->
+                        <div class="site-footer-column">
+                            <h3 class="site-footer-column-title">支持</h3>
+                            <ul class="site-footer-column-list">
+                                <li class="site-footer-column-item">
+                                    <a href="../help/index.aspx" class="site-footer-column-link">帮助中心</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../help/docs.aspx" class="site-footer-column-link">使用文档</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../help/faq.aspx" class="site-footer-column-link">常见问题</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../help/contact.aspx" class="site-footer-column-link">联系我们</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 关于列 -->
+                        <div class="site-footer-column">
+                            <h3 class="site-footer-column-title">关于</h3>
+                            <ul class="site-footer-column-list">
+                                <li class="site-footer-column-item">
+                                    <a href="../about/index.aspx" class="site-footer-column-link">关于我们</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../about/join.aspx" class="site-footer-column-link">加入我们</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../about/privacy.aspx" class="site-footer-column-link">隐私政策</a>
+                                </li>
+                                <li class="site-footer-column-item">
+                                    <a href="../about/terms.aspx" class="site-footer-column-link">服务条款</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部栏 -->
+                <div class="site-footer-bottom">
+                    <div class="site-footer-bottom-left">
+                        <span class="site-footer-copyright">© {year} LearnSite. All rights reserved</span>
+                    </div>
+                    <div class="site-footer-bottom-right">
+                        <span class="site-footer-powered"><a href="https://github.com/learnsite" target="_blank" rel="noopener">LearnSite</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%}%>
+
+    </div><!-- /stu-layout -->
+
+    <!-- 消息通知弹窗 -->
+    <div class="stu-notice-overlay" id="stuNoticeOverlay" onclick="if(event.target===this)closeStuNotice()">
+        <div class="stu-notice-modal">
+            <div class="stu-notice-modal-head">
+                <div class="stu-notice-modal-title">
+                    <h3><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>消息通知</h3>
+                    <button type="button" class="stu-notice-close" onclick="closeStuNotice()" title="关闭"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                <div class="stu-notice-modal-subtitle">查看最新的通知消息</div>
+            </div>
+            <div class="stu-notice-modal-body" id="stuNoticeBody">
+                <div class="stu-notice-state"><div class="stu-notice-loading-spinner"></div><div class="stu-notice-state-text">正在加载通知...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // 导航栏已恢复显示，不再隐藏
+        // User dropdown toggle
+        function toggleStuDropdown() {
+            document.getElementById('stuUserTrigger').classList.toggle('open');
+            document.getElementById('stuDropdown').classList.toggle('show');
+        }
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('stuUserWrap');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('stuUserTrigger').classList.remove('open');
+                document.getElementById('stuDropdown').classList.remove('show');
+            }
+        });
+
+        // Logout
+        function doStuLogout() {
+            var btn = document.querySelectorAll('input[type="submit"][id*="BtnExit"]');
+            if (btn.length > 0) { btn[0].click(); }
+            else { window.location.href = '../student/myinfo.aspx?logout=1'; }
+        }
+    </script>
+    <script src="../js/pub-footer.js"></script>
+    <script type="text/javascript">
+        // 消息通知功能
+        (function(){
+            var KEY = 'stu_notice_last_read_nid';
+            function getLastReadNid(){ return parseInt(localStorage.getItem(KEY) || '0', 10); }
+            function setLastReadNid(nid){ localStorage.setItem(KEY, nid); }
+
+            var loadingHtml = '<div class="stu-notice-state"><div class="stu-notice-loading-spinner"></div><div class="stu-notice-state-text">正在加载通知...</div></div>';
+            var emptyHtml = '<div class="stu-notice-state"><div class="stu-notice-state-icon"><svg viewBox="0 0 24 24" stroke="#c7d2fe"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="stu-notice-state-text">暂无通知消息</div></div>';
+            var errorHtml = '<div class="stu-notice-state"><div class="stu-notice-state-icon"><svg viewBox="0 0 24 24" stroke="#fca5a5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="stu-notice-state-text error">加载失败，请重试</div><button type="button" class="stu-notice-retry-btn" onclick="openStuNotice()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重新加载</button></div>';
+
+            function parseNotices(text){
+                try {
+                    if(!text) return null;
+                    text = text.replace(/^\s+|\s+$/g, '');
+                    return JSON.parse(text);
+                } catch(e) {
+                    try { var m = text.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); } catch(e2){}
+                    return null;
+                }
+            }
+
+            function checkNotice(){
+                $.ajax({
+                    url: '../student/getnotices.aspx', dataType: 'text', cache: false, timeout: 10000,
+                    success: function(text){
+                        var data = parseNotices(text);
+                        if(data && data.notices && data.notices.length > 0){
+                            var maxNid = 0;
+                            for(var i=0;i<data.notices.length;i++){
+                                if(data.notices[i].nid > maxNid) maxNid = data.notices[i].nid;
+                            }
+                            if(maxNid > getLastReadNid()){
+                                $('#stuNoticeDot').addClass('show');
+                            } else {
+                                $('#stuNoticeDot').removeClass('show');
+                            }
+                        }
+                    }
+                });
+            }
+            checkNotice();
+
+            window.openStuNotice = function(){
+                document.getElementById('stuUserTrigger').classList.remove('open');
+                document.getElementById('stuDropdown').classList.remove('show');
+                $('#stuNoticeOverlay').addClass('show');
+                $('#stuNoticeBody').html(loadingHtml);
+                $.ajax({
+                    url: '../student/getnotices.aspx', dataType: 'text', cache: false, timeout: 15000,
+                    success: function(text){
+                        var data = parseNotices(text);
+                        if(!data || !data.notices || data.notices.length === 0){
+                            $('#stuNoticeBody').html(emptyHtml);
+                            return;
+                        }
+                        var html = '', maxNid = 0;
+                        for(var i=0;i<data.notices.length;i++){
+                            var n = data.notices[i];
+                            if(n.nid > maxNid) maxNid = n.nid;
+                            html += '<div class="stu-notice-card">';
+                            html += '<div class="stu-notice-card-title">' + escHtml(n.title) + '</div>';
+                            html += '<div class="stu-notice-card-content">' + escHtml(n.content) + '</div>';
+                            html += '<div class="stu-notice-card-footer"><span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escHtml(n.author) + '</span><span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + escHtml(n.date) + '</span></div>';
+                            html += '</div>';
+                        }
+                        $('#stuNoticeBody').html(html);
+                        if(maxNid > 0){ setLastReadNid(maxNid); }
+                        $('#stuNoticeDot').removeClass('show');
+                    },
+                    error: function(xhr){
+                        // 尝试从错误响应中解析JSON
+                        if(xhr && xhr.responseText){
+                            var data = parseNotices(xhr.responseText);
+                            if(data && data.notices !== undefined){
+                                if(data.notices.length === 0){ $('#stuNoticeBody').html(emptyHtml); }
+                                else {
+                                    var html = '', maxNid = 0;
+                                    for(var i=0;i<data.notices.length;i++){
+                                        var n = data.notices[i];
+                                        if(n.nid > maxNid) maxNid = n.nid;
+                                        html += '<div class="stu-notice-card">';
+                                        html += '<div class="stu-notice-card-title">' + escHtml(n.title) + '</div>';
+                                        html += '<div class="stu-notice-card-content">' + escHtml(n.content) + '</div>';
+                                        html += '<div class="stu-notice-card-footer"><span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escHtml(n.author) + '</span><span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + escHtml(n.date) + '</span></div>';
+                                        html += '</div>';
+                                    }
+                                    $('#stuNoticeBody').html(html);
+                                    if(maxNid > 0){ setLastReadNid(maxNid); }
+                                    $('#stuNoticeDot').removeClass('show');
+                                }
+                                return;
+                            }
+                        }
+                        $('#stuNoticeBody').html(errorHtml);
+                    }
+                });
+            };
+
+            window.closeStuNotice = function(){ $('#stuNoticeOverlay').removeClass('show'); };
+
+            function escHtml(s){
+                if(!s) return '';
+                return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            }
+        })();
+    </script>
+
+    </form>
+</body>
+</html>

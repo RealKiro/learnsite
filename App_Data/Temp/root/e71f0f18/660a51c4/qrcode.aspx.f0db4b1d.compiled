@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/qrcode.aspx" hash="fffffff94ae4f160" filehash="ffffe94dad504b62" flags="110000" assembly="App_Web_zgidwflv" type="ASP.student_qrcode_aspx">
+    <filedeps>
+        <filedep name="/student/qrcode.aspx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/reorder.aspx" hash="fffffff94ae4f160" filehash="a06e477a718b4738" flags="110000" assembly="App_Web_kgua2dk_" type="ASP.teacher_reorder_aspx">
+    <filedeps>
+        <filedep name="/teacher/reorder.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>
