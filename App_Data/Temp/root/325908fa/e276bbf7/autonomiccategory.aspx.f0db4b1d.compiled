@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/autonomiccategory.aspx" hash="fffffff94ae4f160" filehash="1977a25252af" flags="110000" assembly="App_Web_v0nriqn2" type="ASP.student_autonomiccategory_aspx">
+    <filedeps>
+        <filedep name="/student/autonomiccategory.aspx" />
+    </filedeps>
+</preserve>

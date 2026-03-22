@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/excelshow.aspx" hash="fffffff94ae4f160" filehash="52f82798e676517a" flags="110000" assembly="App_Web_bquhs6lj" type="ASP.teacher_excelshow_aspx">
+    <filedeps>
+        <filedep name="/teacher/excelshow.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

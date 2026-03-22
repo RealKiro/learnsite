@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/topicdiscuss.aspx" hash="fffffff94ae4f160" filehash="617a56656d9e07bc" flags="110000" assembly="App_Web_topicdiscuss.aspx.f0db4b1d.qvmgsoji" type="ASP.student_topicdiscuss_aspx">
+    <filedeps>
+        <filedep name="/student/Scm.master" />
+        <filedep name="/student/topicdiscuss.aspx" />
+    </filedeps>
+</preserve>

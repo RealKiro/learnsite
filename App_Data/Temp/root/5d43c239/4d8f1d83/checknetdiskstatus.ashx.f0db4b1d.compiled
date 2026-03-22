@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/CheckNetdiskStatus.ashx" hash="33c60594" filehash="fffffa29b931d526" flags="110000" assembly="App_Web_checknetdiskstatus.ashx.f0db4b1d.unvr6hdp" type="CheckNetdiskStatus">
+    <filedeps>
+        <filedep name="/student/CheckNetdiskStatus.ashx" />
+    </filedeps>
+</preserve>

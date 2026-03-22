@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/ChineseHandler.ashx" hash="33c60594" filehash="e62ffe5969b" flags="110000" assembly="App_Web_4tvqywjb" type="ChineseHandler">
+    <filedeps>
+        <filedep name="/student/ChineseHandler.ashx" />
+    </filedeps>
+</preserve>

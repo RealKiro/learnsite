@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/Stud.master" hash="fffffff94ae4f160" filehash="ffffef751e89a9e8" flags="110000" assembly="App_Web_stud.master.f0db4b1d.j3wbcolq" type="ASP.student_stud_master">
+    <filedeps>
+        <filedep name="/student/Stud.master" />
+    </filedeps>
+</preserve>

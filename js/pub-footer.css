@@ -1,0 +1,427 @@
+/* ===== LearnSite完整底部 - 精确复刻版本 ===== */
+
+/* 底部容器 */
+html body .site-footer,
+body .site-footer,
+.site-footer {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: 'Microsoft YaHei', 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
+    position: relative !important;
+    background: #f5f5f7 !important;
+    color: #1d1d1f !important;
+    box-sizing: border-box !important;
+}
+
+/* 顶部紫色装饰条 */
+html body .site-footer::before,
+body .site-footer::before,
+.site-footer::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: #6366f1 !important;
+    z-index: 1 !important;
+}
+
+/* 内容容器 */
+html body .site-footer .site-footer-inner,
+body .site-footer .site-footer-inner,
+.site-footer .site-footer-inner {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 12px 40px 8px !important;
+    position: relative !important;
+    z-index: 2 !important;
+    box-sizing: border-box !important;
+}
+
+/* ===== 主要内容区域（品牌+链接列） ===== */
+html body .site-footer .site-footer-main,
+body .site-footer .site-footer-main,
+.site-footer .site-footer-main {
+    display: grid !important;
+    grid-template-columns: 2fr 1fr 1fr 1fr !important;
+    gap: 24px !important;
+    margin-bottom: 12px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid #d2d2d7 !important;
+}
+    padding-bottom: 32px !important;
+    border-bottom: 1px solid #d2d2d7 !important;
+}
+
+/* ===== 左侧品牌区 ===== */
+html body .site-footer .site-footer-brand,
+body .site-footer .site-footer-brand,
+.site-footer .site-footer-brand {
+    max-width: 360px !important;
+}
+
+html body .site-footer .site-footer-logo,
+body .site-footer .site-footer-logo,
+.site-footer .site-footer-logo {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 6px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #1d1d1f !important;
+    text-decoration: none !important;
+}
+
+html body .site-footer .site-footer-logo-icon,
+body .site-footer .site-footer-logo-icon,
+.site-footer .site-footer-logo-icon {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    color: #6366f1 !important;
+    font-weight: 700 !important;
+    flex-shrink: 0 !important;
+}
+
+html body .site-footer .site-footer-logo-icon.site-footer-logo-text,
+body .site-footer .site-footer-logo-icon.site-footer-logo-text,
+.site-footer .site-footer-logo-icon.site-footer-logo-text {
+    background: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+html body .site-footer .site-footer-logo-icon img,
+body .site-footer .site-footer-logo-icon img,
+.site-footer .site-footer-logo-icon img {
+    width: 24px !important;
+    height: 24px !important;
+    object-fit: contain !important;
+}
+
+html body .site-footer .site-footer-desc,
+body .site-footer .site-footer-desc,
+.site-footer .site-footer-desc {
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+    color: #86868b !important;
+    margin-bottom: 6px !important;
+    max-width: 240px !important;
+}
+
+/* 社交媒体图标 */
+html body .site-footer .site-footer-social,
+body .site-footer .site-footer-social,
+.site-footer .site-footer-social {
+    display: flex !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+}
+
+html body .site-footer .site-footer-social-link,
+body .site-footer .site-footer-social-link,
+.site-footer .site-footer-social-link {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 5px !important;
+    background: transparent !important;
+    border: 1px solid #d2d2d7 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    color: #86868b !important;
+    transition: all 0.2s ease !important;
+}
+
+html body .site-footer .site-footer-social-link:hover,
+body .site-footer .site-footer-social-link:hover,
+.site-footer .site-footer-social-link:hover {
+    background: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+html body .site-footer .site-footer-social-link svg,
+body .site-footer .site-footer-social-link svg,
+.site-footer .site-footer-social-link svg {
+    width: 12px !important;
+    height: 12px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+}
+
+/* ===== 链接列 ===== */
+html body .site-footer .site-footer-links,
+body .site-footer .site-footer-links,
+.site-footer .site-footer-links {
+    display: contents !important;
+}
+
+html body .site-footer .site-footer-column,
+body .site-footer .site-footer-column,
+.site-footer .site-footer-column {
+    min-width: 0 !important;
+}
+
+html body .site-footer .site-footer-column-title,
+body .site-footer .site-footer-column-title,
+.site-footer .site-footer-column-title {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #1d1d1f !important;
+    margin-bottom: 6px !important;
+    letter-spacing: 0 !important;
+}
+
+html body .site-footer .site-footer-column-list,
+body .site-footer .site-footer-column-list,
+.site-footer .site-footer-column-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+html body .site-footer .site-footer-column-item,
+body .site-footer .site-footer-column-item,
+.site-footer .site-footer-column-item {
+    margin-bottom: 4px !important;
+}
+
+html body .site-footer .site-footer-column-link,
+body .site-footer .site-footer-column-link,
+.site-footer .site-footer-column-link {
+    font-size: 11px !important;
+    text-decoration: none !important;
+    color: #86868b !important;
+    transition: color 0.2s ease !important;
+    display: inline-block !important;
+}
+
+html body .site-footer .site-footer-column-link:hover,
+body .site-footer .site-footer-column-link:hover,
+.site-footer .site-footer-column-link:hover {
+    color: #6366f1 !important;
+}
+
+/* ===== 底部栏（版权信息） ===== */
+html body .site-footer .site-footer-bottom,
+body .site-footer .site-footer-bottom,
+.site-footer .site-footer-bottom {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+    font-size: 10px !important;
+    color: #86868b !important;
+    line-height: 1.3 !important;
+}
+
+html body .site-footer .site-footer-bottom-left,
+body .site-footer .site-footer-bottom-left,
+.site-footer .site-footer-bottom-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+html body .site-footer .site-footer-copyright,
+body .site-footer .site-footer-copyright,
+.site-footer .site-footer-copyright {
+    color: #86868b !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+    font-size: 10px !important;
+}
+
+html body .site-footer .site-footer-icp,
+body .site-footer .site-footer-icp,
+.site-footer .site-footer-icp {
+    color: #86868b !important;
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    font-size: 10px !important;
+}
+
+html body .site-footer .site-footer-icp a,
+body .site-footer .site-footer-icp a,
+.site-footer .site-footer-icp a {
+    text-decoration: none !important;
+    color: #86868b !important;
+    transition: color 0.2s ease !important;
+    font-size: 10px !important;
+}
+
+html body .site-footer .site-footer-icp a:hover,
+body .site-footer .site-footer-icp a:hover,
+.site-footer .site-footer-icp a:hover {
+    color: #6366f1 !important;
+}
+
+html body .site-footer .site-footer-bottom-right,
+body .site-footer .site-footer-bottom-right,
+.site-footer .site-footer-bottom-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+}
+
+html body .site-footer .site-footer-powered,
+body .site-footer .site-footer-powered,
+.site-footer .site-footer-powered {
+    font-size: 10px !important;
+    color: #86868b !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    white-space: nowrap !important;
+}
+
+html body .site-footer .site-footer-powered::before,
+body .site-footer .site-footer-powered::before,
+.site-footer .site-footer-powered::before {
+    content: 'Powered by' !important;
+    margin-right: 2px !important;
+}
+
+html body .site-footer .site-footer-powered a,
+body .site-footer .site-footer-powered a,
+.site-footer .site-footer-powered a {
+    text-decoration: none !important;
+    color: #6366f1 !important;
+    font-weight: 600 !important;
+    transition: color 0.2s ease !important;
+    font-size: 12px !important;
+}
+
+html body .site-footer .site-footer-powered a:hover,
+body .site-footer .site-footer-powered a:hover,
+.site-footer .site-footer-powered a:hover {
+    color: #4f46e5 !important;
+}
+
+/* ===== 简洁模式（隐藏链接列） ===== */
+html body .site-footer.simple-mode .site-footer-main,
+body .site-footer.simple-mode .site-footer-main,
+.site-footer.simple-mode .site-footer-main {
+    display: none !important;
+}
+
+html body .site-footer.simple-mode .site-footer-inner,
+body .site-footer.simple-mode .site-footer-inner,
+.site-footer.simple-mode .site-footer-inner {
+    padding: 24px 40px !important;
+}
+
+html body .site-footer.simple-mode .site-footer-bottom,
+body .site-footer.simple-mode .site-footer-bottom,
+.site-footer.simple-mode .site-footer-bottom {
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+html body .site-footer.simple-mode .site-footer-bottom-left,
+body .site-footer.simple-mode .site-footer-bottom-left,
+.site-footer.simple-mode .site-footer-bottom-left {
+    justify-content: center !important;
+}
+
+html body .site-footer.simple-mode .site-footer-bottom-right,
+body .site-footer.simple-mode .site-footer-bottom-right,
+.site-footer.simple-mode .site-footer-bottom-right {
+    justify-content: center !important;
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 1024px) {
+    html body .site-footer .site-footer-main,
+    body .site-footer .site-footer-main,
+    .site-footer .site-footer-main {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 40px !important;
+    }
+    
+    html body .site-footer .site-footer-brand,
+    body .site-footer .site-footer-brand,
+    .site-footer .site-footer-brand {
+        grid-column: 1 / -1 !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    html body .site-footer::before,
+    body .site-footer::before,
+    .site-footer::before {
+        height: 3px !important;
+    }
+    
+    html body .site-footer .site-footer-inner,
+    body .site-footer .site-footer-inner,
+    .site-footer .site-footer-inner {
+        padding: 32px 24px 20px !important;
+    }
+    
+    html body .site-footer .site-footer-main,
+    body .site-footer .site-footer-main,
+    .site-footer .site-footer-main {
+        grid-template-columns: 1fr !important;
+        gap: 32px !important;
+        margin-bottom: 32px !important;
+        padding-bottom: 24px !important;
+    }
+    
+    html body .site-footer .site-footer-brand,
+    body .site-footer .site-footer-brand,
+    .site-footer .site-footer-brand {
+        max-width: 100% !important;
+    }
+    
+    html body .site-footer .site-footer-bottom,
+    body .site-footer .site-footer-bottom,
+    .site-footer .site-footer-bottom {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+        text-align: center !important;
+    }
+    
+    html body .site-footer .site-footer-bottom-left,
+    body .site-footer .site-footer-bottom-left,
+    .site-footer .site-footer-bottom-left {
+        width: 100% !important;
+        justify-content: center !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    
+    html body .site-footer .site-footer-bottom-right,
+    body .site-footer .site-footer-bottom-right,
+    .site-footer .site-footer-bottom-right {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    html body .site-footer.simple-mode .site-footer-inner,
+    body .site-footer.simple-mode .site-footer-inner,
+    .site-footer.simple-mode .site-footer-inner {
+        padding: 20px 24px !important;
+    }
+}

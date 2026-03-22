@@ -1,0 +1,212 @@
+<%@ page title="" language="C#" masterpagefile="~/student/Stud.master" stylesheettheme="Student" autoeventwireup="true" inherits="Student_downfile, LearnSite" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="Cphs" runat="Server">
+<script runat="server">
+    protected void BtnLike_Click(object sender, EventArgs e)
+    {
+        string fid = LabelFid.Text;
+        string sid = Session["Sid"]);
+        if (string.IsNullOrEmpty(sid)) { LabelLikeMsg.Text = "请先登录"; return; }
+        
+        try {
+            string checkSql = "SELECT COUNT(*) FROM ResourceLikes WHERE Fid=" + fid + " AND Sid='" + sid + "'";
+            if (Convert.ToInt32(SqlHelper.ExecuteScalar(checkSql)) > 0) {
+                LabelLikeMsg.Text = "您已经点赞过了";
+                return;
+            }
+            
+            string insertSql = "INSERT INTO ResourceLikes (Fid, Sid, Ldate) VALUES (" + fid + ", '" + sid + "', GETDATE())";
+            SqlHelper.ExecuteNonQuery(insertSql);
+            
+             0) + 1 WHERE Fid=" + fid;
+            SqlHelper.ExecuteNonQuery(updateSql);
+            
+            LoadLikeCount();
+            LabelLikeMsg.Text = "点赞成功！";
+            BtnLike.Enabled = false;
+            BtnLike.Text = "✓ 已点赞";
+        } catch { LabelLikeMsg.Text = "点赞失败"; }
+    }
+    
+    protected void BtnFavorite_Click(object sender, EventArgs e)
+    {
+        string fid = LabelFid.Text;
+        string sid = Session["Sid"]?.ToString();
+        if (string.IsNullOrEmpty(sid)) { LabelFavMsg.Text = "请先登录"; return; }
+        
+        try {
+            string checkSql = "SELECT COUNT(*) FROM ResourceFavorites WHERE Fid=" + fid + " AND Sid='" + sid + "'";
+            if (Convert.ToInt32(SqlHelper.ExecuteScalar(checkSql)) > 0) {
+                LabelFavMsg.Text = "您已经收藏过了";
+                return;
+            }
+            
+            string insertSql = "INSERT INTO ResourceFavorites (Fid, Sid, Fdate) VALUES (" + fid + ", '" + sid + "', GETDATE())";
+            SqlHelper.ExecuteNonQuery(insertSql);
+            
+            LoadFavoriteCount();
+            LabelFavMsg.Text = "收藏成功！";
+            BtnFavorite.Enabled = false;
+            BtnFavorite.Text = "★ 已收藏";
+        } catch { LabelFavMsg.Text = "收藏失败"; }
+    }
+    
+    protected void BtnSubmitComment_Click(object sender, EventArgs e)
+    {
+        string fid = LabelFid.Text;
+        string sid = Session["Sid"]?.ToString();
+        string content = TxtComment.Text.Trim();
+        
+        if (string.IsNullOrEmpty(sid)) { LabelCommentMsg.Text = "请先登录"; return; }
+        (content)) { LabelCommentMsg.Text = "评论内容不能为空"; return; }
+        
+        try {
+            string sql = "INSERT INTO Resoud, Ccontent, Cdate) VALUES (" + fid + ", '" + sid + "', '" + content.Replace("'", "''") + "', GETDATE())";
+            SqlHelper.ExecuteNonQuery(sql);
+            TxtComment.Text = "";
+            LoadComments();
+            LabelCommentMsg.Text = "评论成功！";
+        } catch { LabelCommentMsg.Text = "评论失败"; }
+    }
+    
+    protected void BtnSubmitNote_Click(object sender, EventArgs e)
+    {
+        string fid = LabelFid.Text;
+        string sid = Session["Sid"]?.ToString();
+        string content = TxtNote.Text.Trim();
+        
+        if (string.IsNullOrEmpty(sid)) { LabelNoteMsg.Text = "请先登录"; return; }
+        if (string.IsNullOrEmpty(content)) { LabelNoteMsg.Text = "心得内容不能为空"; return; }
+        
+        try {
+            string sql = "INSERT INTO LearningNotes (Fid, Sid, Ncontent, Ndate) VALUES (" + fid + ", '" + sid + "', '" + content.Replace("'", "''") + "', GETDATE())";
+            SqlHelper.ExecuteNonQuery(sql);
+            TxtNote.Text = "";
+            LoadNotes();
+            LabelNoteMsg.Text = "发布成功！";
+        } catch { LabelNoteMsg.Text = "发布失败"; }
+    }
+    
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack) {
+            LoadLikeCount();
+            LoadFavoriteCount();
+            LoadComments();
+            LoadNotes();
+            CheckUserActions();
+        }
+    }
+    
+    private void LoadLikeCount()
+    {
+        try {
+            string sql = "SELECT ISNULL(Flikes, 0) FROM FileInfo WHERE Fid=" + LabelFid.Text;
+            LabelLikeCount.Text = SqlHelper.ExecuteScalar(sql).ToString();
+        } catch { LabelLikeCount.Text = "0"; }
+    }
+    
+    private void LoadFavoriteCount()
+    {
+        try {
+            string sql = "SELECT COUNT(*) FROM ResourceFavorites WHERE Fid=" + LabelFid.Text;
+            LabelFavCount.Text = SqlHelper.ExecuteScalar(sql).ToString();
+        } catch { LabelFavCount.Text = "0"; }
+    }
+    
+    private void LoadComments()
+    {
+        try {
+            string sql = "SELECT TOP 20 c.*, s.Sname FROM ResourceComments c LEFT JOIN StudentInfo s ON c.Sid=s.Sid WHERE c.Fid=" + LabelFid.Text + " ORDER BY c.Cdate DESC";
+            RptComments.DataSource = SqlHelper.ExecuteDataTable(sql);
+            RptComments.DataBind();
+        } catch { }
+    }
+    
+    private void LoadNotes()
+    {
+        try {
+            string sql = "SELECT TOP 20 n.*, s.Sname FROM LearningNotes n LEFT JOIN StudentInfo s ON n.Sid=s.Sid WHERE n.Fid=" + LabelFid.Text + " ORDER BY n.Ndate DESC";
+            RptNotes.DataSource = SqlHelper.ExecuteDataTable(sql);
+            RptNotes.DataBind();
+        } catch { }
+    }
+    
+    private void CheckUserActions()
+    {
+        string sid = Session["Sid"]?.ToString();
+        if (string.IsNullOrEmpty(sid)) return;
+        
+        try {
+            string likeSql = "SELECT COUNT(*) FROM ResourceLikes WHERE Fid=" + LabelFid.Text + " AND Sid='" + sid + "'";
+            if (Convert.ToInt32(SqlHelper.ExecuteScalar(likeSql)) > 0) {
+                BtnLike.Enabled = false;
+                BtnLike.Text = "✓ 已点赞";
+            }
+            
+            string favSql = "SELECT COUNT(*) FROM ResourceFavorites WHERE Fid=" + LabelFid.Text + " AND Sid='" + sid + "'";
+            if (Convert.ToInt32(SqlHelper.ExecuteScalar(favSql)) > 0) {
+                BtnFavorite.Enabled = false;
+                BtnFavorite.Text = "★ 已收藏";
+            }
+        } catch { }
+    }
+    
+    protected string GetFirstChar(object name)
+    {
+        if (name == null) return "?";
+        string str ;
+        return string.IsNullOrEmpty(str) ? "?" : str.Substring(0, 1);
+    }
+    
+    protected string CutString(string str, int length)
+    {
+        if (string.IsNullOrEmpty(str) || str.Length <= length) return str;
+        return str.Substring(0, length) + "...";
+    }
+    
+    protected override void OnPreRender(EventArgs e)
+    {
+        base.OnPreRender(e);
+        try {
+            SqlHelper.ExecuteNonQuery(@"
+                IF NOT EXISTS (SELECT * FROM 'U')
+                CREATE TABLE ResourceLikes (
+                    Lid INT IDENTITY(1,1) PRIMARY KEY,
+                    Fid INT NOT NULL,
+                    Sid VARCHAR(50) NOT NULL,
+                    Ldate DATETIME NOT NULL
+                )
+                
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ResourceFavorites' AND xtype='U')
+                CREATE TABLE ResourceFavorites (
+                    Fvid INT IDENTITY(1,1) PRIMARY KEY,
+                    Fid INT NOT NULL,
+                ,
+                    Fdate DATETIME NOT NULL
+                )
+                
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ResourceComments' AND xtype='U')
+                CREATE TABLE ResourceComments (
+                    Cid INT IDENTITY(1,1) PRIMARY KEY,
+                    Fid INT NOT NULL,
+                    Sid VARCHAR(50) NOT NULL,
+                    Ccontent NVARCHAR(2000) NOT NULL,
+                    Cdate DATETIME NOT NULL
+                )
+                
+                IF ype='U')
+     ABLE LearningNotes (
+                    Nid INT IDENTITY(1,1) PRIMARY KEY,
+                    Fid INT NOT NULL,
+                    Sid VARCHAR(50) NOT NULL,
+                    Ncontent NVARCHAR(2000) NOT NULL,
+                    Ndate DATETIME NOT NULL
+                )
+                
+                IF NOT EXISTS (SELECT * FROM syscolumns WHERE id=OBJECT_ID('FileInfo') AND name='Flikes')
+                ALTER TABLE FileInfo ADD Flikes INT DEFAULT 0
+            ");
+        } catch { }
+    }
+</script>

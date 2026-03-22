@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/signin.aspx" hash="fffffff94ae4f160" filehash="796ecbfbc7bc863b" flags="110000" assembly="App_Web_td-jscq3" type="ASP.teacher_signin_aspx">
+    <filedeps>
+        <filedep name="/teacher/signin.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

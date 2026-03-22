@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/uploadwork.aspx" hash="fffffff94ae4f160" filehash="61d2c7c9b18" flags="110000" assembly="App_Web_zgidwflv" type="ASP.student_uploadwork_aspx">
+    <filedeps>
+        <filedep name="/student/uploadwork.aspx" />
+    </filedeps>
+</preserve>

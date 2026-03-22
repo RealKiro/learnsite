@@ -1,0 +1,1 @@
+<%@ page language="C#" autoeventwireup="true" inherits="Student_autoupload, LearnSite" %>

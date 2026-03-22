@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工智能 - 文字识别技术</title>
+    <link rel="stylesheet" href="deepseek.css">
+	
+</head>
+<body>
+    <div class="container">		
+        <div class="left-column">		
+			<!-- 聊天区域 -->
+			<div class="chat-container" id="chatHistory">
+				<!-- 聊天记录将动态加载到这里🐳  -->
+				<div class="wall">
+				<h2><img  src="ocr.png" /> 人工智能 - 文字识别，很高兴看见你！
+				</h2>
+				</div>
+			</div>
+			
+			<!-- 输入框区域 -->
+			<div class="loading-container">
+			<!-- 加载状态 -->
+			<div id="loading" style="display: none;"><img src="loading.gif" />文字识别中...</div>
+			
+			</div>
+
+			<!-- 输入框区域 -->
+			<div class="input-container">
+				<div class="other">
+					<input type="file" name="file" id="userfile" accept="image/*" hidden>
+					<button id="uploadbtn" >上传图片</button>
+					<button id="btnmsg" onclick="sendText()" title="文字识别">文字识别</button>
+				</div>
+				
+			</div>
+        </div>	
+		
+        <div class="right-column">
+			<!-- 导航栏 -->
+			<div class="navbar">
+			<img src="ocr.png" /> 历史对话记录
+			</div>
+			<!-- 聊天记录栏 -->
+			<div id ="chatbar">			
+			</div>
+        </div>
+
+ </div>
+    <script>
+        let messageHistory = []; // 新增：存储对话历史的数组
+		
+		var port=":2000";//端口
+		var lor =location.origin + port;// http://192.168.1.3
+		console.log(lor);
+		
+        const apiUploadUrl = lor+"/upload";
+        const apiChatUrl = lor+"/ocr";
+			
+		const userfile = document.getElementById("userfile");
+		const uploadbtn = document.getElementById("uploadbtn");
+		const userchatbar = document.getElementById("chatbar");
+        const sendButtonmsg = document.getElementById("btnmsg");
+		let imgfilename ;
+        sendButtonmsg.disabled = true;
+		
+		//console.log(userform.action);
+		// 为表单添加提交事件监听器
+        userfile.addEventListener('change', async (event) => {
+			  const files = event.target.files;
+			  if (!files) return;
+
+			  // 创建图片对象					
+				//console.log("上传文件是",files[0]);
+				var formData = new FormData(); // 创建FormData对象
+				formData.append("file",files[0]);
+				// 使用Fetch API发送POST请求
+				fetch(apiUploadUrl, {
+					method: 'POST',
+					body: formData
+				})
+				.then(response => response.json()) // 将响应解析为JSON
+				.then(data => {
+					// 在页面上显示服务器响应
+					var result =  JSON.parse(JSON.stringify(data));
+					imgfilename = result["response"];
+					console.log(imgfilename);
+					addMessage("upload", imgfilename);				
+					sendButtonmsg.disabled = false;
+				})
+				.catch(error => {
+					console.error('Error:', error); // 在控制台显示错误信息
+				});
+        });
+		
+		uploadbtn.addEventListener('click', function() {
+			userfile.click();
+		});
+
+        async function sendText() {
+            const userInput = imgfilename;
+            if (!userInput) return;
+			
+            sendButtonmsg.disabled = true;
+			uploadbtn.disabled = true;
+
+            // 新增：将用户消息添加到历史记录
+			const userMessage = { role: "upload", content: userInput };
+
+            try {
+                document.getElementById("loading").style.display = "block";
+                const response = await fetch(apiChatUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: userMessage }) 
+                });
+                
+                const data = await response.json();
+                
+                // 新增：将AI回复添加到历史记录
+                const botMessage = { role: "assistant", content: data.response };
+                addMessage("bot", data.response);
+			
+				const chatTitle = document.createElement("div");
+				chatTitle.className="chattitle";
+				chatTitle.innerHTML=data.response;
+				userchatbar.appendChild(chatTitle);
+			
+            } catch (error) {
+                console.error("Error:", error);
+                const errorMessage = { role: "assistant", content: `Error: ${error.message}` };
+                addMessage("sys", `Error: ${error.message}`);
+            } finally {
+                document.getElementById("loading").style.display = "none";				
+				uploadbtn.disabled  = false;
+				imgfilename ="";
+            }
+        }
+		
+		
+		function addMessage(role, content) {
+			const chatHistory = document.getElementById("chatHistory");
+			const messageDiv = document.createElement("div");
+			messageDiv.className = `message ${role}`;
+			if (role === "upload") {				
+				messageDiv.innerHTML = `<img src="../deepseek/uploads/${content}" />`;
+			}else {
+				messageDiv.innerHTML = `<div class="user">${content}</div>`;
+			}
+			chatHistory.appendChild(messageDiv);
+
+			// 滚动到底部
+			chatHistory.scrollTop = chatHistory.scrollHeight;
+		}
+
+			
+
+    </script>
+</body>
+</html>

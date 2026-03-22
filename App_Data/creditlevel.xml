@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<levels>
+  <level threshold="0" name="学习新手" icon="/images/levelicons/lv_639075364449216866.png" color="#94a3b8" />
+  <level threshold="20" name="勤奋学生" icon="🌿" color="#10b981" />
+  <level threshold="50" name="优秀学子" icon="🌳" color="#22c55e" />
+  <level threshold="100" name="学习达人" icon="🌟" color="#f59e0b" />
+  <level threshold="200" name="学习精英" icon="🏆" color="#8b5cf6" />
+  <level threshold="350" name="学习大师" icon="👑" color="#ec4899" />
+</levels>

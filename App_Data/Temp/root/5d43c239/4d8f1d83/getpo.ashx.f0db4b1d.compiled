@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/getpo.ashx" hash="33c60594" filehash="fffff3b73c4dba03" flags="110000" assembly="App_Web_w_oty_lo" type="getpo">
+    <filedeps>
+        <filedep name="/student/getpo.ashx" />
+    </filedeps>
+</preserve>

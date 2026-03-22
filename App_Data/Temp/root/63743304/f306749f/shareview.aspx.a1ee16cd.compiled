@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/shareview.aspx" hash="fffffff94ae4f160" filehash="fffff6e35d4978e4" flags="110000" assembly="App_Web_5qa_rpu0" type="ASP.teacher_shareview_aspx">
+    <filedeps>
+        <filedep name="/teacher/shareview.aspx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/typeedit.aspx" hash="fffffff94ae4f160" filehash="2eccd3537bafc841" flags="110000" assembly="App_Web_td-jscq3" type="ASP.teacher_typeedit_aspx">
+    <filedeps>
+        <filedep name="/teacher/Teach.master" />
+        <filedep name="/teacher/typeedit.aspx" />
+    </filedeps>
+</preserve>

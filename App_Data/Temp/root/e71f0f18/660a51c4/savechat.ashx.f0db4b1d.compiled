@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/savechat.ashx" hash="33c60594" filehash="fffffabefc616cf8" flags="110000" assembly="App_Web_4tvqywjb" type="savechat">
+    <filedeps>
+        <filedep name="/student/savechat.ashx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,1285 @@
+<%@ master language="C#" autoeventwireup="true" inherits="Teach, LearnSite" %>
+
+<script runat="server">
+    protected string GetSiteTitle()
+    {
+        try
+        {
+            string xmlPath = Server.MapPath("~/website.xml");
+            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            doc.Load(xmlPath);
+            System.Xml.XmlNode node = doc.SelectSingleNode("//add[@key='SiteTitle']");
+            if (node != null && node.Attributes["value"] != null)
+                return node.Attributes["value"].Value;
+        }
+        catch { }
+        return "LearnSite";
+    }
+
+    protected string GetSiteLogoUrl()
+    {
+        string[] exts = { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
+        foreach (string ext in exts)
+        {
+            string path = Server.MapPath("~/images/site-logo" + ext);
+            if (System.IO.File.Exists(path))
+                return ResolveUrl("~/images/site-logo" + ext) + "?v=" + System.IO.File.GetLastWriteTime(path).Ticks;
+        }
+        return "";
+    }
+
+    protected string GetCurrentPageName()
+    {
+        string path = Request.Url.AbsolutePath.ToLower();
+        if (path.Contains("learnrate") || path.Contains("workshow")) return "start";
+        if (path.Contains("start")) return "start";
+        if (path.Contains("schedule")) return "schedule";
+        if (path.Contains("coursetemplate")) return "coursetemplate";
+        if (path.Contains("coursecreate") || path.Contains("courseedit") || path.Contains("courseshow") ||
+            path.Contains("coursedel") || path.Contains("courseimport") || path.Contains("courseold") ||
+            path.Contains("courseanalyse") || path.Contains("coursetotal")) return "course";
+        if (path.Contains("course")) return "course";
+        if (path.Contains("gaugeitem")) return "gauge";
+        if (path.Contains("gauge")) return "gauge";
+        if (path.Contains("studentwork") || path.Contains("stuworkcircle")) return "works";
+        if (path.Contains("works")) return "works";
+        if (path.Contains("signshow") || path.Contains("notsign")) return "signin";
+        if (path.Contains("signin")) return "signin";
+        if (path.Contains("studentadd") || path.Contains("studentedit") ||
+            path.Contains("studentdel") || path.Contains("studentshow") ||
+            path.Contains("delstudents")) return "student";
+        if (path.Contains("student")) return "student";
+        if (path.Contains("quiz")) return "quiz";
+        if (path.Contains("typechinese")) return "typechinese";
+        if (path.Contains("typer") || path.Contains("typeadd") || path.Contains("typeedit") ||
+            path.Contains("typedel") || path.Contains("printtyper")) return "typer";
+        if (path.Contains("resourcemanage")) return "resourcemanage";
+        if (path.Contains("resourcecategory")) return "resourcecategory";
+        if (path.Contains("resourcecreate")) return "resourcecreate";
+        if (path.Contains("softwaredownload")) return "softwaredownload";
+        if (path.Contains("softadd") || path.Contains("softedit") || path.Contains("softdel") ||
+            path.Contains("softview") || path.Contains("softnomic") || path.Contains("softcategory")) return "soft";
+        if (path.Contains("soft")) return "soft";
+        if (path.Contains("creditscore")) return "creditscore";
+        if (path.Contains("attitudetype")) return "attitudetype";
+        if (path.Contains("badgesetting")) return "badgesetting";
+        if (path.Contains("badgeaward")) return "badgeaward";
+        if (path.Contains("badgemanage")) return "badgemanage";
+        if (path.Contains("badgeshop")) return "badgeshop";
+        if (path.Contains("badgeexchange")) return "badgeexchange";
+        if (path.Contains("knowledge")) return "knowledge";
+        if (path.Contains("questionbank")) return "questionbank";
+        if (path.Contains("paper")) return "paper";
+        if (path.Contains("exampublish")) return "exampublish";
+        if (path.Contains("marking")) return "marking";
+        if (path.Contains("scores")) return "scores";
+        if (path.Contains("notice")) return "notice";
+        if (path.Contains("gamemanage")) return "gamemanage";
+        if (path.Contains("gameupdate")) return "gameupdate";
+        if (path.Contains("profile")) return "profile";
+        if (path.Contains("petmanage")) return "petmanage";
+        if (path.Contains("petcostume")) return "petcostume";
+        if (path.Contains("petsetting")) return "petsetting";
+        if (path.Contains("infomation")) return "infomation";
+        if (path.Contains("systeminfo") || path.Contains("sitelog")) return "systeminfo";
+        if (path.Contains("helper")) return "helper";
+        return "index";
+    }
+
+    protected string GetAppVersion()
+    {
+        // 优先从 changelog.xml 读取最新版本号
+        try
+        {
+            string xmlPath = Server.MapPath("~/changelog.xml");
+            if (System.IO.File.Exists(xmlPath))
+            {
+                System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+                doc.Load(xmlPath);
+                System.Xml.XmlNode node = doc.SelectSingleNode("//changelog/version[1]");
+                if (node != null && node.Attributes["ver"] != null)
+                    return node.Attributes["ver"].Value;
+            }
+        }
+        catch { }
+        // 回退：从 DLL 读取版本号
+        try
+        {
+            string dllPath = Server.MapPath("~/bin/LearnSite.dll");
+            if (System.IO.File.Exists(dllPath))
+            {
+                System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(dllPath);
+                return "v" + fvi.FileVersion;
+            }
+        }
+        catch { }
+        return "";
+    }
+
+    private static System.Reflection.BindingFlags tFlags =
+        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic
+        | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static;
+
+    protected string tUserName = "";
+    protected string tUserInitial = "\u5E08";
+    protected string tUserAvatarUrl = "";
+
+    protected string GetProfileUrl()
+    {
+        try
+        {
+            string path = ResolveUrl("~/teacher/profile.aspx");
+            return new Uri(Request.Url, path).AbsoluteUri;
+        }
+        catch { return ResolveUrl("~/teacher/profile.aspx"); }
+    }
+
+    private object TDecodeCookie(string typeName, string cookieValue)
+    {
+        Type cookType = typeof(LearnSite.Common.CookieHelp).Assembly.GetType(typeName);
+        if (cookType == null) return null;
+        object model = Activator.CreateInstance(cookType);
+        System.Reflection.MethodInfo toModel = cookType.GetMethod("ToModel", tFlags);
+        if (toModel != null) toModel.Invoke(model, new object[] { cookieValue });
+        return model;
+    }
+
+    private string TGetProp(object model, string propName)
+    {
+        if (model == null) return "";
+        System.Reflection.PropertyInfo prop = model.GetType().GetProperty(propName);
+        if (prop == null) return "";
+        object val = prop.GetValue(model, null);
+        return val != null ? val.ToString() : "";
+    }
+
+    private void LoadTeacherUserInfo()
+    {
+        int hid = 0;
+        try
+        {
+            HttpCookie tc = Request.Cookies[LearnSite.Common.CookieHelp.teaCookieNname];
+            if (tc != null && !string.IsNullOrEmpty(tc.Value))
+            {
+                object t = TDecodeCookie("LearnSite.Model.TeaCook", tc.Value);
+                string name = TGetProp(t, "Hname");
+                if (!string.IsNullOrEmpty(name))
+                {
+                    // 尝试URL解码，如果包含%编码
+                    try
+                    {
+                        if (name.Contains("%"))
+                        {
+                            name = Server.UrlDecode(name);
+                        }
+                    }
+                    catch { }
+                    tUserName = name;
+                    tUserInitial = name.Substring(0, 1);
+                }
+                string sid = TGetProp(t, "Hid");
+                if (!string.IsNullOrEmpty(sid)) int.TryParse(sid, out hid);
+            }
+        }
+        catch { }
+        if (hid > 0)
+        {
+            string[] exts = { ".png", ".jpg", ".jpeg", ".gif", ".webp" };
+            foreach (string ext in exts)
+            {
+                string fp = Server.MapPath("~/images/avatars/" + hid + ext);
+                if (System.IO.File.Exists(fp))
+                {
+                    tUserAvatarUrl = ResolveUrl("~/images/avatars/" + hid + ext) + "?t=" + System.IO.File.GetLastWriteTime(fp).Ticks;
+                    break;
+                }
+            }
+        }
+    }
+
+    protected void Page_Init(object sender, EventArgs e)
+    {
+        string icoPath = Server.MapPath("~/favicon.ico");
+        if (System.IO.File.Exists(icoPath))
+        {
+            LitFavicon.Text = "<link rel=\"icon\" type=\"image/x-icon\" href=\"" + ResolveUrl("~/favicon.ico") + "?v=" + System.IO.File.GetLastWriteTime(icoPath).Ticks + "\" />";
+        }
+        else
+        {
+            string pngPath = Server.MapPath("~/favicon.png");
+            if (System.IO.File.Exists(pngPath))
+                LitFavicon.Text = "<link rel=\"icon\" type=\"image/png\" href=\"" + ResolveUrl("~/favicon.png") + "?v=" + System.IO.File.GetLastWriteTime(pngPath).Ticks + "\" />";
+        }
+        Page.Title = GetSiteTitle() + " - \u6559\u5E08\u5E73\u53F0";
+        LoadTeacherUserInfo();
+
+        // Auth guard: redirect to login if no valid teacher cookie (skip login page itself)
+        string reqPath = Request.Url.AbsolutePath.ToLower();
+        if (!reqPath.EndsWith("/index.aspx") && !reqPath.EndsWith("/teacher/"))
+        {
+            HttpCookie tc = Request.Cookies[LearnSite.Common.CookieHelp.teaCookieNname];
+            if (tc == null || string.IsNullOrEmpty(tc.Value))
+            {
+                Response.Redirect(ResolveUrl("~/teacher/index.aspx"));
+            }
+        }
+    }
+</script>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server" id="Head1">
+    <title>教师平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <asp:Literal ID="LitFavicon" runat="server" />
+    <link rel="stylesheet" type="text/css" href="../App_Themes/Teacher/StyleSheet.css" />
+    <script src="../js/MenuCookie.js" type="text/javascript"></script>
+    <script src="../js/jquery-1.8.2.min.js" type="text/javascript"></script>
+    <script src="../kindeditor/plugins/code/prettify.js" type="text/javascript"></script>
+    <script src="../js/ruffle.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = { "autoplay": "on" };
+    </script>
+    <style>
+        /* ===== Reset ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; width: 100%; overflow: hidden; margin: 0; }
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', -apple-system, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1e293b;
+        }
+        #form1 { width: 100%; height: 100%; margin: 0; padding: 0; }
+        .layout-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            width: 220px;
+            min-width: 220px;
+            max-width: 220px;
+            height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e8ecf1;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            flex-grow: 0;
+            transition: width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease;
+            z-index: 100;
+            position: relative;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+        }
+        .sidebar.collapsed { width: 64px; min-width: 64px; max-width: 64px; }
+        .sidebar.collapsed .sidebar-brand-text,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .nav-group-label,
+        .sidebar.collapsed .sidebar-footer-text { display: none; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 0 0; }
+        .sidebar.collapsed .nav-icon { margin-right: 0; }
+        .sidebar.collapsed .sidebar-brand { justify-content: center; padding: 0 8px; }
+
+        /* Brand */
+        .sidebar-brand {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #f1f5f9;
+            flex-shrink: 0;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .sidebar-brand-logo {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .sidebar-brand-logo img {
+            width: 32px; height: 32px;
+            object-fit: contain;
+        }
+        .sidebar-brand-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        /* Navigation */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 8px;
+        }
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+        .nav-group-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 16px 12px 6px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .nav-group-label:hover { background: #f8fafc; color: #64748b; }
+        .nav-group-arrow {
+            width: 14px; height: 14px; flex-shrink: 0;
+            transition: transform 0.25s ease;
+            stroke: #94a3b8; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+            margin-left: 4px;
+        }
+        .nav-group.collapsed .nav-group-arrow { transform: rotate(-90deg); }
+        .nav-group-items {
+            overflow: hidden;
+            transition: max-height 0.22s ease;
+            max-height: 2000px;
+        }
+        .nav-group.collapsed .nav-group-items { max-height: 0; }
+        .sidebar.collapsed .nav-group-items { max-height: 2000px !important; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            height: 40px;
+            border-radius: 8px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .nav-item:hover { background: #f1f5f9; color: #334155; }
+        .nav-item.active {
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .nav-item.active .nav-icon { color: #6366f1; }
+        .nav-icon {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: #f1f5f9;
+            transition: all 0.15s;
+        }
+        .nav-icon svg {
+            width: 18px; height: 18px;
+            stroke: #94a3b8;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.15s;
+        }
+        .nav-item:hover .nav-icon { background: #e2e8f0; }
+        .nav-item:hover .nav-icon svg { stroke: #475569; }
+        .nav-item.active .nav-icon { background: #e0e7ff; }
+        .nav-item.active .nav-icon svg { stroke: #6366f1; }
+        .nav-text { white-space: nowrap; }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+        .sidebar-footer-text {
+            font-size: 11px;
+            color: #94a3b8;
+            text-align: center;
+            padding: 4px 0 0;
+        }
+        /* Sidebar collapse button */
+        .sb-collapse-btn {
+            width: 100%; padding: 8px 12px; background: #f8fafc; border: 1px solid #e8ecf1;
+            border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            color: #64748b; font-size: 12px; font-weight: 500; transition: all 0.2s;
+            margin-bottom: 8px; font-family: inherit;
+        }
+        .sb-collapse-btn:hover { background: #e2e8f0; color: #334155; }
+        .sb-arrow { width: 16px; height: 16px; flex-shrink: 0; transition: transform 0.3s ease; }
+        .sidebar.collapsed .sb-arrow { transform: rotate(180deg); }
+        .sidebar.collapsed .sb-collapse-btn { justify-content: center; padding: 8px; }
+        .sb-collapse-text { white-space: nowrap; }
+        .sidebar.collapsed .sb-collapse-text { display: none; }
+
+        /* ===== Main Area ===== */
+        .main-area {
+            flex: 1 1 0%;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            width: 0;
+        }
+
+        /* Top Header */
+        .top-header {
+            height: 60px;
+            background: #fff;
+            border-bottom: 1px solid #e8ecf1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .toggle-btn {
+            width: 36px; height: 36px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .toggle-btn:hover { background: #e2e8f0; color: #334155; }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-time {
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        /* ===== User Dropdown ===== */
+        .user-dropdown-wrap { position: relative; }
+        .user-trigger {
+            display: flex; align-items: center; gap: 8px;
+            padding: 4px 10px 4px 4px;
+            background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0;
+            cursor: pointer; transition: all 0.2s; user-select: none;
+        }
+        .user-trigger:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .user-trigger.open { border-color: #818cf8; box-shadow: 0 2px 8px rgba(99,102,241,0.12); }
+        .user-avatar {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #6366f1, #a78bfa);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; font-weight: 700; flex-shrink: 0; overflow: hidden;
+        }
+        .user-avatar img { width:100%; height:100%; object-fit:cover; }
+        .user-trigger-name {
+            font-size: 13px; font-weight: 500; color: #475569;
+            max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .user-trigger-arrow {
+            width: 16px; height: 16px; stroke: #94a3b8; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+        }
+        .user-trigger.open .user-trigger-arrow { transform: rotate(180deg); }
+
+        /* Dropdown panel */
+        .user-dropdown {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            width: 240px; background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+            padding: 0; opacity: 0; visibility: hidden;
+            transform: translateY(-8px);
+            transition: opacity 0.22s ease, visibility 0.22s ease, transform 0.22s cubic-bezier(.4,0,.2,1);
+            z-index: 9999;
+        }
+        .user-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        /* Profile header */
+        .dd-profile {
+            padding: 16px; display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid #f1f5f9; background: #fff;
+        }
+        .dd-profile-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a78bfa);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 17px; font-weight: 700; flex-shrink: 0; overflow: hidden;
+        }
+        .dd-profile-avatar img { width:100%; height:100%; object-fit:cover; }
+        .dd-profile-info { min-width: 0; }
+        .dd-profile-name {
+            font-size: 14px; font-weight: 600; color: #1e293b;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .dd-profile-role {
+            font-size: 11px; color: #94a3b8; margin-top: 2px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .dd-profile-role::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%; background: #34d399;
+        }
+
+        /* Menu items */
+        .dd-menu { padding: 6px; background: #fff; }
+        .dd-menu-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px; border-radius: 10px;
+            font-size: 13px; font-weight: 500; color: #475569;
+            text-decoration: none; cursor: pointer;
+            transition: all 0.15s ease; background: #fff;
+        }
+        .dd-menu-item:hover { background: #f1f5f9; color: #1e293b; }
+        .dd-menu-item svg {
+            width: 18px; height: 18px; stroke: #94a3b8; fill: none;
+            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+            flex-shrink: 0; transition: stroke 0.15s;
+        }
+        .dd-menu-item:hover svg { stroke: #6366f1; }
+        .dd-sep { height: 1px; background: #f1f5f9; margin: 2px 14px; }
+
+        /* Logout */
+        .dd-menu-item.dd-logout { color: #ef4444; }
+        .dd-menu-item.dd-logout:hover { background: #fef2f2; color: #dc2626; }
+        .dd-menu-item.dd-logout svg { stroke: #f87171; }
+        .dd-menu-item.dd-logout:hover svg { stroke: #dc2626; }
+
+        /* Logout confirm dialog */
+        .ls-logout-modal {
+            position: fixed !important;
+            top: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: rgba(15, 23, 42, 0.46) !important;
+            display: none !important;
+            z-index: 10050 !important;
+        }
+        .ls-logout-modal.show {
+            display: block !important;
+        }
+        .ls-logout-dialog,
+        .ls-logout-dialog * {
+            writing-mode: horizontal-tb !important;
+            text-orientation: mixed !important;
+            word-break: normal !important;
+            white-space: normal !important;
+            letter-spacing: normal !important;
+            text-align: left !important;
+        }
+        .ls-logout-dialog {
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            width: 420px !important;
+            max-width: calc(100% - 32px) !important;
+            min-width: 320px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 1px solid rgba(226, 232, 240, 0.96) !important;
+            border-radius: 24px !important;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28), 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+            overflow: hidden !important;
+            transform: translate(-50%, -50%) scale(0.96) !important;
+            transition: transform 0.22s cubic-bezier(.4,0,.2,1) !important;
+            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif !important;
+            color: #0f172a !important;
+        }
+        .ls-logout-modal.show .ls-logout-dialog {
+            transform: translate(-50%, -50%) scale(1) !important;
+        }
+        .ls-logout-head {
+            display: flex !important;
+            align-items: center !important;
+            gap: 14px !important;
+            padding: 22px 24px 18px !important;
+            background: linear-gradient(135deg, rgba(239, 246, 255, 0.98), rgba(255, 255, 255, 1)) !important;
+            border-bottom: 1px solid #eef2f7 !important;
+        }
+        .ls-logout-icon {
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 16px !important;
+            background: linear-gradient(135deg, #ef4444, #f97316) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+            box-shadow: 0 14px 28px rgba(239, 68, 68, 0.22) !important;
+        }
+        .ls-logout-icon svg {
+            width: 22px !important;
+            height: 22px !important;
+            stroke: #ffffff !important;
+            fill: none !important;
+            stroke-width: 2 !important;
+            stroke-linecap: round !important;
+            stroke-linejoin: round !important;
+        }
+        .ls-logout-headtext {
+            display: block !important;
+            min-width: 0 !important;
+        }
+        .ls-logout-title {
+            font-size: 18px !important;
+            line-height: 1.35 !important;
+            font-weight: 700 !important;
+            color: #0f172a !important;
+        }
+        .ls-logout-subtitle {
+            margin-top: 4px !important;
+            font-size: 12px !important;
+            line-height: 1.6 !important;
+            color: #64748b !important;
+        }
+        .ls-logout-body {
+            padding: 20px 24px 24px !important;
+        }
+        .ls-logout-text {
+            font-size: 14px !important;
+            line-height: 1.85 !important;
+            color: #334155 !important;
+        }
+        .ls-logout-actions {
+            margin-top: 22px !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+        .ls-logout-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 100px !important;
+            height: 42px !important;
+            padding: 0 18px !important;
+            margin: 0 !important;
+            border: 1px solid #dbe2ea !important;
+            border-radius: 999px !important;
+            background: #ffffff !important;
+            color: #475569 !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            line-height: 1 !important;
+            text-decoration: none !important;
+            cursor: pointer !important;
+            outline: none !important;
+            box-shadow: none !important;
+            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif !important;
+            vertical-align: middle !important;
+        }
+        .ls-logout-btn:hover {
+            border-color: #cbd5e1 !important;
+            background: #f8fafc !important;
+            color: #334155 !important;
+        }
+        .ls-logout-btn-primary {
+            border-color: transparent !important;
+            background: linear-gradient(135deg, #ef4444, #f97316) !important;
+            color: #ffffff !important;
+            box-shadow: 0 12px 24px rgba(239, 68, 68, 0.18) !important;
+        }
+        .ls-logout-btn-primary:hover {
+            background: linear-gradient(135deg, #dc2626, #ea580c) !important;
+            color: #ffffff !important;
+            box-shadow: 0 16px 28px rgba(239, 68, 68, 0.22) !important;
+        }
+        @media (max-width: 520px) {
+            .ls-logout-dialog {
+                min-width: 0 !important;
+                max-width: calc(100% - 24px) !important;
+            }
+            .ls-logout-head,
+            .ls-logout-body {
+                padding-left: 18px !important;
+                padding-right: 18px !important;
+            }
+            .ls-logout-actions {
+                justify-content: stretch !important;
+            }
+            .ls-logout-btn {
+                flex: 1 1 0 !important;
+                min-width: 0 !important;
+            }
+        }
+
+        /* ===== Content Area ===== */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 20px 24px;
+        }
+        .content-area::-webkit-scrollbar { width: 6px; }
+        .content-area::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+        /* Override old layout classes for content compatibility */
+        .content-area .placehold { text-align: center; font-size: 12pt; width: 100%; }
+        .content-area .startdiv { min-width: 0; width: 100%; }
+        .content-area .centerdiv { width: 100%; }
+
+        /* Hide old layout elements from theme CSS */
+        .layout-wrapper .mainhead,
+        .layout-wrapper .mainleft,
+        .layout-wrapper .mainrighttop { display: none !important; }
+        .layout-wrapper .mainarea { width: 100%; font-size: inherit; }
+        .layout-wrapper .mainright { position: static; width: 100%; text-align: center; }
+        .layout-wrapper .mainrightcontent { margin-left: 0; text-align: center; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 900px) {
+            .sidebar { width: 64px; min-width: 64px; max-width: 64px; }
+            .sidebar .sidebar-brand-text,
+            .sidebar .nav-text,
+            .sidebar .nav-group-label,
+            .sidebar .sidebar-footer-text { display: none; }
+            .sidebar .nav-item { justify-content: center; padding: 0; }
+            .sidebar .nav-icon { margin-right: 0; }
+            .sidebar .sidebar-brand { justify-content: center; }
+            .user-trigger-name { display: none; }
+        }
+    </style>
+</head>
+<body onload="prettyPrint();">
+    <form id="form1" runat="server">
+    <!-- Hidden legacy controls for code-behind compatibility -->
+    <asp:Image ID="Imagelogo" runat="server" ImageUrl="~/images/learnsite.gif" style="display:none" />
+    <asp:Label ID="LabelVer" runat="server" Font-Size="8pt" style="display:none"></asp:Label>
+
+    <div class="layout-wrapper">
+
+    <!-- ========== Sidebar ========== -->
+    <div class="sidebar" id="sidebarEl">
+        <div class="sidebar-brand" onclick="toggleSidebar()">
+            <div class="sidebar-brand-logo">
+                <% string tLogoUrl = GetSiteLogoUrl(); %>
+                <% if (!string.IsNullOrEmpty(tLogoUrl)) { %>
+                    <img src="<%= tLogoUrl %>" alt="Logo" />
+                <% } else { %>
+                    <svg viewBox="0 0 32 32" width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#6366f1"/><text x="16" y="22" text-anchor="middle" fill="#fff" font-size="16" font-weight="bold">T</text></svg>
+                <% } %>
+            </div>
+            <span class="sidebar-brand-text"><%= GetSiteTitle() %></span>
+        </div>
+
+        <div class="sidebar-nav">
+            <a href="../teacher/infomation.aspx" class="nav-item <%= GetCurrentPageName()=="infomation"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+                <span class="nav-text">仪表盘</span>
+            </a>
+
+            <div class="nav-group-label">课堂教学</div>
+            <a href="../teacher/start.aspx" class="nav-item <%= GetCurrentPageName()=="start"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+                <span class="nav-text">上课</span>
+            </a>
+            <a href="../teacher/schedule.aspx" class="nav-item <%= GetCurrentPageName()=="schedule"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                <span class="nav-text">课程表</span>
+            </a>
+            <a href="../teacher/coursetemplate.aspx" class="nav-item <%= GetCurrentPageName()=="coursetemplate"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></span>
+                <span class="nav-text">学案模板</span>
+            </a>
+            <a href="../teacher/course.aspx" class="nav-item <%= GetCurrentPageName()=="course"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                <span class="nav-text">备课</span>
+            </a>
+            <a href="../teacher/gauge.aspx" class="nav-item <%= GetCurrentPageName()=="gauge"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+                <span class="nav-text">量规</span>
+            </a>
+            <a href="../teacher/attitudetype.aspx" class="nav-item <%= GetCurrentPageName()=="attitudetype"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+                <span class="nav-text">评分管理</span>
+            </a>
+
+            <div class="nav-group-label">学生管理</div>
+            <a href="../teacher/student.aspx" class="nav-item <%= GetCurrentPageName()=="student"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                <span class="nav-text">学生</span>
+            </a>
+            <a href="../teacher/creditscore.aspx" class="nav-item <%= GetCurrentPageName()=="creditscore"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>
+                <span class="nav-text">学分管理</span>
+            </a>
+            <a href="../teacher/works.aspx" class="nav-item <%= GetCurrentPageName()=="works"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+                <span class="nav-text">作品</span>
+            </a>
+            <a href="../teacher/signin.aspx" class="nav-item <%= GetCurrentPageName()=="signin"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+                <span class="nav-text">签到</span>
+            </a>
+
+            <div class="nav-group-label">班级互动</div>
+            <a href="../teacher/petmanage.aspx" class="nav-item <%= GetCurrentPageName()=="petmanage"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+                <span class="nav-text">宠物管理</span>
+            </a>
+            <a href="../teacher/petcostume.aspx" class="nav-item <%= GetCurrentPageName()=="petcostume"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+                <span class="nav-text">换装设置</span>
+            </a>
+            <a href="../teacher/petsetting.aspx" class="nav-item <%= GetCurrentPageName()=="petsetting"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                <span class="nav-text">宠物设置</span>
+            </a>
+
+            <div class="nav-group-label">测评练习</div>
+            <a href="../quiz/quiz.aspx" class="nav-item <%= GetCurrentPageName()=="quiz"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <span class="nav-text">常识</span>
+            </a>
+            <a href="../teacher/typer.aspx" class="nav-item <%= GetCurrentPageName()=="typer"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span>
+                <span class="nav-text">中文打字</span>
+            </a>
+            <a href="../teacher/typechinese.aspx" class="nav-item <%= GetCurrentPageName()=="typechinese"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/></svg></span>
+                <span class="nav-text">拼音打字</span>
+            </a>
+
+            <div class="nav-group-label">资源工具</div>
+            <a href="../teacher/resourcemanage.aspx" class="nav-item <%= GetCurrentPageName()=="resourcemanage"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+                <span class="nav-text">资源管理</span>
+            </a>
+            <a href="../teacher/resourcecategory.aspx" class="nav-item <%= GetCurrentPageName()=="resourcecategory"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+                <span class="nav-text">资源分类</span>
+            </a>
+            <a href="../teacher/resourcecreate.aspx" class="nav-item <%= GetCurrentPageName()=="resourcecreate"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></span>
+                <span class="nav-text">创建资源</span>
+            </a>
+            <a href="../teacher/softwaredownload.aspx" class="nav-item <%= GetCurrentPageName()=="softwaredownload"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                <span class="nav-text">软件下载</span>
+            </a>
+
+            <div class="nav-group-label">学生荣誉</div>
+            <a href="../teacher/badgesetting.aspx" class="nav-item <%= GetCurrentPageName()=="badgesetting"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+                <span class="nav-text">徽章设置</span>
+            </a>
+            <a href="../teacher/badgeaward.aspx" class="nav-item <%= GetCurrentPageName()=="badgeaward"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 15l-3.5 2 .67-3.89L6 10.11l3.94-.57L12 6l2.06 3.54 3.94.57-3.17 3L16.5 17z"/><path d="M5 21h14"/></svg></span>
+                <span class="nav-text">徽章颁发</span>
+            </a>
+            <a href="../teacher/badgemanage.aspx" class="nav-item <%= GetCurrentPageName()=="badgemanage"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></span>
+                <span class="nav-text">徽章管理</span>
+            </a>
+            <a href="../teacher/badgeshop.aspx" class="nav-item <%= GetCurrentPageName()=="badgeshop"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></span>
+                <span class="nav-text">徽章商城</span>
+            </a>
+            <a href="../teacher/badgeexchange.aspx" class="nav-item <%= GetCurrentPageName()=="badgeexchange"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></span>
+                <span class="nav-text">徽章兑换</span>
+            </a>
+
+            <div class="nav-group-label">考试管理</div>
+            <a href="../teacher/knowledge.aspx" class="nav-item <%= GetCurrentPageName()=="knowledge"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+                <span class="nav-text">知识库</span>
+            </a>
+            <a href="../teacher/questionbank.aspx" class="nav-item <%= GetCurrentPageName()=="questionbank"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
+                <span class="nav-text">题库管理</span>
+            </a>
+            <a href="../teacher/paper.aspx" class="nav-item <%= GetCurrentPageName()=="paper"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg></span>
+                <span class="nav-text">试卷管理</span>
+            </a>
+            <a href="../teacher/exampublish.aspx" class="nav-item <%= GetCurrentPageName()=="exampublish"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></span>
+                <span class="nav-text">考试发布</span>
+            </a>
+            <a href="../teacher/exammonitor.aspx" class="nav-item <%= GetCurrentPageName()=="exammonitor"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></span>
+                <span class="nav-text">考试监考</span>
+            </a>
+            <a href="../teacher/marking.aspx" class="nav-item <%= GetCurrentPageName()=="marking"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
+                <span class="nav-text">阅卷管理</span>
+            </a>
+            <a href="../teacher/scores.aspx" class="nav-item <%= GetCurrentPageName()=="scores"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
+                <span class="nav-text">成绩管理</span>
+            </a>
+            <a href="../teacher/examanalysis.aspx" class="nav-item <%= GetCurrentPageName()=="examanalysis"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+                <span class="nav-text">成绩分析</span>
+            </a>
+
+            <div class="nav-group-label">通知管理</div>
+            <a href="../teacher/notice.aspx" class="nav-item <%= GetCurrentPageName()=="notice"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></span>
+                <span class="nav-text">通知发布</span>
+            </a>
+
+            <div class="nav-group-label">游戏管理</div>
+            <a href="../teacher/gamemanage.aspx" class="nav-item <%= GetCurrentPageName()=="gamemanage"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg></span>
+                <span class="nav-text">游戏管理</span>
+            </a>
+            <a href="../teacher/gameupdate.aspx" class="nav-item <%= GetCurrentPageName()=="gameupdate"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></span>
+                <span class="nav-text">更新游戏</span>
+            </a>
+
+            <div class="nav-group-label">系统</div>
+            <a href="<%= GetProfileUrl() %>" class="nav-item <%= GetCurrentPageName()=="profile"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                <span class="nav-text">个人中心</span>
+            </a>
+            <a href="../teacher/systeminfo.aspx" class="nav-item <%= GetCurrentPageName()=="systeminfo"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+                <span class="nav-text">系统状态</span>
+            </a>
+            <a href="../teacher/helper.aspx" class="nav-item <%= GetCurrentPageName()=="helper"?"active":"" %>">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <span class="nav-text">帮助</span>
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <button type="button" class="sb-collapse-btn" onclick="toggleSidebar()" title="折叠/展开菜单">
+                <svg class="sb-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                <span class="sb-collapse-text">折叠菜单</span>
+            </button>
+            <div class="sidebar-footer-text">
+                版本<%= GetAppVersion() %>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Main ========== -->
+    <div class="main-area">
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="header-left">
+                <button type="button" class="toggle-btn" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+            </div>
+            <div class="header-right">
+                <div class="header-time" id="headerTime">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="clockSpan"></span>
+                </div>
+                <div class="user-dropdown-wrap" id="userDropdownWrap">
+                    <div class="user-trigger" id="userTrigger" onclick="toggleUserDropdown(event)">
+                        <% if (!string.IsNullOrEmpty(tUserAvatarUrl)) { %>
+                        <div class="user-avatar"><img src="<%= tUserAvatarUrl %>" /></div>
+                        <% } else { %>
+                        <div class="user-avatar"><%= Server.HtmlEncode(tUserInitial) %></div>
+                        <% } %>
+                        <span class="user-trigger-name"><%= !string.IsNullOrEmpty(tUserName) ? Server.HtmlEncode(tUserName) : "\u6559\u5E08" %></span>
+                        <svg class="user-trigger-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dd-profile">
+                            <% if (!string.IsNullOrEmpty(tUserAvatarUrl)) { %>
+                            <div class="dd-profile-avatar"><img src="<%= tUserAvatarUrl %>" /></div>
+                            <% } else { %>
+                            <div class="dd-profile-avatar"><%= Server.HtmlEncode(tUserInitial) %></div>
+                            <% } %>
+                            <div class="dd-profile-info">
+                                <div class="dd-profile-name"><%= !string.IsNullOrEmpty(tUserName) ? Server.HtmlEncode(tUserName) : "\u6559\u5E08" %></div>
+                                <div class="dd-profile-role">教师</div>
+                            </div>
+                        </div>
+                        <div class="dd-menu">
+                            <a href="<%= GetProfileUrl() %>" class="dd-menu-item">
+                                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                个人中心
+                            </a>
+                            <a href="<%= ResolveUrl("~/teacher/helper.aspx") %>" class="dd-menu-item">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                帮助
+                            </a>
+                            <div class="dd-sep"></div>
+                            <a href="javascript:void(0)" class="dd-menu-item dd-logout" onclick="doLogout(); return false;">
+                                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                退出系统
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-area">
+            <asp:ContentPlaceHolder id="Content" runat="server">
+            </asp:ContentPlaceHolder>
+        </div>
+    </div>
+    </div><!-- /layout-wrapper -->
+
+    <div class="ls-logout-modal" id="logoutModal" onclick="handleLogoutModalBackdrop(event)">
+        <div class="ls-logout-dialog" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+            <div class="ls-logout-head">
+                <div class="ls-logout-icon">
+                    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </div>
+                <div class="ls-logout-headtext">
+                    <div class="ls-logout-title" id="logoutModalTitle">确认退出登录</div>
+                    <div class="ls-logout-subtitle">退出后需要重新输入账号密码</div>
+                </div>
+            </div>
+            <div class="ls-logout-body">
+                <div class="ls-logout-text">确定要退出当前账号吗？退出后将离开教师工作台，重新登录后才能继续使用当前功能。</div>
+                <div class="ls-logout-actions">
+                    <button type="button" class="ls-logout-btn" id="logoutCancelBtn" onclick="closeLogoutConfirm()">取消</button>
+                    <button type="button" class="ls-logout-btn ls-logout-btn-primary" id="logoutConfirmBtn" onclick="executeLogout()">确认退出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Sidebar toggle
+        function toggleSidebar() {
+            var sb = document.getElementById('sidebarEl');
+            sb.classList.toggle('collapsed');
+            try { localStorage.setItem('teachSidebarCollapsed', sb.classList.contains('collapsed') ? '1' : '0'); } catch(e){}
+        }
+        (function(){
+            try {
+                if (localStorage.getItem('teachSidebarCollapsed') === '1') {
+                    document.getElementById('sidebarEl').classList.add('collapsed');
+                }
+            } catch(e){}
+        })();
+
+        // Legacy compat
+        function ShowMenu() {
+            var sb = document.getElementById('sidebarEl');
+            if (sb) sb.classList.remove('collapsed');
+        }
+        function HideMenu() {
+            var sb = document.getElementById('sidebarEl');
+            if (sb) sb.classList.add('collapsed');
+        }
+
+        // Clock
+        function updateClock() {
+            var now = new Date();
+            var h = now.getHours().toString().padStart(2,'0');
+            var m = now.getMinutes().toString().padStart(2,'0');
+            var d = (now.getMonth()+1) + '月' + now.getDate() + '日';
+            var el = document.getElementById('clockSpan');
+            if (el) el.textContent = d + ' ' + h + ':' + m;
+        }
+        updateClock();
+        setInterval(updateClock, 30000);
+
+        // User dropdown
+        function toggleUserDropdown(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            var trigger = document.getElementById('userTrigger');
+            var dropdown = document.getElementById('userDropdown');
+            if (trigger && dropdown) {
+                trigger.classList.toggle('open');
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        function closeUserDropdown() {
+            var trigger = document.getElementById('userTrigger');
+            var dropdown = document.getElementById('userDropdown');
+            if (trigger) trigger.classList.remove('open');
+            if (dropdown) dropdown.classList.remove('show');
+        }
+
+        function openLogoutConfirm() {
+            var modal = document.getElementById('logoutModal');
+            closeUserDropdown();
+            if (modal) {
+                modal.classList.add('show');
+            }
+            setTimeout(function () {
+                var btn = document.getElementById('logoutConfirmBtn');
+                if (btn) {
+                    try { btn.focus(); } catch (e) { }
+                }
+            }, 40);
+            return false;
+        }
+
+        function closeLogoutConfirm() {
+            var modal = document.getElementById('logoutModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            return false;
+        }
+
+        function handleLogoutModalBackdrop(event) {
+            if (event && event.target && event.target.id === 'logoutModal') {
+                closeLogoutConfirm();
+            }
+        }
+
+        // Logout: try clicking the hidden server button on infomation page, otherwise navigate
+        function executeLogout() {
+            closeLogoutConfirm();
+            var btn = document.getElementById('<%= "Content_Btnlogout" %>');
+            if (!btn) {
+                // Try alternate ID patterns generated by ASP.NET
+                var all = document.querySelectorAll('input[type="submit"][id*="Btnlogout"]');
+                if (all.length > 0) btn = all[0];
+            }
+            if (btn) {
+                btn.click();
+            } else {
+                // Not on infomation page, navigate there with auto-logout param
+                window.location.href = '<%= ResolveUrl("~/teacher/infomation.aspx") %>?logout=1';
+            }
+            return false;
+        }
+
+        function doLogout() {
+            return openLogoutConfirm();
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('userDropdownWrap');
+            if (wrap && !wrap.contains(e.target)) {
+                closeUserDropdown();
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            var modal = document.getElementById('logoutModal');
+            if (!modal || modal.className.indexOf('show') < 0) {
+                return;
+            }
+            if (e.keyCode === 27) {
+                closeLogoutConfirm();
+            }
+        });
+        // Nav group collapsible
+        (function() {
+            var NG_KEY = 'teachNavGroupsCollapsed';
+            function ngGet() { try { return JSON.parse(localStorage.getItem(NG_KEY)) || {}; } catch(e) { return {}; } }
+            function ngSet(s) { try { localStorage.setItem(NG_KEY, JSON.stringify(s)); } catch(e) {} }
+            function initNavGroups() {
+                var sidebar = document.getElementById('sidebarEl');
+                if (!sidebar) return;
+                var navDiv = sidebar.querySelector('.sidebar-nav');
+                if (!navDiv) return;
+                var children = [];
+                for (var k = 0; k < navDiv.children.length; k++) children.push(navDiv.children[k]);
+                var groups = [], cur = null, items = [];
+                for (var i = 0; i < children.length; i++) {
+                    var c = children[i];
+                    if (c.classList && c.classList.contains('nav-group-label')) {
+                        if (cur) groups.push({lbl: cur, items: items.slice()});
+                        cur = c; items = [];
+                    } else if (c.classList && c.classList.contains('nav-item') && cur) {
+                        items.push(c);
+                    }
+                }
+                if (cur) groups.push({lbl: cur, items: items.slice()});
+                var state = ngGet();
+                groups.forEach(function(g, idx) {
+                    var gid = 'ng' + idx;
+                    // Build group wrapper
+                    var wrap = document.createElement('div');
+                    wrap.className = 'nav-group';
+                    wrap.setAttribute('data-gid', gid);
+                    // Add chevron arrow to label
+                    var arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    arrow.setAttribute('class', 'nav-group-arrow');
+                    arrow.setAttribute('viewBox', '0 0 24 24');
+                    arrow.setAttribute('fill', 'none');
+                    arrow.setAttribute('stroke', 'currentColor');
+                    arrow.setAttribute('stroke-width', '2');
+                    arrow.setAttribute('stroke-linecap', 'round');
+                    arrow.setAttribute('stroke-linejoin', 'round');
+                    var pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                    pl.setAttribute('points', '6 9 12 15 18 9');
+                    arrow.appendChild(pl);
+                    g.lbl.appendChild(arrow);
+                    g.lbl.setAttribute('data-gid', gid);
+                    g.lbl.onclick = function() { window.toggleNavGroup(this.getAttribute('data-gid')); };
+                    // Build items container
+                    var itemsDiv = document.createElement('div');
+                    itemsDiv.className = 'nav-group-items';
+                    g.items.forEach(function(it) { itemsDiv.appendChild(it); });
+                    // Re-insert wrapped structure
+                    navDiv.insertBefore(wrap, g.lbl);
+                    wrap.appendChild(g.lbl);
+                    wrap.appendChild(itemsDiv);
+                    // Restore saved state
+                    if (state[gid]) wrap.classList.add('collapsed');
+                });
+                // Auto-expand the group that contains the active nav item
+                var active = navDiv.querySelector('.nav-item.active');
+                if (active) {
+                    var pg = active.parentElement;
+                    if (pg && pg.classList.contains('nav-group-items')) {
+                        var gw = pg.parentElement;
+                        if (gw && gw.classList.contains('collapsed')) {
+                            gw.classList.remove('collapsed');
+                            var s = ngGet(); delete s[gw.getAttribute('data-gid')]; ngSet(s);
+                        }
+                    }
+                }
+            }
+            window.toggleNavGroup = function(gid) {
+                var sb = document.getElementById('sidebarEl');
+                if (sb && sb.classList.contains('collapsed')) return; // icon mode: no toggling
+                var wrap = document.querySelector('.nav-group[data-gid="' + gid + '"]');
+                if (!wrap) return;
+                var now = wrap.classList.toggle('collapsed');
+                var s = ngGet();
+                if (now) s[gid] = 1; else delete s[gid];
+                ngSet(s);
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initNavGroups);
+            } else {
+                initNavGroups();
+            }
+        })();
+    </script>
+
+    </form>
+</body>
+</html>

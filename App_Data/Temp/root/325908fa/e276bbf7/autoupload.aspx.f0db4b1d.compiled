@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/autoupload.aspx" hash="fffffff94ae4f160" filehash="37e6426827b2" flags="110000" assembly="App_Web_v0nriqn2" type="ASP.student_autoupload_aspx">
+    <filedeps>
+        <filedep name="/student/autoupload.aspx" />
+    </filedeps>
+</preserve>

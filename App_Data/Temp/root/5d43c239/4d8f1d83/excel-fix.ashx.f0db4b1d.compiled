@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/excel-fix.ashx" hash="33c60594" filehash="ffffe9446887ae3d" flags="110000" assembly="App_Web_excel-fix.ashx.f0db4b1d.yawltwzu" type="ExcelFixHandler">
+    <filedeps>
+        <filedep name="/student/excel-fix.ashx" />
+    </filedeps>
+</preserve>

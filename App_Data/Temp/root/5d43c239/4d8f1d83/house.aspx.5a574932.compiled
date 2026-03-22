@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/seat/house.aspx" hash="fffffff94ae4f160" filehash="9c8a814737345eac" flags="110000" assembly="App_Web_xhjsysff" type="ASP.seat_house_aspx">
+    <filedeps>
+        <filedep name="/manager/Manage.master" />
+        <filedep name="/seat/house.aspx" />
+    </filedeps>
+</preserve>

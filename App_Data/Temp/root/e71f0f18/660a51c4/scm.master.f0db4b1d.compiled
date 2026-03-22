@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/Scm.master" hash="fffffff94ae4f160" filehash="ffffc1a5c71e4689" flags="110000" assembly="App_Web_4tvqywjb" type="ASP.student_scm_master">
+    <filedeps>
+        <filedep name="/student/Scm.master" />
+    </filedeps>
+</preserve>

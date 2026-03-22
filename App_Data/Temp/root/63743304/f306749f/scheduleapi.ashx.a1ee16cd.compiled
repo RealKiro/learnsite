@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/scheduleapi.ashx" hash="33c60594" filehash="15d33df3aae4" flags="110000" assembly="App_Web_5qa_rpu0" type="ScheduleAPI">
+    <filedeps>
+        <filedep name="/teacher/scheduleapi.ashx" />
+    </filedeps>
+</preserve>

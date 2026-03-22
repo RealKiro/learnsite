@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/SendEmailCode.ashx" hash="33c60594" filehash="ffffcb98e78999e2" flags="110000" assembly="App_Web_5qa_rpu0" type="TeacherSendEmailCode">
+    <filedeps>
+        <filedep name="/teacher/SendEmailCode.ashx" />
+    </filedeps>
+</preserve>

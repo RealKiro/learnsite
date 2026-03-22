@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/judgeedit.aspx" hash="fffffff94ae4f160" filehash="bd3245e91dead23d" flags="110000" assembly="App_Web_akkvzxy3" type="ASP.teacher_judgeedit_aspx">
+    <filedeps>
+        <filedep name="/teacher/judgeedit.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LearnSite 安装向导 · 信息学习平台</title>
+<style>
+:root {
+  --primary:#4f6ef7; --primary-dark:#3a56d4; --success:#22c55e;
+  --warning:#f59e0b; --danger:#ef4444; --text:#1e293b; --muted:#64748b;
+  --border:#e2e8f0; --bg:#f8fafc; --card:#fff;
+  --done:#22c55e; --active:#4f6ef7; --idle:#cbd5e1;
+  --r:18px; --sh:0 22px 60px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Microsoft YaHei","PingFang SC",-apple-system,sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(79,110,247,.10), transparent 24%),
+    radial-gradient(circle at top right, rgba(59,130,246,.10), transparent 20%),
+    linear-gradient(180deg,#f4f8ff 0%,#f8fafc 22%,#f8fafc 100%);
+  color:var(--text);
+  min-height:100vh
+}
+
+/* Header */
+.header{
+  position:relative;overflow:hidden;text-align:center;color:#fff;padding:52px 24px 42px;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255,255,255,.16), transparent 18%),
+    radial-gradient(circle at 88% 14%, rgba(255,255,255,.14), transparent 20%),
+    linear-gradient(135deg,#2563eb 0%,#3b82f6 42%,#0ea5e9 100%)
+}
+.header::before,
+.header::after{
+  content:"";position:absolute;border-radius:999px;pointer-events:none
+}
+.header::before{
+  width:420px;height:420px;left:-160px;top:-250px;
+  background:radial-gradient(circle, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 68%)
+}
+.header::after{
+  width:320px;height:320px;right:-90px;bottom:-180px;
+  background:radial-gradient(circle, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 72%)
+}
+.header>*{position:relative;z-index:1}
+.logo{display:inline-flex;align-items:center;gap:14px;margin-bottom:16px}
+.logo-icon{width:56px;height:56px;background:rgba(255,255,255,.18);border-radius:18px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.logo-icon svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.header h1{font-size:31px;font-weight:800;letter-spacing:.3px}
+.header p{margin-top:8px;font-size:14px;opacity:.9}
+.badge{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:5px 16px;font-size:12px;margin-top:12px;backdrop-filter:blur(10px)}
+
+/* Container */
+.container{max-width:1240px;margin:0 auto;padding:44px 28px 72px}
+
+/* ── AUTO DEPLOY PANEL ── */
+.auto-panel{display:none;animation:fadeIn .3s ease}
+.auto-panel.visible{display:block}
+
+.auto-card{background:var(--card);border-radius:28px;box-shadow:0 28px 72px rgba(15,23,42,.09);overflow:hidden;border:1px solid rgba(148,163,184,.14)}
+.auto-head{
+  background:
+    radial-gradient(circle at top right, rgba(125,211,252,.18), transparent 34%),
+    linear-gradient(135deg,#143a70 0%,#1d4f91 52%,#0f7cc4 100%);
+  padding:34px 34px 30px;color:#fff;position:relative;overflow:hidden
+}
+.auto-head::after{
+  content:'';position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 72%);
+}
+.auto-head-main{display:flex;align-items:flex-start;gap:16px;position:relative;z-index:1}
+.auto-head-icon{
+  width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)
+}
+.auto-head-icon svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.auto-head-copy{flex:1}
+.auto-head-copy h2{font-size:24px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.auto-head-copy p{font-size:14px;opacity:.84;line-height:1.8;max-width:880px}
+
+.auto-progress{
+  padding:22px 30px 26px;
+  background:linear-gradient(180deg,#f7fbff 0%,#eef6ff 100%);
+  border-bottom:1px solid rgba(219,234,254,.9)
+}
+.auto-progress-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.auto-progress-head strong{font-size:14px;color:#16356b}
+.auto-progress-head span{font-size:12px;color:#4b6387}
+.auto-progress-bar{
+  width:100%;height:12px;border-radius:999px;overflow:hidden;background:linear-gradient(90deg,#dbeafe 0%,#e0f2fe 100%);
+  box-shadow:inset 0 1px 2px rgba(15,23,42,.08)
+}
+.auto-progress-fill{
+  width:16.666%;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#2563eb 0%,#3b82f6 55%,#0ea5e9 100%);
+  box-shadow:0 10px 18px rgba(37,99,235,.24);transition:width .28s ease
+}
+.auto-progress-steps{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:16px
+}
+.auto-progress-step{
+  border:1px solid rgba(191,219,254,.95);border-radius:16px;padding:14px 12px;background:rgba(255,255,255,.78);
+  display:flex;gap:10px;align-items:flex-start;min-height:84px;transition:border-color .2s,box-shadow .2s,transform .2s
+}
+.auto-progress-step:hover{transform:translateY(-1px);box-shadow:0 14px 24px rgba(59,130,246,.08)}
+.auto-progress-step-index{
+  width:28px;height:28px;flex:0 0 28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  background:#dbeafe;color:#2563eb;font-size:12px;font-weight:800
+}
+.auto-progress-step-copy strong{display:block;font-size:12.5px;color:#16356b;margin-bottom:3px}
+.auto-progress-step-copy span{display:block;font-size:11.5px;line-height:1.55;color:#64748b}
+.auto-progress-step.active{border-color:#60a5fa;background:linear-gradient(180deg,#ffffff 0%,#eff6ff 100%);box-shadow:0 16px 28px rgba(59,130,246,.12)}
+.auto-progress-step.active .auto-progress-step-index{background:linear-gradient(135deg,#2563eb 0%,#0ea5e9 100%);color:#fff}
+.auto-progress-step.done{border-color:#93c5fd;background:linear-gradient(180deg,#f8fbff 0%,#eef6ff 100%)}
+.auto-progress-step.done .auto-progress-step-index{background:#2563eb;color:#fff}
+
+.svg-icon{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+.svg-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+.form-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;padding:30px;
+  background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%)
+}
+.form-group{
+  display:flex;flex-direction:column;gap:8px;padding:16px;border:1px solid rgba(226,232,240,.95);
+  border-radius:18px;background:rgba(255,255,255,.94);box-shadow:0 14px 28px rgba(15,23,42,.04)
+}
+.form-group label{
+  font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.55px
+}
+.form-group .label-row{display:inline-flex;align-items:center;gap:8px}
+.form-group .label-row .svg-icon{
+  width:28px;height:28px;border-radius:10px;background:#eef4ff;color:#3158d3;flex:0 0 28px
+}
+.form-group .label-row .svg-icon svg{width:15px;height:15px}
+.form-group input{
+  width:100%;padding:12px 14px;border:1.5px solid #dbe4f0;border-radius:14px;font-size:14px;font-family:inherit;
+  color:var(--text);transition:border .2s,box-shadow .2s,background .2s;background:#fff
+}
+.form-group input:focus{outline:none;border-color:#4f6ef7;box-shadow:0 0 0 4px rgba(79,110,247,.12);background:#fcfdff}
+.form-group .hint{font-size:11.5px;color:var(--muted);line-height:1.65}
+.hint.strong{color:#475569}
+.path-picker{display:flex;align-items:center;gap:10px}
+.picker-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 16px;border:none;
+  border-radius:14px;background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);color:#1d4ed8;font-size:13px;
+  font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s;white-space:nowrap;
+  box-shadow:0 8px 18px rgba(59,130,246,.12)
+}
+.picker-btn:hover{transform:translateY(-1px);background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);box-shadow:0 12px 20px rgba(59,130,246,.16)}
+.picker-btn .svg-icon{color:inherit}
+.picker-meta{
+  display:flex;align-items:center;gap:8px;margin-top:2px;padding:10px 12px;border-radius:12px;
+  background:#f8fafc;border:1px dashed #dbe4f0;font-size:11.5px;color:#64748b
+}
+.picker-meta .svg-icon{color:#0f766e}
+.picker-meta.success{background:#ecfdf5;border-color:#86efac;color:#166534}
+.picker-meta.warn{background:#fff7ed;border-color:#fdba74;color:#c2410c}
+.picker-meta.error{background:#fef2f2;border-color:#fca5a5;color:#b91c1c}
+.form-span2{grid-column:1/3}
+
+.generate-row{padding:0 30px 28px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:14px;font-size:13px;font-weight:700;
+  cursor:pointer;border:none;transition:all .2s;white-space:nowrap
+}
+.btn .svg-icon{color:inherit}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 12px rgba(79,110,247,.35)}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-success{background:var(--success);color:#fff;box-shadow:0 2px 12px rgba(34,197,94,.35)}
+.btn-success:hover{background:#16a34a}
+.btn-ghost{background:#fff;color:#475569;border:1.5px solid var(--border);box-shadow:0 8px 20px rgba(15,23,42,.04)}
+.btn-ghost:hover{background:var(--bg);color:var(--text)}
+.btn-sm{padding:7px 16px;font-size:12px}
+.copy-toast{font-size:12px;color:var(--success);display:none;align-items:center;gap:6px}
+.copy-popup{
+  position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-12px);
+  display:flex;align-items:center;gap:10px;min-width:240px;max-width:calc(100vw - 32px);
+  padding:14px 18px;border-radius:14px;background:rgba(15,23,42,.94);color:#fff;
+  box-shadow:0 18px 48px rgba(15,23,42,.28);border:1px solid rgba(255,255,255,.12);
+  opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;z-index:9999;
+  font-size:13px;font-weight:600
+}
+.copy-popup.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.copy-popup.success{background:linear-gradient(135deg,#065f46 0%,#059669 100%)}
+.copy-popup.warn{background:linear-gradient(135deg,#9a3412 0%,#f59e0b 100%)}
+.copy-popup.error{background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%)}
+.copy-popup-icon{
+  width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.18);flex:0 0 26px
+}
+.copy-popup-icon svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Generated Command Box */
+.cmd-wrap{background:#1e293b;border-radius:18px;margin:0 30px 28px;overflow:hidden;box-shadow:0 20px 36px rgba(15,23,42,.18)}
+.cmd-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:rgba(255,255,255,.06)}
+.cmd-bar span{font-size:12px;color:#94a3b8;font-family:monospace}
+.cmd-text{padding:16px;font-family:"Consolas","Source Code Pro",monospace;font-size:12.5px;color:#e2e8f0;line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.cmd-note{padding:0 30px 28px}
+.cmd-note p{font-size:12.5px;color:var(--muted);line-height:1.7}
+.inline-note-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:text-bottom;margin-right:6px;color:#3158d3}
+.inline-note-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* Steps preview in auto mode */
+.auto-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:0 30px 32px}
+.auto-step-card{border:1px solid var(--border);border-radius:18px;padding:18px;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%)}
+.auto-step-card .icon{margin-bottom:10px;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:14px;background:#eef4ff;color:#3158d3}
+.auto-step-card .icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.auto-step-card .title{font-size:13px;font-weight:700;margin-bottom:4px}
+.auto-step-card .desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.al{border-radius:8px;padding:11px 14px;font-size:12.5px;margin-top:12px;display:flex;gap:9px;align-items:flex-start;line-height:1.6}
+.al-w{background:#fffbeb;border-left:3px solid var(--warning);color:#92400e}
+.al-i{background:#eff6ff;border-left:3px solid var(--primary);color:#1e40af}
+.al-s{background:#f0fdf4;border-left:3px solid var(--success);color:#14532d}
+.al-ico{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.al-ico svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chklist{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.chklist li{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.6}
+.chk{width:20px;height:20px;border-radius:50%;background:var(--success);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+@media(max-width:980px){
+  .container{max-width:100%;padding:32px 18px 56px}
+  .auto-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .auto-progress-steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media(max-width:600px){
+  .header{padding:40px 18px 32px}
+  .header h1{font-size:24px}
+  .header p{font-size:13px}
+  .container{padding:24px 14px 44px}
+  .form-grid{grid-template-columns:1fr}
+  .form-span2{grid-column:1}
+  .auto-head{padding:24px 20px}
+  .auto-head-copy h2{font-size:20px}
+  .auto-head-copy p{font-size:13px}
+  .auto-progress{padding:18px 20px 22px}
+  .auto-progress-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .auto-progress-step{min-height:76px;padding:12px 10px}
+  .generate-row{padding:0 20px 22px}
+  .cmd-wrap{margin:0 20px 20px}
+  .cmd-note{padding:0 20px 22px}
+  .auto-steps{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ Header ══ -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M20 19.5H6.5A2.5 2.5 0 0 0 4 22"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
+    </div>
+    <div style="text-align:left">
+      <div style="font-size:11px;opacity:.7;letter-spacing:1px">INSTALLATION WIZARD</div>
+      <h1>LearnSite 信息学习平台</h1>
+    </div>
+  </div>
+  <p>专注一键自动部署，统一使用蓝色安装界面，预计用时 <strong>5 ~ 15 分钟</strong></p>
+  <div class="badge"><span class="svg-icon" style="margin-right:6px"><svg viewBox="0 0 24 24"><path d="M5 19c2.5-5.5 7.3-10.3 12.8-12.8"/><path d="M15 4h5v5"/><path d="M9 13l2 2"/><path d="M5 15l4 4"/></svg></span>当前版本：<span id="versionBadgeText">v3.1.7</span> &nbsp;·&nbsp; ASP.NET + SQL Server + IIS</div>
+</div>
+
+<!-- ══ Main ══ -->
+<div class="container">
+
+<!-- ════════════════════════════════════════════════
+     AUTO DEPLOY PANEL
+════════════════════════════════════════════════ -->
+<div class="auto-panel visible" id="panelAuto">
+
+  <div class="auto-card">
+    <div class="auto-head">
+      <div class="auto-head-main">
+        <div class="auto-head-icon">
+          <svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+        </div>
+        <div class="auto-head-copy">
+          <h2><span>一键自动部署配置生成器</span></h2>
+          <p>填写以下信息，直接生成专属 PowerShell 部署命令。支持目录选择、路径自检和自动部署路径保护，减少手动输入错误。进入 IIS 服务器下方新建网站，配置好端口，配置好应用池即可访问。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="auto-progress">
+      <div class="auto-progress-head">
+        <strong id="autoProgressTitle">安装流程进度 · 第 1 步 / 共 6 步</strong>
+        <span id="autoProgressDesc">当前阶段：填写部署参数，确认 SQL Server 和站点信息。</span>
+      </div>
+      <div class="auto-progress-bar">
+        <div class="auto-progress-fill" id="autoProgressFill"></div>
+      </div>
+      <div class="auto-progress-steps">
+        <div class="auto-progress-step active" data-auto-step="1">
+          <span class="auto-progress-step-index">1</span>
+          <span class="auto-progress-step-copy"><strong>填写参数</strong><span>输入数据库、管理员和部署目录。</span></span>
+        </div>
+        <div class="auto-progress-step" data-auto-step="2">
+          <span class="auto-progress-step-index">2</span>
+          <span class="auto-progress-step-copy"><strong>生成命令</strong><span>自动拼好专属 PowerShell 安装命令。</span></span>
+        </div>
+        <div class="auto-progress-step" data-auto-step="3">
+          <span class="auto-progress-step-index">3</span>
+          <span class="auto-progress-step-copy"><strong>管理员执行</strong><span>复制命令后在管理员 PowerShell 中运行。</span></span>
+        </div>
+        <div class="auto-progress-step" data-auto-step="4">
+          <span class="auto-progress-step-index">4</span>
+          <span class="auto-progress-step-copy"><strong>自动部署 IIS</strong><span>脚本会配置 IIS、目录权限和站点。</span></span>
+        </div>
+        <div class="auto-progress-step" data-auto-step="5">
+          <span class="auto-progress-step-index">5</span>
+          <span class="auto-progress-step-copy"><strong>初始化数据库</strong><span>执行基础库和升级脚本，写入管理员账号。</span></span>
+        </div>
+        <div class="auto-progress-step" data-auto-step="6">
+          <span class="auto-progress-step-index">6</span>
+          <span class="auto-progress-step-copy"><strong>完成访问</strong><span>输出管理员、教师端和学生端访问地址。</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 表单 -->
+    <div class="form-grid">
+      <!-- 数据库 -->
+      <div class="form-group">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span><span>SQL Server 地址</span></span></label>
+        <input type="text" id="fDbServer" value="localhost" placeholder="localhost 或 IP">
+        <span class="hint">本机部署填 localhost，跨机器填内网 IP</span>
+      </div>
+      <div class="form-group">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg></span><span>数据库名称</span></span></label>
+        <input type="text" id="fDbName" value="learnsite" placeholder="learnsite">
+      </div>
+      <div class="form-group">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>数据库账号</span></span></label>
+        <input type="text" id="fDbUser" value="sa" placeholder="sa">
+        <span class="hint">需开启 SQL Server 混合验证</span>
+      </div>
+      <div class="form-group">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V8a5 5 0 0 1 10 0v3"/><circle cx="12" cy="16" r="1"/></svg></span><span>数据库密码 <span style="color:var(--danger)">*</span></span></span></label>
+        <input type="password" id="fDbPwd" placeholder="SQL Server SA 密码" autocomplete="new-password">
+      </div>
+      <!-- 管理员 -->
+      <div class="form-group">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z"/><path d="M9.5 12.5l1.8 1.8 3.2-3.6"/></svg></span><span>平台管理员账号</span></span></label>
+        <input type="text" id="fAdminUser" value="admin" placeholder="admin">
+      </div>
+      <div class="form-group">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-4z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></span><span>平台管理员密码 <span style="color:var(--danger)">*</span></span></span></label>
+        <input type="password" id="fAdminPwd" placeholder="建议8位以上" autocomplete="new-password">
+        <span class="hint">留空则使用默认密码 12345</span>
+      </div>
+      <!-- 网站 -->
+      <div class="form-group form-span2">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M3 7h5l2 2h11v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7V5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2"/></svg></span><span>网站部署目录</span></span></label>
+        <div class="path-picker">
+          <input type="text" id="fSitePath" value="C:\inetpub\wwwroot\LearnSite" placeholder="C:\inetpub\wwwroot\LearnSite">
+          <button type="button" class="picker-btn" onclick="pickFolder()">
+            <span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M3 7h5l2 2h11v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg></span>
+            选择文件夹
+          </button>
+        </div>
+        <div class="picker-meta" id="sitePathMeta">
+          <span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M12 8v4"/><path d="M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></span>
+          <span id="sitePathMetaText">仅用于选择部署路径，不会上传文件；不要含中文或空格</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 20V8"/><path d="M12 20V4"/><path d="M17 20v-6"/></svg></span><span>IIS 站点名称</span></span></label>
+        <input type="text" id="fSiteName" value="LearnSite">
+      </div>
+      <div class="form-group">
+        <label><span class="label-row"><span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 14 0"/><path d="M8.5 12a3.5 3.5 0 0 1 7 0"/><path d="M12 12h.01"/><path d="M4 18h16"/></svg></span><span>HTTP 端口</span></span></label>
+        <input type="number" id="fPort" value="80" min="1" max="65535">
+        <span class="hint strong">80 端口可直接通过 IP 访问，其他端口需显式带端口号</span>
+      </div>
+    </div>
+
+    <!-- 生成按钮 -->
+    <div class="generate-row">
+      <button class="btn btn-primary" onclick="generateCmd()">
+        <span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>
+        生成部署命令
+      </button>
+      <button class="btn btn-ghost" onclick="togglePwdVis()">
+        <span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span>
+        显示/隐藏密码
+      </button>
+      <span class="copy-toast" id="copyToast"><span class="svg-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>已复制到剪贴板</span>
+    </div>
+
+    <!-- 生成的命令 -->
+    <div class="cmd-wrap" id="cmdWrap" style="display:none">
+      <div class="cmd-bar">
+        <span>PowerShell (管理员) — 将以下命令粘贴并回车执行</span>
+        <button class="btn btn-ghost btn-sm" onclick="copyCmd()"><span class="svg-icon"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><rect x="4" y="4" width="11" height="11" rx="2"/></svg></span>复制命令</button>
+      </div>
+      <div class="cmd-text" id="cmdText"></div>
+    </div>
+
+    <div class="cmd-note" id="cmdNote" style="display:none">
+      <p>
+        <span class="inline-note-icon"><svg viewBox="0 0 24 24"><path d="M3 7h5l2 2h11v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7V5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2"/></svg></span><strong>前提：</strong>生成的命令会直接调用平台根目录中的 <code style="background:#f1f5f9;padding:1px 6px;border-radius:4px">deploy.ps1</code>；如果你不是从本地打开本页，请确认脚本目录与部署目录一致或手动改成脚本实际所在目录。<br><br>
+        <span class="inline-note-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V8a5 5 0 0 1 10 0v3"/><circle cx="12" cy="16" r="1"/></svg></span><strong>密码安全：</strong>命令中密码以参数方式传递，不会写入日志文件。<br><br>
+        <span class="inline-note-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M12 2v2"/><path d="M5 4.5L6.5 6"/></svg></span><strong>预计用时：</strong>5 ~ 15 分钟（取决于 IIS/SQL Server 是否已安装）。
+      </p>
+    </div>
+
+    <div class="copy-popup" id="copyPopup" role="status" aria-live="polite">
+      <span class="copy-popup-icon" id="copyPopupIcon"></span>
+      <span id="copyPopupText">已复制到剪贴板</span>
+    </div>
+
+    <!-- 脚本自动完成的6步 -->
+    <div style="padding:0 28px 12px">
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px">deploy.ps1 将自动完成以下操作：</div>
+    </div>
+    <div class="auto-steps">
+      <div class="auto-step-card">
+        <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg></div>
+        <div class="title">步骤 1 · 安装 IIS</div>
+        <div class="desc">自动启用 IIS、ASP.NET（.NET 3.5/CLR v2.0）、ISAPI 等必需 Windows 功能</div>
+      </div>
+      <div class="auto-step-card">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M3 7h5l2 2h11v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7V5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2"/></svg></div>
+        <div class="title">步骤 2 · 部署文件</div>
+        <div class="desc">复制所有网站文件到目标目录，自动设置 Everyone 修改权限</div>
+      </div>
+      <div class="auto-step-card">
+        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V21a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.7-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H3a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.7 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V3a2 2 0 1 1 4 0v.2a1 1 0 0 0 .7.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H21a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.7"/></svg></div>
+        <div class="title">步骤 3 · 配置 IIS</div>
+        <div class="desc">创建 .NET CLR v2.0 经典模式应用程序池、网站及 11 种 MIME 类型</div>
+      </div>
+      <div class="auto-step-card">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2.8-2.8a5 5 0 0 0-7.1-7.1L11 5"/><path d="M14 11a5 5 0 0 0-7.1 0L4.1 13.8a5 5 0 0 0 7.1 7.1L13 19"/></svg></div>
+        <div class="title">步骤 4 · 连接字符串</div>
+        <div class="desc">自动将 web.config 中的数据库地址、名称、密码替换为填写的值</div>
+      </div>
+      <div class="auto-step-card">
+        <div class="icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></div>
+        <div class="title">步骤 5 · 初始化数据库</div>
+        <div class="desc">创建数据库、执行全部 SQL 初始化和升级脚本，设置管理员密码</div>
+      </div>
+      <div class="auto-step-card">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M6 3v6"/><path d="M18 3v6"/><path d="M12 2v8"/><path d="M4 10l2.5 8a2 2 0 0 0 1.9 1.4h7.2a2 2 0 0 0 1.9-1.4L20 10"/><path d="M3 10h18"/></svg></div>
+        <div class="title">步骤 6 · 部署完成</div>
+        <div class="desc">输出学生端、教师端、管理后台的访问地址，立即可用</div>
+      </div>
+    </div>
+
+    <!-- 前置条件提示 -->
+    <div style="padding:0 28px 28px">
+      <div class="al al-w">
+        <span class="al-ico"><svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>
+        <span>
+          <strong>前置条件（脚本会自动补装可选模块）：</strong><br>
+          1. SQL Server Express 已安装并开启混合验证（SA 登录已启用）<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;安装包路径：<code style="background:rgba(0,0,0,.08);padding:1px 6px;border-radius:3px">说明必读\数据库脚本\SQL2022-SSEI-Expr.exe</code><br>
+          2. IIS URL Rewrite 模块如未安装，脚本会优先查找本地 <code style="background:rgba(0,0,0,.08);padding:1px 6px;border-radius:3px">rewrite_*.msi</code>，找不到时再自动从官方页下载安装（无扩展名 URL 必需）<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;离线环境手动下载：<a href="https://www.iis.net/downloads/microsoft/url-rewrite" target="_blank" style="color:#1e40af">https://www.iis.net/downloads/microsoft/url-rewrite</a>
+        </span>
+      </div>
+    </div>
+
+  </div><!-- auto-card -->
+</div><!-- auto-panel -->
+
+
+</div><!-- container -->
+
+<script>
+// ── 自动部署 ──
+let _pwdVisible = false;
+const DEFAULT_VERSION = 'v3.1.7';
+
+function setAutoProgress(step) {
+  const total = 6;
+  const title = document.getElementById('autoProgressTitle');
+  const desc = document.getElementById('autoProgressDesc');
+  const fill = document.getElementById('autoProgressFill');
+  const steps = document.querySelectorAll('.auto-progress-step');
+  const copy = {
+    1: '当前阶段：填写部署参数，确认 SQL Server 和站点信息。',
+    2: '当前阶段：部署命令已生成，可检查路径和账号参数。',
+    3: '当前阶段：请复制命令并在管理员 PowerShell 中执行。',
+    4: '执行脚本后将自动安装 IIS、创建网站并配置权限。',
+    5: '随后会自动初始化数据库并写入管理员账号。',
+    6: '安装完成后即可访问管理员、教师端和学生端。'
+  };
+  const safeStep = Math.max(1, Math.min(total, step || 1));
+  if (title) title.textContent = '安装流程进度 · 第 ' + safeStep + ' 步 / 共 6 步';
+  if (desc) desc.textContent = copy[safeStep] || copy[1];
+  if (fill) fill.style.width = ((safeStep / total) * 100) + '%';
+  steps.forEach(function (item) {
+    const index = parseInt(item.getAttribute('data-auto-step'), 10) || 1;
+    item.classList.toggle('active', index === safeStep);
+    item.classList.toggle('done', index < safeStep);
+  });
+}
+
+function applyVersionText(version) {
+  const safeVersion = (version || '').trim() || DEFAULT_VERSION;
+  const badge = document.getElementById('versionBadgeText');
+  if (badge) badge.textContent = safeVersion;
+  document.title = 'LearnSite 安装向导 · 信息学习平台 ' + safeVersion;
+}
+
+async function syncVersionFromMeta() {
+  try {
+    const response = await fetch('version.json?_=' + Date.now(), { cache: 'no-store' });
+    if (!response.ok) throw new Error('version.json not ok');
+    const data = await response.json();
+    if (data && typeof data.version === 'string' && data.version.trim()) {
+      applyVersionText(data.version.trim());
+      return;
+    }
+  } catch (e) {}
+
+  try {
+    const response = await fetch('changelog.xml?_=' + Date.now(), { cache: 'no-store' });
+    if (!response.ok) throw new Error('changelog.xml not ok');
+    const xmlText = await response.text();
+    const match = xmlText.match(/ver="(v[^"]+)"/i);
+    if (match && match[1]) {
+      applyVersionText(match[1]);
+      return;
+    }
+  } catch (e) {}
+
+  applyVersionText(DEFAULT_VERSION);
+}
+
+function togglePwdVis() {
+  _pwdVisible = !_pwdVisible;
+  ['fDbPwd','fAdminPwd'].forEach(id => {
+    document.getElementById(id).type = _pwdVisible ? 'text' : 'password';
+  });
+}
+
+function esc(s) { return s.replace(/"/g, '`"'); }  // PowerShell 字符串内双引号转义
+
+function normalizeWinPath(p) {
+  return (p || '').replace(/\//g, '\\').replace(/[\\\/]+$/, '').toLowerCase();
+}
+
+function cleanWinPath(p) {
+  return (p || '').replace(/\//g, '\\').replace(/[\\\/]+$/, '');
+}
+
+function detectInstallDir() {
+  try {
+    if (!window.location || window.location.protocol !== 'file:') return '';
+    let p = decodeURIComponent(window.location.pathname || '');
+    p = p.replace(/\//g, '\\');
+    if (/^\\[A-Za-z]:\\/.test(p)) p = p.substring(1);
+    p = p.replace(/\\install\.html?$/i, '');
+    return p;
+  } catch (e) {
+    return '';
+  }
+}
+
+function updateSitePathMeta(message, tone) {
+  const meta = document.getElementById('sitePathMeta');
+  const text = document.getElementById('sitePathMetaText');
+  if (!meta || !text) return;
+  text.textContent = message;
+  meta.classList.remove('success', 'warn', 'error');
+  if (tone) meta.classList.add(tone);
+}
+
+function replaceLeafFolder(path, folderName) {
+  const cleaned = cleanWinPath(path);
+  if (!cleaned) return folderName || '';
+  const idx = cleaned.lastIndexOf('\\');
+  return idx >= 0 ? cleaned.slice(0, idx + 1) + folderName : folderName;
+}
+
+function validateSitePath(path, fromPicker) {
+  if (!path) {
+    updateSitePathMeta('请输入网站部署目录。', 'warn');
+    return;
+  }
+  if (/[\u4e00-\u9fa5]/.test(path) || /\s/.test(path)) {
+    updateSitePathMeta('当前路径包含中文或空格，建议改为纯英文目录，否则 IIS 和脚本可能失败。', 'error');
+    return;
+  }
+  updateSitePathMeta(fromPicker ? '目录已选择，可直接生成部署命令。' : '路径格式看起来正常，可直接用于部署。', 'success');
+}
+
+function setSitePathValue(path, message, tone, fromPicker) {
+  const input = document.getElementById('fSitePath');
+  if (!input || !path) return;
+  input.value = cleanWinPath(path);
+  if (message) {
+    updateSitePathMeta(message, tone);
+  } else {
+    validateSitePath(input.value, fromPicker);
+  }
+  if (document.getElementById('cmdWrap').style.display !== 'none') generateCmd();
+}
+
+function tryBrowseFolderViaActiveX() {
+  try {
+    const shell = new ActiveXObject('Shell.Application');
+    const folder = shell.BrowseForFolder(0, '选择 LearnSite 网站部署目录', 0, 0);
+    if (!folder || !folder.Self || !folder.Self.Path) return '';
+    return cleanWinPath(folder.Self.Path);
+  } catch (e) {
+    return '';
+  }
+}
+
+function promptForSitePath(defaultPath, message, tone) {
+  const manualPath = window.prompt(message, defaultPath || '');
+  if (!manualPath) {
+    showCopyPopup('已取消目录选择。', 'warn');
+    return false;
+  }
+  setSitePathValue(manualPath, null, tone || 'success', true);
+  showCopyPopup('部署目录已更新。', tone || 'success');
+  return true;
+}
+
+async function pickFolder() {
+  const activeXPath = tryBrowseFolderViaActiveX();
+  if (activeXPath) {
+    setSitePathValue(activeXPath, '已通过系统目录选择器设置部署目录。', 'success', true);
+    showCopyPopup('部署目录已更新。', 'success');
+    return;
+  }
+
+  const currentPath = document.getElementById('fSitePath').value.trim();
+  if (window.showDirectoryPicker) {
+    try {
+      const handle = await window.showDirectoryPicker({ mode: 'read' });
+      const selectedName = handle && handle.name ? handle.name : '';
+      const guessedPath = selectedName ? replaceLeafFolder(currentPath || 'C:\\inetpub\\wwwroot\\LearnSite', selectedName) : currentPath;
+      promptForSitePath(
+        guessedPath,
+        '当前浏览器只能读取所选文件夹名称，不能直接返回 Windows 绝对路径。\n请确认并补全完整部署路径：',
+        'warn'
+      );
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') {
+        showCopyPopup('已取消目录选择。', 'warn');
+        return;
+      }
+    }
+  }
+
+  if (promptForSitePath(
+    currentPath || 'C:\\inetpub\\wwwroot\\LearnSite',
+    '当前浏览器不支持直接读取 Windows 目录绝对路径。\n请选择目标文件夹后，把完整部署路径粘贴到这里：',
+    'warn'
+  )) {
+    return;
+  }
+  showCopyPopup('当前浏览器无法直接选择目录，请手动填写部署路径。', 'warn');
+}
+
+function generateCmd() {
+  const dbServer   = document.getElementById('fDbServer').value.trim()  || 'localhost';
+  const dbName     = document.getElementById('fDbName').value.trim()    || 'learnsite';
+  const dbUser     = document.getElementById('fDbUser').value.trim()    || 'sa';
+  const dbPwd      = document.getElementById('fDbPwd').value;
+  const adminUser  = document.getElementById('fAdminUser').value.trim() || 'admin';
+  const adminPwdInput = document.getElementById('fAdminPwd').value;
+  const adminPwd   = adminPwdInput || '12345';
+  const sitePath   = document.getElementById('fSitePath').value.trim()  || 'C:\\inetpub\\wwwroot\\LearnSite';
+  const siteName   = document.getElementById('fSiteName').value.trim()  || 'LearnSite';
+  const port       = document.getElementById('fPort').value.trim()      || '80';
+
+  if (!dbPwd) {
+    alert('请填写数据库密码！');
+    document.getElementById('fDbPwd').focus();
+    return;
+  }
+
+  const installDir = detectInstallDir();
+  const scriptDir = cleanWinPath(installDir || sitePath);
+  const deployScript = scriptDir ? scriptDir + '\\deploy.ps1' : 'deploy.ps1';
+  const sameDirDeploy = scriptDir && normalizeWinPath(scriptDir) === normalizeWinPath(sitePath);
+
+  // 生成 PowerShell 命令
+  let cmd = '';
+  cmd += `$DeployScript = "${esc(deployScript)}"\n`;
+  cmd += `if (-not (Test-Path $DeployScript)) {\n`;
+  cmd += `  Write-Host "未找到部署脚本: $DeployScript" -ForegroundColor Yellow\n`;
+  cmd += `  Write-Host "请确认这里指向 LearnSite 平台根目录中的 deploy.ps1，然后重新执行。" -ForegroundColor Yellow\n`;
+  cmd += `  return\n`;
+  cmd += `}\n`;
+  cmd += `Set-ExecutionPolicy RemoteSigned -Scope Process -Force\n`;
+  cmd += `& $DeployScript`;
+  cmd += ` -DbServer "${esc(dbServer)}"`;
+  cmd += ` -DbName "${esc(dbName)}"`;
+  cmd += ` -DbUser "${esc(dbUser)}"`;
+  cmd += ` -DbPassword "${esc(dbPwd)}"`;
+  cmd += ` -AdminUser "${esc(adminUser)}"`;
+  cmd += ` -AdminPwd "${esc(adminPwd)}"`;
+  cmd += ` -SitePath "${esc(sitePath)}"`;
+  if (siteName !== 'LearnSite') cmd += ` -SiteName "${esc(siteName)}"`;
+  if (port !== '80')            cmd += ` -Port ${port}`;
+  cmd += ` -NoConfirm`;
+  if (sameDirDeploy) {
+    cmd += `\n# 当前部署目录与平台目录相同，脚本会自动跳过自复制并直接配置 IIS/数据库`;
+  } else if (!installDir) {
+    cmd += `\n# 如上方 $DeployScript 不正确，请改成 LearnSite 平台根目录中的 deploy.ps1 再执行`;
+  }
+
+  document.getElementById('cmdText').textContent = cmd;
+  document.getElementById('cmdWrap').style.display = 'block';
+  document.getElementById('cmdNote').style.display = 'block';
+  setAutoProgress(2);
+  document.getElementById('cmdWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyCmd() {
+  const cmdNode = document.getElementById('cmdText');
+  const txt = ((cmdNode && (cmdNode.innerText || cmdNode.textContent)) || '').trim();
+  if (!txt) {
+    showCopyPopup('请先生成部署命令，再执行复制。', false);
+    return;
+  }
+
+  const onSuccess = function () {
+    const t = document.getElementById('copyToast');
+    if (t) {
+      t.style.display = 'inline-flex';
+      setTimeout(function () { t.style.display = 'none'; }, 2200);
+    }
+    setAutoProgress(3);
+    showCopyPopup('部署命令已复制到剪贴板。', true);
+  };
+
+  const onFail = function () {
+    highlightCmdText();
+    showCopyPopup('自动复制失败，已选中命令，请手动 Ctrl+C。', false);
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(txt).then(onSuccess).catch(function () {
+      legacyCopyCmd(txt) ? onSuccess() : onFail();
+    });
+    return;
+  }
+
+  legacyCopyCmd(txt) ? onSuccess() : onFail();
+}
+
+function legacyCopyCmd(txt) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.setAttribute('readonly', 'readonly');
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    ta.style.left = '-1000px';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return !!ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+function highlightCmdText() {
+  const cmdNode = document.getElementById('cmdText');
+  if (!cmdNode) return;
+  try {
+    const range = document.createRange();
+    range.selectNodeContents(cmdNode);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch (e) {}
+}
+
+let copyPopupTimer = null;
+function popupTone(tone) {
+  if (tone === true) return 'success';
+  if (tone === false) return 'error';
+  return tone || 'success';
+}
+
+function popupIconSvg(tone) {
+  if (tone === 'error') {
+    return '<svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>';
+  }
+  if (tone === 'warn') {
+    return '<svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+  }
+  return '<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
+}
+
+function showCopyPopup(message, tone) {
+  const popup = document.getElementById('copyPopup');
+  const text = document.getElementById('copyPopupText');
+  const icon = document.getElementById('copyPopupIcon');
+  if (!popup || !text || !icon) return;
+  const popupClass = popupTone(tone);
+  text.textContent = message;
+  icon.innerHTML = popupIconSvg(popupClass);
+  popup.className = 'copy-popup ' + popupClass + ' show';
+  if (copyPopupTimer) clearTimeout(copyPopupTimer);
+  copyPopupTimer = setTimeout(function () {
+    popup.className = 'copy-popup ' + popupClass;
+  }, 2200);
+}
+
+// 实时更新命令（输入框监听）
+['fDbServer','fDbName','fDbUser','fDbPwd','fAdminUser','fAdminPwd','fSitePath','fSiteName','fPort'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    setAutoProgress(1);
+    if (document.getElementById('cmdWrap').style.display !== 'none') generateCmd();
+  });
+});
+
+document.getElementById('fSitePath').addEventListener('input', function () {
+  validateSitePath(this.value.trim(), false);
+});
+validateSitePath(document.getElementById('fSitePath').value.trim(), false);
+setAutoProgress(1);
+syncVersionFromMeta();
+</script>
+</body>
+</html>

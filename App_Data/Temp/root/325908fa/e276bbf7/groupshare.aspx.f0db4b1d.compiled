@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/groupshare.aspx" hash="fffffff94ae4f160" filehash="ffffc016192adf7b" flags="110000" assembly="App_Web_v0nriqn2" type="ASP.student_groupshare_aspx">
+    <filedeps>
+        <filedep name="/student/groupshare.aspx" />
+    </filedeps>
+</preserve>

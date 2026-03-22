@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/mxgraph-fix.ashx" hash="33c60594" filehash="7f1462c30e7" flags="110000" assembly="App_Web_mxgraph-fix.ashx.f0db4b1d.pn5swqnu" type="MxgraphFix">
+    <filedeps>
+        <filedep name="/student/mxgraph-fix.ashx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,1294 @@
+<%@ master language="C#" autoeventwireup="true" inherits="Manage, LearnSite" %>
+
+<script runat="server">
+    protected string GetSiteTitle()
+    {
+        try
+        {
+            string xmlPath = Server.MapPath("~/website.xml");
+            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            doc.Load(xmlPath);
+            System.Xml.XmlNode node = doc.SelectSingleNode("//add[@key='SiteTitle']");
+            if (node != null && node.Attributes["value"] != null)
+                return node.Attributes["value"].Value;
+        }
+        catch { }
+        return "LearnSite";
+    }
+
+    protected string GetSiteLogoUrl()
+    {
+        string[] exts = { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
+        foreach (string ext in exts)
+        {
+            string path = Server.MapPath("~/images/site-logo" + ext);
+            if (System.IO.File.Exists(path))
+                return ResolveUrl("~/images/site-logo" + ext) + "?v=" + System.IO.File.GetLastWriteTime(path).Ticks;
+        }
+        return "";
+    }
+
+    protected string GetCurrentPageName()
+    {
+        string path = Request.Url.AbsolutePath.ToLower();
+        if (path.Contains("dashboard")) return "dashboard";
+        if (path.Contains("footersetting")) return "footersetting";
+        if (path.Contains("emailsetting")) return "emailsetting";
+        if (path.Contains("systemupdate")) return "systemupdate";
+        if (path.Contains("schoolsetting")) return "schoolsetting";
+        if (path.Contains("usermanagement")) return "usermanagement";
+        if (path.Contains("setting")) return "setting";
+        if (path.Contains("classlist")) return "classlist";
+        if (path.Contains("createroom")) return "createroom";
+        if (path.Contains("teacheradd")) return "teacher";
+        if (path.Contains("teacheredit")) return "teacher";
+        if (path.Contains("teacher")) return "teacher";
+        if (path.Contains("unassigned")) return "unassigned";
+        if (path.Contains("studentlist")) return "studentlist";
+        if (path.Contains("studentimport")) return "studentimport";
+        if (path.Contains("dbupgrade")) return "dbupgrade";
+        if (path.Contains("upgrade")) return "upgrade";
+        if (path.Contains("divide")) return "divide";
+        if (path.Contains("backup")) return "backup";
+        if (path.Contains("clearold")) return "clearold";
+        if (path.Contains("computer")) return "computer";
+        if (path.Contains("getip")) return "house";
+        if (path.Contains("/ip")) return "house";
+        if (path.Contains("house")) return "house";
+        if (path.Contains("copygood")) return "copygood";
+        if (path.Contains("roomselect")) return "roomselect";
+        if (path.Contains("loginimage")) return "loginimage";
+        if (path.Contains("profile")) return "profile";
+        if (path.Contains("forgotpwd")) return "forgotpwd";
+        if (path.Contains("classroomrule")) return "classroomrule";
+        if (path.Contains("aisetting")) return "aisetting";
+        if (path.Contains("grouplevel")) return "grouplevel";
+        if (path.Contains("creditlevel")) return "creditlevel";
+        if (path.Contains("helpsetting")) return "helpsetting";
+        if (path.Contains("feedback")) return "feedback";
+        if (path.Contains("navsetting")) return "navsetting";
+        return "index";
+    }
+
+    protected string GetAppVersion()
+    {
+        // 优先从 changelog.xml 读取最新版本号
+        try
+        {
+            string xmlPath = Server.MapPath("~/changelog.xml");
+            if (System.IO.File.Exists(xmlPath))
+            {
+                System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+                doc.Load(xmlPath);
+                System.Xml.XmlNode node = doc.SelectSingleNode("//changelog/version[1]");
+                if (node != null && node.Attributes["ver"] != null)
+                    return node.Attributes["ver"].Value;
+            }
+        }
+        catch { }
+        // 回退：从 DLL 读取版本号
+        try
+        {
+            string dllPath = Server.MapPath("~/bin/LearnSite.dll");
+            if (System.IO.File.Exists(dllPath))
+            {
+                System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(dllPath);
+                return "v" + fvi.FileVersion;
+            }
+        }
+        catch { }
+        return "";
+    }
+
+    protected string GetFaviconLinkTag()
+    {
+        string icoPath = Server.MapPath("~/favicon.ico");
+        if (System.IO.File.Exists(icoPath))
+            return "<link rel=\"icon\" type=\"image/x-icon\" href=\"" + ResolveUrl("~/favicon.ico") + "?v=" + System.IO.File.GetLastWriteTime(icoPath).Ticks + "\" />";
+        string pngPath = Server.MapPath("~/favicon.png");
+        if (System.IO.File.Exists(pngPath))
+            return "<link rel=\"icon\" type=\"image/png\" href=\"" + ResolveUrl("~/favicon.png") + "?v=" + System.IO.File.GetLastWriteTime(pngPath).Ticks + "\" />";
+        return "";
+    }
+
+    private static System.Reflection.BindingFlags mFlags =
+        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic
+        | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static;
+
+    protected string mUserName = "";
+    protected string mUserInitial = "\u7BA1";
+    protected string mUserAvatarUrl = "";
+
+    private object MDecodeCookie(string typeName, string cookieValue)
+    {
+        Type cookType = typeof(LearnSite.Common.CookieHelp).Assembly.GetType(typeName);
+        if (cookType == null) return null;
+        object model = Activator.CreateInstance(cookType);
+        System.Reflection.MethodInfo toModel = cookType.GetMethod("ToModel", mFlags);
+        if (toModel != null) toModel.Invoke(model, new object[] { cookieValue });
+        return model;
+    }
+
+    private string MGetProp(object model, string propName)
+    {
+        if (model == null) return "";
+        System.Reflection.PropertyInfo prop = model.GetType().GetProperty(propName);
+        if (prop == null) return "";
+        object val = prop.GetValue(model, null);
+        return val != null ? val.ToString() : "";
+    }
+
+    private void LoadMasterUserInfo()
+    {
+        int hid = 0;
+        // Manager cookie
+        try
+        {
+            HttpCookie mc = Request.Cookies[LearnSite.Common.CookieHelp.mngCookieNname];
+            if (mc != null && !string.IsNullOrEmpty(mc.Value))
+            {
+                object m = MDecodeCookie("LearnSite.Model.MngCook", mc.Value);
+                string name = MGetProp(m, "Hname");
+                if (!string.IsNullOrEmpty(name))
+                {
+                    try { if (name.Contains("%")) name = Server.UrlDecode(name); } catch { }
+                    mUserName = name; mUserInitial = name.Substring(0, 1);
+                }
+                string sid = MGetProp(m, "Hid");
+                if (!string.IsNullOrEmpty(sid)) int.TryParse(sid, out hid);
+            }
+        }
+        catch { }
+        // Teacher cookie fallback
+        if (string.IsNullOrEmpty(mUserName))
+        {
+            try
+            {
+                HttpCookie tc = Request.Cookies[LearnSite.Common.CookieHelp.teaCookieNname];
+                if (tc != null && !string.IsNullOrEmpty(tc.Value))
+                {
+                    object t = MDecodeCookie("LearnSite.Model.TeaCook", tc.Value);
+                    string name = MGetProp(t, "Hname");
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        try { if (name.Contains("%")) name = Server.UrlDecode(name); } catch { }
+                        mUserName = name; mUserInitial = name.Substring(0, 1);
+                    }
+                    if (hid <= 0)
+                    {
+                        string sid = MGetProp(t, "Hid");
+                        if (!string.IsNullOrEmpty(sid)) int.TryParse(sid, out hid);
+                    }
+                }
+            }
+            catch { }
+        }
+        // Find avatar file on disk (no DB needed)
+        if (hid > 0)
+        {
+            string[] exts = { ".png", ".jpg", ".jpeg", ".gif", ".webp" };
+            foreach (string ext in exts)
+            {
+                string fp = Server.MapPath("~/images/avatars/" + hid + ext);
+                if (System.IO.File.Exists(fp))
+                {
+                    mUserAvatarUrl = ResolveUrl("~/images/avatars/" + hid + ext) + "?t=" + System.IO.File.GetLastWriteTime(fp).Ticks;
+                    break;
+                }
+            }
+        }
+    }
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        Page.Title = GetSiteTitle() + " - \u7BA1\u7406\u540E\u53F0";
+        LitFavicon.Text = GetFaviconLinkTag();
+        LoadMasterUserInfo();
+    }
+
+    protected void BtnMasterLogout_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            HttpCookie mngCookie = new HttpCookie(LearnSite.Common.CookieHelp.mngCookieNname);
+            mngCookie.Expires = DateTime.Now.AddDays(-1);
+            Response.Cookies.Add(mngCookie);
+        }
+        catch { }
+
+        try
+        {
+            HttpCookie teaCookie = new HttpCookie(LearnSite.Common.CookieHelp.teaCookieNname);
+            teaCookie.Expires = DateTime.Now.AddDays(-1);
+            Response.Cookies.Add(teaCookie);
+        }
+        catch { }
+
+        try { Session.Abandon(); }
+        catch { }
+
+        Response.Redirect("~/manager/login.aspx");
+    }
+</script>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>管理后台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <asp:Literal ID="LitFavicon" runat="server" />
+    <link rel="stylesheet" type="text/css" href="../App_Themes/Teacher/StyleSheet.css" />
+    <style>
+        /* ===== Reset ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; width: 100%; overflow: hidden; margin: 0; }
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', -apple-system, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1e293b;
+        }
+        /* form fills entire viewport */
+        #form1 {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        /* Dedicated layout wrapper: exactly 2 children (sidebar + main) */
+        /* This isolates flex from ASP.NET injected hidden fields */
+        .layout-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            width: 220px;
+            min-width: 220px;
+            max-width: 220px;
+            height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e8ecf1;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            flex-grow: 0;
+            transition: width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease;
+            z-index: 100;
+            position: relative;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+        }
+        .sidebar.collapsed { width: 64px; min-width: 64px; max-width: 64px; }
+        .sidebar.collapsed .sidebar-brand-text,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .nav-group-header,
+        .sidebar.collapsed .sidebar-footer-text { display: none; }
+        .sidebar.collapsed .nav-group-content { max-height: 800px !important; opacity: 1 !important; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 0 0; }
+        .sidebar.collapsed .nav-icon { margin-right: 0; }
+        .sidebar.collapsed .sidebar-brand { justify-content: center; padding: 0 8px; }
+
+        /* Brand */
+        .sidebar-brand {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #f1f5f9;
+            flex-shrink: 0;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .sidebar-brand-logo {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .sidebar-brand-logo img {
+            width: 32px; height: 32px;
+            object-fit: contain;
+        }
+        .sidebar-brand-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        /* Navigation */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 8px;
+        }
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+        .nav-group-header {
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 16px 12px 6px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.15s;
+        }
+        .nav-group-header:hover { color: #64748b; }
+        .nav-group-chevron {
+            width: 14px; height: 14px;
+            stroke: #cbd5e1; fill: none;
+            stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+            flex-shrink: 0;
+        }
+        .nav-group-header:hover .nav-group-chevron { stroke: #94a3b8; }
+        .nav-group.collapsed .nav-group-chevron { transform: rotate(-90deg); }
+        .nav-group-content {
+            overflow: hidden;
+            max-height: 800px;
+            transition: max-height 0.3s cubic-bezier(.4,0,.2,1), opacity 0.25s ease;
+            opacity: 1;
+        }
+        .nav-group.collapsed .nav-group-content { max-height: 0; opacity: 0; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            height: 40px;
+            border-radius: 8px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .nav-item.active .nav-icon { color: #6366f1; }
+        .nav-icon {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: #f1f5f9;
+            transition: all 0.15s;
+        }
+        .nav-icon svg {
+            width: 18px; height: 18px;
+            stroke: #94a3b8;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.15s;
+        }
+        .nav-item:hover .nav-icon { background: #e2e8f0; }
+        .nav-item:hover .nav-icon svg { stroke: #475569; }
+        .nav-item.active .nav-icon { background: #e0e7ff; }
+        .nav-item.active .nav-icon svg { stroke: #6366f1; }
+        .nav-text { white-space: nowrap; }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+        .sidebar-footer .nav-item { color: #ef4444; }
+        .sidebar-footer .nav-item:hover { background: #fef2f2; color: #dc2626; }
+        .sidebar-footer .nav-icon { background: #fef2f2; }
+        .sidebar-footer .nav-icon svg { stroke: #f87171; }
+        .sidebar-footer .nav-item:hover .nav-icon { background: #fee2e2; }
+        .sidebar-footer .nav-item:hover .nav-icon svg { stroke: #dc2626; }
+        .sidebar-footer-text {
+            font-size: 11px;
+            color: #94a3b8;
+            text-align: center;
+            padding: 4px 0 0;
+        }
+
+        /* ===== Main Area ===== */
+        .main-area {
+            flex: 1 1 0%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+            width: 0; /* force flex to calculate width */
+        }
+
+        /* Top Header */
+        .top-header {
+            height: 60px;
+            background: #fff;
+            border-bottom: 1px solid #e8ecf1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .toggle-btn {
+            width: 36px; height: 36px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .toggle-btn:hover { background: #e2e8f0; color: #334155; }
+        .header-page-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .header-breadcrumb {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-time {
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        /* ===== User Dropdown ===== */
+        .user-dropdown-wrap { position: relative; }
+        .user-trigger {
+            display: flex; align-items: center; gap: 8px;
+            padding: 4px 10px 4px 4px;
+            background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0;
+            cursor: pointer; transition: all 0.2s; user-select: none;
+        }
+        .user-trigger:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .user-trigger.open { border-color: #818cf8; box-shadow: 0 2px 8px rgba(99,102,241,0.12); }
+        .user-avatar {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #6366f1, #a78bfa);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; font-weight: 700; flex-shrink: 0; overflow: hidden;
+        }
+        .user-avatar img { width:100%; height:100%; object-fit:cover; }
+        .user-trigger-name {
+            font-size: 13px; font-weight: 500; color: #475569;
+            max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .user-trigger-arrow {
+            width: 16px; height: 16px; stroke: #94a3b8; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+        }
+        .user-trigger.open .user-trigger-arrow { transform: rotate(180deg); }
+
+        /* Dropdown panel */
+        .user-dropdown {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            width: 240px; background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+            padding: 0; opacity: 0; visibility: hidden;
+            transform: translateY(-8px);
+            transition: opacity 0.22s ease, visibility 0.22s ease, transform 0.22s cubic-bezier(.4,0,.2,1);
+            z-index: 9999;
+        }
+        .user-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        /* Profile header */
+        .dd-profile {
+            padding: 16px; display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid #f1f5f9; background: #fff;
+        }
+        .dd-profile-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a78bfa);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 17px; font-weight: 700; flex-shrink: 0; overflow: hidden;
+        }
+        .dd-profile-avatar img { width:100%; height:100%; object-fit:cover; }
+        .dd-profile-info { min-width: 0; }
+        .dd-profile-name {
+            font-size: 14px; font-weight: 600; color: #1e293b;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .dd-profile-role {
+            font-size: 11px; color: #94a3b8; margin-top: 2px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .dd-profile-role::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%; background: #34d399;
+        }
+
+        /* Menu items */
+        .dd-menu { padding: 6px; background: #fff; }
+        .dd-menu-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px; border-radius: 10px;
+            font-size: 13px; font-weight: 500; color: #475569;
+            text-decoration: none; cursor: pointer;
+            transition: all 0.15s ease; background: #fff;
+        }
+        .dd-menu-item:hover { background: #f1f5f9; color: #1e293b; }
+        .dd-menu-item svg {
+            width: 18px; height: 18px; stroke: #94a3b8; fill: none;
+            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+            flex-shrink: 0; transition: stroke 0.15s;
+        }
+        .dd-menu-item:hover svg { stroke: #6366f1; }
+        .dd-sep { height: 1px; background: #f1f5f9; margin: 2px 14px; }
+
+        /* Logout */
+        .dd-menu-item.dd-logout { color: #ef4444; }
+        .dd-menu-item.dd-logout:hover { background: #fef2f2; color: #dc2626; }
+        .dd-menu-item.dd-logout svg { stroke: #f87171; }
+        .dd-menu-item.dd-logout:hover svg { stroke: #dc2626; }
+
+        .logout-modal {
+            position: fixed;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            writing-mode: horizontal-tb;
+        }
+        .logout-modal.show { display: block; }
+        .logout-modal-dialog {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: calc(100vw - 40px);
+            max-width: 420px;
+            max-height: calc(100vh - 40px);
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+            overflow: hidden;
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            transform: translate(-50%, -50%);
+            animation: logoutModalIn .18s ease-out;
+            writing-mode: horizontal-tb;
+        }
+        .logout-modal-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 22px 14px;
+            background: linear-gradient(135deg, #fff7ed 0%, #fef2f2 100%);
+        }
+        .logout-modal-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            box-shadow: 0 10px 24px rgba(239, 68, 68, 0.22);
+        }
+        .logout-modal-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .logout-modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            writing-mode: horizontal-tb;
+        }
+        .logout-modal-subtitle {
+            margin-top: 4px;
+            font-size: 13px;
+            color: #64748b;
+            writing-mode: horizontal-tb;
+        }
+        .logout-modal-body {
+            padding: 18px 22px 22px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #334155;
+            writing-mode: horizontal-tb;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .logout-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 0 22px 22px;
+        }
+        .logout-modal-btn {
+            min-width: 96px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            font-size: 14px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+        .logout-modal-btn.cancel {
+            background: #fff;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+        .logout-modal-btn.cancel:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+        .logout-modal-btn.confirm {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            box-shadow: 0 10px 22px rgba(239, 68, 68, 0.22);
+        }
+        .logout-modal-btn.confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 26px rgba(239, 68, 68, 0.26);
+        }
+        .master-hidden-action {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+        }
+        @keyframes logoutModalIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ===== Content Area ===== */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 20px 24px;
+        }
+        .content-area::-webkit-scrollbar { width: 6px; }
+        .content-area::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+        /* Override old styles within content */
+        .content-area .manageplace { text-align: center; font-size: 13px; width: 100%; }
+        .content-area .settingdiv {
+            border: none;
+            width: auto;
+            max-width: 820px;
+        }
+        .content-area .centerdiv { width: 100%; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 900px) {
+            .sidebar { width: 64px; min-width: 64px; max-width: 64px; }
+            .sidebar .sidebar-brand-text,
+            .sidebar .nav-text,
+            .sidebar .nav-group-header,
+            .sidebar .sidebar-footer-text { display: none; }
+            .sidebar .nav-group-content { max-height: 800px !important; opacity: 1 !important; }
+            .sidebar .nav-item { justify-content: center; padding: 0; }
+            .sidebar .nav-icon { margin-right: 0; }
+            .sidebar .sidebar-brand { justify-content: center; }
+        }
+        /* ===== 更新通知Toast ===== */
+        #updateToast{position:fixed;bottom:24px;right:24px;z-index:99990;width:312px;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.13),0 2px 8px rgba(0,0,0,.05);border:1px solid #e2e8f0;overflow:hidden;opacity:0;transform:translateY(16px) scale(.97);pointer-events:none;transition:opacity .32s ease,transform .35s cubic-bezier(.22,.68,0,1.2);}
+        #updateToast.show{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+        #updateToast.home-toast{top:50%;left:50%;right:auto;bottom:auto;width:360px;max-width:calc(100vw - 32px);transform:translate(-50%,calc(-50% + 16px)) scale(.97);}
+        #updateToast.home-toast.show{transform:translate(-50%,-50%) scale(1);}
+        #updateToast.ut-clickable{cursor:pointer;}
+        .ut-bar{height:4px;background:linear-gradient(90deg,#3b82f6,#6366f1,#a78bfa);}
+        .ut-body{padding:14px 14px 10px;display:flex;align-items:flex-start;gap:11px;}
+        .ut-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#eff6ff,#eef2ff);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .ut-icon svg{width:19px;height:19px;stroke:#6366f1;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+        .ut-info{flex:1;min-width:0;}
+        .ut-title{font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;margin-bottom:3px;}
+        .ut-title span{color:#6366f1;}
+        .ut-desc{font-size:11.5px;color:#64748b;line-height:1.5;}
+        .ut-close{width:24px;height:24px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:-2px;transition:background .15s;}
+        .ut-close:hover{background:#e2e8f0;}
+        .ut-close svg{width:12px;height:12px;stroke:#94a3b8;fill:none;stroke-width:2.5;stroke-linecap:round;}
+        .ut-footer{padding:0 14px 14px;display:flex;gap:8px;}
+        .ut-go{flex:1;display:inline-flex;align-items:center;justify-content:center;height:34px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff!important;text-decoration:none;border-radius:9px;font-size:12px;font-weight:600;box-shadow:0 2px 8px rgba(99,102,241,.28);transition:box-shadow .2s;}
+        .ut-go:hover{box-shadow:0 5px 16px rgba(99,102,241,.45);}
+        .ut-later{display:inline-flex;align-items:center;justify-content:center;height:34px;padding:0 14px;background:#f1f5f9;color:#64748b;border-radius:9px;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s;white-space:nowrap;border:none;font-family:inherit;}
+        .ut-later:hover{background:#e2e8f0;}
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div class="layout-wrapper">
+
+    <!-- ========== Sidebar ========== -->
+    <div class="sidebar" id="sidebarEl">
+        <div class="sidebar-brand" onclick="toggleSidebar()">
+            <div class="sidebar-brand-logo">
+                <% string mLogoUrl = GetSiteLogoUrl(); %>
+                <% if (!string.IsNullOrEmpty(mLogoUrl)) { %>
+                    <img src="<%= mLogoUrl %>" alt="Logo" />
+                <% } else { %>
+                    L
+                <% } %>
+            </div>
+            <span class="sidebar-brand-text"><%= GetSiteTitle() %></span>
+        </div>
+
+        <div class="sidebar-nav">
+            <div class="nav-group" id="group-system">
+                <div class="nav-group-header" onclick="toggleNavGroup('group-system')">
+                    <span>系统管理</span>
+                    <svg class="nav-group-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="nav-group-content">
+                    <a href="../manager/dashboard.aspx" class="nav-item <%= GetCurrentPageName()=="dashboard"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>
+                        <span class="nav-text">数据仪表盘</span>
+                    </a>
+                    <a href="../manager/setting.aspx" class="nav-item <%= GetCurrentPageName()=="setting"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                        <span class="nav-text">系统设置</span>
+                    </a>
+                    <a href="../manager/usermanagement.aspx" class="nav-item <%= GetCurrentPageName()=="usermanagement"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="nav-text">用户管理</span>
+                    </a>
+                    <a href="../manager/schoolsetting.aspx" class="nav-item <%= GetCurrentPageName()=="schoolsetting"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+                        <span class="nav-text">学校设置</span>
+                    </a>
+                    <a href="../manager/classlist.aspx" class="nav-item <%= GetCurrentPageName()=="classlist"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="nav-text">班级列表</span>
+                    </a>
+                    <a href="../manager/createroom.aspx" class="nav-item <%= GetCurrentPageName()=="createroom"||GetCurrentPageName()=="roomselect"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></span>
+                        <span class="nav-text">班级设置</span>
+                    </a>
+                    <a href="../manager/teacher.aspx" class="nav-item <%= GetCurrentPageName()=="teacher"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                        <span class="nav-text">教师管理</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group" id="group-student">
+                <div class="nav-group-header" onclick="toggleNavGroup('group-student')">
+                    <span>学生管理</span>
+                    <svg class="nav-group-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="nav-group-content">
+                    <a href="../manager/studentlist.aspx" class="nav-item <%= GetCurrentPageName()=="studentlist"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="nav-text">学生列表</span>
+                    </a>
+                    <a href="../manager/unassigned.aspx" class="nav-item <%= GetCurrentPageName()=="unassigned"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>
+                        <span class="nav-text">未分配学生</span>
+                    </a>
+                    <a href="../manager/studentimport.aspx" class="nav-item <%= GetCurrentPageName()=="studentimport"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/><path d="M3 21V3"/></svg></span>
+                        <span class="nav-text">新生导入</span>
+                    </a>
+                    <a href="../manager/upgrade.aspx" class="nav-item <%= GetCurrentPageName()=="upgrade"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
+                        <span class="nav-text">学年升班</span>
+                    </a>
+                    <a href="../manager/divide.aspx" class="nav-item <%= GetCurrentPageName()=="divide"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+                        <span class="nav-text">重新分班</span>
+                    </a>
+                    <a href="../manager/grouplevel.aspx" class="nav-item <%= GetCurrentPageName()=="grouplevel"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="nav-text">小组等级设置</span>
+                    </a>
+                    <a href="../manager/creditlevel.aspx" class="nav-item <%= GetCurrentPageName()=="creditlevel"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                        <span class="nav-text">积分等级设置</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group" id="group-data">
+                <div class="nav-group-header" onclick="toggleNavGroup('group-data')">
+                    <span>数据与工具</span>
+                    <svg class="nav-group-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="nav-group-content">
+                    <a href="../manager/backup.aspx" class="nav-item <%= GetCurrentPageName()=="backup"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></span>
+                        <span class="nav-text">数据备份</span>
+                    </a>
+                    <a href="../manager/dbupgrade.aspx" class="nav-item <%= GetCurrentPageName()=="dbupgrade"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><line x1="12" y1="15" x2="12" y2="19"/><polyline points="9 17 12 14 15 17"/></svg></span>
+                        <span class="nav-text">数据库升级</span>
+                    </a>
+                    <a href="../manager/systemupdate.aspx" class="nav-item <%= GetCurrentPageName()=="systemupdate"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span>
+                        <span class="nav-text">系统更新</span>
+                    </a>
+                    <a href="../manager/clearold.aspx" class="nav-item <%= GetCurrentPageName()=="clearold"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                        <span class="nav-text">数据清理</span>
+                    </a>
+                    <a href="../seat/house.aspx" class="nav-item <%= GetCurrentPageName()=="house"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+                        <span class="nav-text">机房布置</span>
+                    </a>
+                    <a href="../manager/copygood.aspx" class="nav-item <%= GetCurrentPageName()=="copygood"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                        <span class="nav-text">收藏推荐</span>
+                    </a>
+                    <a href="../manager/loginimage.aspx" class="nav-item <%= GetCurrentPageName()=="loginimage"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
+                        <span class="nav-text">登录页插画</span>
+                    </a>
+                    <a href="../manager/emailsetting.aspx" class="nav-item <%= GetCurrentPageName()=="emailsetting"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+                        <span class="nav-text">邮箱服务</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group" id="group-personal">
+                <div class="nav-group-header" onclick="toggleNavGroup('group-personal')">
+                    <span>个人</span>
+                    <svg class="nav-group-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="nav-group-content">
+                    <a href="../manager/profile.aspx" class="nav-item <%= GetCurrentPageName()=="profile"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                        <span class="nav-text">个人中心</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group" id="group-website">
+                <div class="nav-group-header" onclick="toggleNavGroup('group-website')">
+                    <span>网站设置</span>
+                    <svg class="nav-group-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="nav-group-content">
+                    <a href="../manager/navsetting.aspx" class="nav-item <%= GetCurrentPageName()=="navsetting"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/><polyline points="15 3 18 6 15 9"/></svg></span>
+                        <span class="nav-text">导航设置</span>
+                    </a>
+                    <a href="../manager/footersetting.aspx" class="nav-item <%= GetCurrentPageName()=="footersetting"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                        <span class="nav-text">底部设置</span>
+                    </a>
+                    <a href="../manager/classroomrule.aspx" class="nav-item <%= GetCurrentPageName()=="classroomrule"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                        <span class="nav-text">课堂守则设置</span>
+                    </a>
+                    <a href="../manager/aisetting.aspx" class="nav-item <%= GetCurrentPageName()=="aisetting"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1v4a4 4 0 0 1-8 0v-4H7a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg></span>
+                        <span class="nav-text">大模型设置</span>
+                    </a>
+                    <a href="../manager/helpsetting.aspx" class="nav-item <%= GetCurrentPageName()=="helpsetting"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                        <span class="nav-text">教师端帮助中心</span>
+                    </a>
+                    <a href="../manager/feedback.aspx" class="nav-item <%= GetCurrentPageName()=="feedback"?"active":"" %>">
+                        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="nav-text">意见反馈</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <asp:Label ID="LabelVer" runat="server" Font-Size="8pt" Visible="false"></asp:Label>
+            <div class="sidebar-footer-text">
+                版本<%= GetAppVersion() %>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Main ========== -->
+    <div class="main-area">
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="header-left">
+                <button type="button" class="toggle-btn" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+            </div>
+            <div class="header-right">
+                <div class="header-time" id="headerTime">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="clockSpan"></span>
+                </div>
+                <div class="user-dropdown-wrap" id="userDropdownWrap">
+                    <div class="user-trigger" id="userTrigger" onclick="toggleUserDropdown()">
+                        <% if (!string.IsNullOrEmpty(mUserAvatarUrl)) { %>
+                        <div class="user-avatar"><img src="<%= mUserAvatarUrl %>" /></div>
+                        <% } else { %>
+                        <div class="user-avatar"><%= Server.HtmlEncode(mUserInitial) %></div>
+                        <% } %>
+                        <span class="user-trigger-name"><%= !string.IsNullOrEmpty(mUserName) ? Server.HtmlEncode(mUserName) : "\u7BA1\u7406\u5458" %></span>
+                        <svg class="user-trigger-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dd-profile">
+                            <% if (!string.IsNullOrEmpty(mUserAvatarUrl)) { %>
+                            <div class="dd-profile-avatar"><img src="<%= mUserAvatarUrl %>" /></div>
+                            <% } else { %>
+                            <div class="dd-profile-avatar"><%= Server.HtmlEncode(mUserInitial) %></div>
+                            <% } %>
+                            <div class="dd-profile-info">
+                                <div class="dd-profile-name"><%= !string.IsNullOrEmpty(mUserName) ? Server.HtmlEncode(mUserName) : "\u7BA1\u7406\u5458" %></div>
+                                <div class="dd-profile-role">管理员</div>
+                            </div>
+                        </div>
+                        <div class="dd-menu">
+                            <a href="../manager/profile.aspx" class="dd-menu-item">
+                                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                个人中心
+                            </a>
+                            <a href="../manager/setting.aspx" class="dd-menu-item">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                系统设置
+                            </a>
+                            <div class="dd-sep"></div>
+                            <a href="javascript:void(0);" class="dd-menu-item dd-logout" onclick="return openLogoutModal(event);">
+                                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                退出系统
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-area">
+            <asp:ContentPlaceHolder ID="Content" runat="server">
+            </asp:ContentPlaceHolder>
+        </div>
+    </div>
+    </div><!-- /layout-wrapper -->
+
+    <asp:Button ID="BtnMasterLogout" runat="server" CssClass="master-hidden-action" OnClick="BtnMasterLogout_Click" UseSubmitBehavior="false" />
+
+    <div class="logout-modal" id="logoutModal" onclick="handleLogoutModalMask(event)">
+        <div class="logout-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+            <div class="logout-modal-head">
+                <div class="logout-modal-icon">
+                    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </div>
+                <div>
+                    <div class="logout-modal-title" id="logoutModalTitle">确认退出登录？</div>
+                    <div class="logout-modal-subtitle">退出后将返回管理后台登录页</div>
+                </div>
+            </div>
+            <div class="logout-modal-body">
+                当前登录身份将被安全退出。如需继续访问后台，需要重新登录。
+            </div>
+            <div class="logout-modal-actions">
+                <button type="button" class="logout-modal-btn cancel" onclick="closeLogoutModal()">取消</button>
+                <button type="button" class="logout-modal-btn confirm" onclick="submitLogout()">确认退出</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Nav group collapse
+        function toggleNavGroup(groupId) {
+            var sidebar = document.getElementById('sidebarEl');
+            if (sidebar && sidebar.classList.contains('collapsed')) return;
+            var group = document.getElementById(groupId);
+            if (!group) return;
+            group.classList.toggle('collapsed');
+            try {
+                var states = JSON.parse(localStorage.getItem('navGroupStates') || '{}');
+                states[groupId] = group.classList.contains('collapsed') ? '1' : '0';
+                localStorage.setItem('navGroupStates', JSON.stringify(states));
+            } catch(e) {}
+        }
+        // Restore nav group states on load
+        (function() {
+            try {
+                var states = JSON.parse(localStorage.getItem('navGroupStates') || '{}');
+                ['group-system','group-student','group-data','group-personal','group-website'].forEach(function(id) {
+                    if (states[id] === '1') {
+                        var el = document.getElementById(id);
+                        if (el) el.classList.add('collapsed');
+                    }
+                });
+                // Auto-expand the group that contains the active menu item
+                document.querySelectorAll('.nav-group.collapsed').forEach(function(group) {
+                    if (group.querySelector('.nav-item.active')) {
+                        group.classList.remove('collapsed');
+                        try {
+                            var s = JSON.parse(localStorage.getItem('navGroupStates') || '{}');
+                            s[group.id] = '0';
+                            localStorage.setItem('navGroupStates', JSON.stringify(s));
+                        } catch(e) {}
+                    }
+                });
+            } catch(e) {}
+        })();
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            var sb = document.getElementById('sidebarEl');
+            sb.classList.toggle('collapsed');
+            try { localStorage.setItem('sidebarCollapsed', sb.classList.contains('collapsed') ? '1' : '0'); } catch(e){}
+        }
+        // Restore sidebar state
+        (function(){
+            try {
+                if (localStorage.getItem('sidebarCollapsed') === '1') {
+                    document.getElementById('sidebarEl').classList.add('collapsed');
+                }
+            } catch(e){}
+        })();
+
+        // Legacy compat
+        function ShowMenu() { 
+            var sb = document.getElementById('sidebarEl');
+            if (sb) sb.classList.remove('collapsed');
+        }
+        function HideMenu() { 
+            var sb = document.getElementById('sidebarEl');
+            if (sb) sb.classList.add('collapsed');
+        }
+
+        // Clock
+        function updateClock() {
+            var now = new Date();
+            var h = now.getHours().toString().padStart(2,'0');
+            var m = now.getMinutes().toString().padStart(2,'0');
+            var d = (now.getMonth()+1) + '月' + now.getDate() + '日';
+            var el = document.getElementById('clockSpan');
+            if (el) el.textContent = d + ' ' + h + ':' + m;
+        }
+        updateClock();
+        setInterval(updateClock, 30000);
+
+        // User dropdown
+        function toggleUserDropdown() {
+            var trigger = document.getElementById('userTrigger');
+            var dropdown = document.getElementById('userDropdown');
+            trigger.classList.toggle('open');
+            dropdown.classList.toggle('show');
+        }
+        // Close dropdown on outside click
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('userDropdownWrap');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('userTrigger').classList.remove('open');
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        });
+
+        function openLogoutModal(e) {
+            if (e) {
+                if (e.preventDefault) e.preventDefault();
+                if (e.stopPropagation) e.stopPropagation();
+            }
+            var trigger = document.getElementById('userTrigger');
+            var dropdown = document.getElementById('userDropdown');
+            var modal = document.getElementById('logoutModal');
+            if (trigger) trigger.classList.remove('open');
+            if (dropdown) dropdown.classList.remove('show');
+            if (modal) modal.classList.add('show');
+            return false;
+        }
+
+        function closeLogoutModal() {
+            var modal = document.getElementById('logoutModal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        function handleLogoutModalMask(e) {
+            if (e && e.target && e.target.id === 'logoutModal') {
+                closeLogoutModal();
+            }
+        }
+
+        function submitLogout() {
+            var btn = document.getElementById('<%= BtnMasterLogout.ClientID %>');
+            if (btn) btn.click();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLogoutModal();
+            }
+        });
+
+        // ===== 后台更新自动检测 =====
+        (function(){
+            var INTERVAL = 4 * 60 * 60 * 1000; // 4 小时检测一次
+            var LS_KEY   = 'ls_upd_notify_v1';
+            var curPage  = (window.location.pathname || '').toLowerCase();
+            var updateUrl = '<%= ResolveUrl("~/manager/systemupdate.aspx?autoupdate=1") %>';
+            var isIndexPage = /\/manager\/(?:index\.aspx)?$/i.test(curPage);
+            var currentVersion = '<%= GetAppVersion() %>';
+
+            function normalizeVer(ver) {
+                return (ver || '').toString().replace(/^[vV]/, '');
+            }
+
+            function compareVer(a, b) {
+                var p1 = normalizeVer(a).split('.');
+                var p2 = normalizeVer(b).split('.');
+                var len = Math.max(p1.length, p2.length);
+                for (var i = 0; i < len; i++) {
+                    var x = parseInt(p1[i] || '0', 10);
+                    var y = parseInt(p2[i] || '0', 10);
+                    if (isNaN(x)) x = 0;
+                    if (isNaN(y)) y = 0;
+                    if (x > y) return 1;
+                    if (x < y) return -1;
+                }
+                return 0;
+            }
+
+            function clearToastCache() {
+                try { localStorage.removeItem(LS_KEY); } catch(e) {}
+            }
+
+            function showToast(ver) {
+                if (compareVer(currentVersion, ver) >= 0) {
+                    clearToastCache();
+                    return;
+                }
+                var el = document.getElementById('updateToast');
+                if (!el) return;
+                var vEl = document.getElementById('utVer');
+                if (vEl) vEl.textContent = ver;
+                el.classList.toggle('home-toast', isIndexPage);
+                el.classList.add('ut-clickable');
+                el.onclick = function() { window.location.href = updateUrl; };
+                setTimeout(function(){ el.classList.add('show'); }, 1000);
+                // 35 秒后自动消失
+                setTimeout(function(){ el.classList.remove('show'); }, 36000);
+            }
+
+            window.__utClose = function() {
+                var el = document.getElementById('updateToast');
+                if (el) el.classList.remove('show');
+                // 点击「稍后再说」后本次运行内不再弹出
+                try {
+                    var d = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+                    if (d) { d.dismissed = true; localStorage.setItem(LS_KEY, JSON.stringify(d)); }
+                } catch(e) {}
+            };
+
+            function runCheck() {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '<%= ResolveUrl("~/manager/checkupdate.ashx") %>?_=' + Date.now(), true);
+                xhr.timeout = 12000;
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        try {
+                            var r = JSON.parse(xhr.responseText);
+                            if (r && r.success) {
+                                try {
+                                    localStorage.setItem(LS_KEY, JSON.stringify({
+                                        t: Date.now(), has: r.hasUpdate,
+                                        ver: r.latestVersion, dismissed: false
+                                    }));
+                                } catch(e) {}
+                                if (r.hasUpdate) showToast(r.latestVersion);
+                            }
+                        } catch(e) {}
+                    }
+                };
+                xhr.onerror = xhr.ontimeout = function(){};
+                xhr.send();
+            }
+
+            // 页面加载 2.5s 后执行，不阻塞首屏渲染
+            setTimeout(function() {
+                try {
+                    var d = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+                    if (d && d.ver && compareVer(currentVersion, d.ver) >= 0) {
+                        clearToastCache();
+                        d = null;
+                    }
+                    // systemupdate 页面自带检测功能，跳过toast
+                    if (curPage.indexOf('systemupdate') !== -1) return;
+                    if (d && (Date.now() - d.t) < INTERVAL) {
+                        if (d.has && !d.dismissed) showToast(d.ver);
+                        return;
+                    }
+                } catch(e) {}
+
+                runCheck();
+            }, 2500);
+        }());
+    </script>
+
+    <!-- 更新通知Toast -->
+    <div id="updateToast">
+        <div class="ut-bar"></div>
+        <div class="ut-body">
+            <div class="ut-icon">
+                <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </div>
+            <div class="ut-info">
+                <div class="ut-title">发现系统新版本&nbsp;<span id="utVer"></span></div>
+                <div class="ut-desc">建议尽快更新以获取新功能和安全修复</div>
+            </div>
+            <div class="ut-close" onclick="event.stopPropagation();__utClose()">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+        </div>
+        <div class="ut-footer">
+            <a href="<%= ResolveUrl("~/manager/systemupdate.aspx?autoupdate=1") %>" class="ut-go" onclick="event.stopPropagation()">立即前往更新</a>
+            <button class="ut-later" onclick="event.stopPropagation();__utClose()">稍后再说</button>
+        </div>
+    </div>
+
+    </form>
+</body>
+</html>

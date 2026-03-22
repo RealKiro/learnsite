@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/profile/mygroup.aspx" hash="fffffff94ae4f160" filehash="ea978537099b2ed5" flags="110000" assembly="App_Web_mygroup.aspx.a34e6a3d.qiud6f-h" type="ASP.profile_mygroup_aspx">
+    <filedeps>
+        <filedep name="/profile/mygroup.aspx" />
+        <filedep name="/profile/Pf.master" />
+    </filedeps>
+</preserve>

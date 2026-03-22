@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工智能助手</title>
+    <link rel="stylesheet" href="robot.css?v=20260228">
+    <script src="marked.min.js"></script>
+    <link rel="stylesheet" href="github-dark.min.css">
+    <script src="highlight.min.js"></script>
+    <link rel="stylesheet" href="all.min.css">
+    <style>
+    /* 关键布局内联样式，确保不受缓存影响 */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;background:#f8fafc;color:#1e293b}
+    #maincontainer{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden}
+    .ai-header{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a78bfa 100%)!important;padding:14px 150px 14px 24px!important;display:flex!important;align-items:center!important;gap:12px!important;flex-shrink:0!important;position:relative!important;overflow:hidden!important;margin-right:0!important}
+    .ai-header .logo{width:30px;height:30px;filter:brightness(0) invert(1);position:relative;z-index:1}
+    .ai-header-text{position:relative!important;z-index:1!important;color:#fff!important;font-size:15px!important;font-weight:600!important;flex:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important}
+    .ai-header-badge{position:relative!important;z-index:1!important;background:rgba(255,255,255,.2)!important;color:#fff!important;font-size:11px!important;font-weight:500!important;padding:3px 10px!important;border-radius:20px!important;flex-shrink:0!important;white-space:nowrap!important;margin-right:8px!important;transform:translateX(10px)!important}
+    .ai-header-status{position:relative!important;z-index:1!important;display:flex!important;align-items:center!important;gap:6px!important;font-size:12px!important;color:rgba(255,255,255,.8)!important;flex-shrink:0!important;max-width:200px!important;white-space:nowrap!important;transform:translateX(10px)!important}
+    .ai-header-status .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,.5)}
+    .ai-body{display:flex;flex-direction:column;flex:1;min-height:0;width:100%}
+    .chat-container{flex:1;overflow-y:auto;padding:20px 24px;background:#f8fafc;width:100%}
+    .loading-container{flex-shrink:0}
+    .input-container{background:#fff;padding:12px 16px;border-top:1px solid #e2e8f0;display:flex;align-items:flex-end;gap:8px;flex-shrink:0;width:100%}
+    .input-container textarea{flex:1;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;resize:none;font-size:14px;font-family:inherit;line-height:1.5;outline:none;max-height:120px;min-height:40px;background:#f8fafc;color:#1e293b}
+    .input-container textarea:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1);background:#fff}
+    .input-container button{padding:9px 20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;height:40px;flex-shrink:0}
+    .input-container button:disabled{background:#cbd5e1;cursor:not-allowed}
+    .message{margin-bottom:16px;display:flex;max-width:100%}
+    .message.user{justify-content:flex-end;white-space:pre-wrap}
+    .message.user span,.message.user .content{display:inline-block;padding:10px 16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:14px 14px 4px 14px;font-size:14px;line-height:1.6;max-width:75%;word-wrap:break-word;box-shadow:0 2px 8px rgba(99,102,241,.2)}
+    .message.bot{justify-content:flex-start;gap:8px;align-items:flex-start}
+    .message.bot>div:first-child{flex-shrink:0}
+    .message.bot .avatar{width:28px;height:28px;border-radius:8px}
+    .message.bot .markdown-content{background:#fff;border:1px solid #e2e8f0;border-radius:4px 14px 14px 14px;padding:12px 16px;max-width:calc(100% - 40px);box-shadow:0 2px 8px rgba(0,0,0,.06);word-break:break-word}
+    .wall{text-align:center;padding:50px 24px 30px}
+    .wall h2{font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
+    .wall h2 .logo{width:36px;height:36px;filter:none}
+    .wall>div{color:#64748b;font-size:14px}
+    #loading{text-align:center;padding:8px 16px;font-size:13px;color:#6366f1;display:flex;align-items:center;justify-content:center;gap:8px;background:#eef2ff}
+    #loading img{width:18px;height:18px}
+    .left-column,.right-column,.navbar,#chatbar,#footbar,.photobar,.sp,.chattitle{display:none!important}
+    </style>
+</head>
+<body>
+    <div id="maincontainer">
+		<div class="ai-header">
+			<img class="logo" src="deepseek.svg" />
+			<span class="ai-header-text" id="headerTitle">人工智能助手</span>
+			<span class="ai-header-badge" id="headerBadge">AI</span>
+			<div class="ai-header-status" id="headerStatus">
+				<span class="dot"></span>
+				<span>在线</span>
+			</div>
+		</div>
+
+        <div class="ai-body">
+			<div class="chat-container" id="chatHistory">
+				<div class="wall" id="welcomeWall">
+				<h2><img class="logo" src="deepseek.svg" /> <span id="welcomeTitle">我是人工智能助手，很高兴见到你！</span></h2>
+				<div id="welcomeDesc">我可以帮你写作、编程、聊天等各种创意内容，请把你的任务交给我吧~</div>
+				</div>
+			</div>
+
+			<div class="loading-container">
+			<div id="loading" style="display: none;"><img src="loading.gif" />思考中...</div>
+			</div>
+
+			<div class="input-container">
+				<textarea id="userInput" placeholder="输入你的问题..." rows="1" maxlength="2000"></textarea>
+				<button id="btnmsg" onclick="sendMessage()" title="人工智能聊天">对话</button>
+				<button id="btntran" style="display: none;" onclick="sendChinese()" title="中文翻译成英文">翻译</button>
+				<button id="btnphoto" style="display: none;" onclick="sendPhoto()" title="文本生成图片">图片</button>
+			</div>
+        </div>
+    </div>
+    <script>
+        let messageHistory = []; // 新增：存储对话历史的数组
+		
+		// 使用后台 aisetting.aspx 配置的大模型，通过 aichat.ashx 代理
+		var aiChatHandler = "aichat.ashx";
+		var port=":2000";//端口（备用：本地服务）
+		var lor=location.origin+port;
+		
+        const apiChatUrl = aiChatHandler; // 对话接口改为使用后台配置的大模型
+        const apiPhotoUrl = lor+"/photo";
+        const apiTranUrl = lor+"/translator";
+
+		// AI 是否已启用的标志
+		var aiEnabled = true;
+		
+		// 加载 AI 配置，更新欢迎信息和标题栏
+		(function loadAiConfig() {
+			fetch(aiChatHandler)
+				.then(function(res) {
+					if (!res.ok) throw new Error('HTTP ' + res.status);
+					return res.json();
+				})
+				.then(function(cfg) {
+					if (cfg.model) {
+						var title = document.getElementById("welcomeTitle");
+						if (title) title.textContent = "我是人工智能助手（" + cfg.model + "），很高兴见到你！";
+						// 更新顶部标题栏
+						var headerTitle = document.getElementById("headerTitle");
+						if (headerTitle) headerTitle.textContent = "人工智能助手";
+						var headerBadge = document.getElementById("headerBadge");
+						if (headerBadge) headerBadge.textContent = cfg.model;
+					}
+					if (!cfg.enabled) {
+						aiEnabled = false;
+						var desc = document.getElementById("welcomeDesc");
+						if (desc) {
+							desc.textContent = "AI 功能暂未启用，请联系管理员在后台开启。";
+							desc.style.color = '#e74c3c';
+						}
+						var btn = document.getElementById("btnmsg");
+						if (btn) btn.disabled = true;
+						// 更新状态指示器为离线
+						var statusDot = document.querySelector('#headerStatus .dot');
+						if (statusDot) statusDot.className = 'dot offline';
+						var statusText = document.querySelector('#headerStatus span:last-child');
+						if (statusText) statusText.textContent = '未启用';
+					}
+				})
+			.catch(function(err) {
+				console.error("加载AI配置失败:", err);
+				aiEnabled = false;
+				var desc = document.getElementById("welcomeDesc");
+				if (desc) {
+					desc.textContent = "AI 服务连接失败，请检查网络或联系管理员。";
+					desc.style.color = '#e74c3c';
+				}
+				var btn = document.getElementById("btnmsg");
+				if (btn) btn.disabled = true;
+				// 更新状态指示器为离线
+				var statusDot = document.querySelector('#headerStatus .dot');
+				if (statusDot) statusDot.className = 'dot offline';
+				var statusText = document.querySelector('#headerStatus span:last-child');
+				if (statusText) statusText.textContent = '离线';
+			});
+		})();
+			
+		const userTextarea = document.getElementById("userInput");
+        const sendButtonmsg = document.getElementById("btnmsg");
+        const sendButtonphoto = document.getElementById("btnphoto");
+        const sendButtontran = document.getElementById("btntran");
+		const chatHistory = document.getElementById("chatHistory");
+		
+		function restoreHistory(){
+			var mychatHistory = localStorage.getItem("chatHistory");
+			chatHistory.innerHTML =mychatHistory;					
+		}
+		//restoreHistory();//恢复聊天记录
+
+        async function sendChinese() {
+            const userInput = document.getElementById("userInput").value.trim();
+            if (!userInput) return;
+			
+			userTextarea.disabled = true;
+			sendButtontran.disabled = true;
+            // 新增：将用户消息添加到历史记录
+            const userMessage = { role: "user", content: userInput };
+            messageHistory.push(userMessage);
+            addMessage("user", userInput);
+
+            try {
+                document.getElementById("loading").style.display = "block";
+                const response = await fetch(apiTranUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: userMessage }) // 改为发送完整对话历史
+                });
+                
+                const data = await response.json();
+                
+                // 新增：将AI回复添加到历史记录
+                const botMessage = { role: "assistant", content: data.response };
+                messageHistory.push(botMessage);
+                addMessage("tran", data.response);
+						
+            } catch (error) {
+                console.error("Error:", error);
+                const errorMessage = { role: "assistant", content: `Error: ${error.message}` };
+                messageHistory.push(errorMessage);
+                addMessage("tran", `Error: ${error.message}`);
+            } finally {
+                document.getElementById("loading").style.display = "none";
+				userTextarea.disabled = false;
+				sendButtontran.disabled = false;
+                document.getElementById("userInput").value = "";
+            }
+        }
+		
+
+async function sendMessage() {
+    var messageId = null;
+    try {
+        var userInput = document.getElementById("userInput").value.trim();
+        if (!userInput) return;
+        
+        // 检查 AI 是否启用
+        if (!aiEnabled) {
+            addMessage("bot", "AI 功能暂未启用，请联系管理员在后台开启。");
+            return;
+        }
+        
+        // 隐藏欢迎信息
+        var welcomeWall = document.getElementById("welcomeWall");
+        if (welcomeWall) welcomeWall.style.display = "none";
+        
+        sendButtonmsg.disabled = true;
+        if (sendButtonphoto) sendButtonphoto.disabled = true;
+        userTextarea.disabled = true;
+
+        // 将用户消息添加到历史记录
+        var userMessage = { role: "user", content: userInput };
+        messageHistory.push(userMessage);
+        addMessage("user", userInput);
+        
+        document.getElementById("loading").style.display = "block";
+        
+        // 为AI回复创建占位消息
+        messageId = Date.now();
+        var botMessage = { role: "assistant", content: "" };
+        messageHistory.push(botMessage);
+        addPosMessage("bot", "", messageId);
+
+        // 添加超时控制（3分钟）
+        var controller = null;
+        var timeoutId = null;
+        var fetchOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: messageHistory })
+        };
+        
+        // AbortController 兼容性处理
+        if (typeof AbortController !== 'undefined') {
+            controller = new AbortController();
+            timeoutId = setTimeout(function() { controller.abort(); }, 180000);
+            fetchOptions.signal = controller.signal;
+        }
+
+        var response = await fetch(apiChatUrl, fetchOptions);
+
+        if (timeoutId) clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            // 尝试读取错误响应体
+            var errorBody = '';
+            try { errorBody = await response.text(); } catch(e) {}
+            var statusMsg = '请求失败 (HTTP ' + response.status + ')';
+            if (errorBody && errorBody.length < 200) statusMsg += ': ' + errorBody;
+            throw new Error(statusMsg);
+        }
+
+        // 流式处理响应
+        if (!response.body || !response.body.getReader) {
+            // 不支持流式读取，尝试作为普通文本处理
+            var textBody = await response.text();
+            console.log('[AI] 非流式响应原始数据:', textBody.substring(0, 500));
+            var fullResponse = '';
+            var reasoningResponse = '';
+            
+            // 解析SSE文本
+            var textLines = textBody.split('\n');
+            for (var i = 0; i < textLines.length; i++) {
+                var tLine = textLines[i].trim();
+                if (!tLine) continue;
+                try {
+                    var jsonStr = tLine.startsWith('data: ') ? tLine.substring(6) : tLine;
+                    if (jsonStr === '[DONE]') continue;
+                    var data = JSON.parse(jsonStr);
+                    if (data.reasoning) reasoningResponse += data.reasoning;
+                    if (data.content || data.response) fullResponse += (data.content || data.response || '');
+                } catch(e) { console.warn('[AI] 解析行失败:', tLine, e); }
+            }
+            
+            if (!fullResponse && !reasoningResponse) {
+                fullResponse = textBody || '未收到有效回复，请稍后重试。';
+            }
+            console.log('[AI] 非流式解析结果: fullResponse=', fullResponse.substring(0, 200));
+            _doUpdateBotMessage(messageId, reasoningResponse, fullResponse);
+            if (messageHistory.length > 0) {
+                messageHistory[messageHistory.length - 1].content = fullResponse;
+            }
+        } else {
+            // 流式处理响应
+            var reader = response.body.getReader();
+            var decoder = new TextDecoder();
+            var buffer = '';
+            var fullResponse = '';
+            var reasoningResponse = '';
+            var chunkCount = 0;
+
+            while (true) {
+                var result = await reader.read();
+                if (result.done) break;
+                
+                var chunk = decoder.decode(result.value, { stream: true });
+                buffer += chunk;
+                chunkCount++;
+                if (chunkCount <= 3) console.log('[AI] 流式chunk#' + chunkCount + ':', chunk.substring(0, 200));
+                
+                // 处理SSE格式或JSON流格式
+                var lines = buffer.split('\n');
+                for (var i = 0; i < lines.length - 1; i++) {
+                    var line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    try {
+                        var jsonStr = line.startsWith('data: ') ? line.substring(6) : line;
+                        if (jsonStr === '[DONE]') continue;
+                        
+                        var data = JSON.parse(jsonStr);
+                        
+                        if (data.reasoning) {
+                            reasoningResponse += data.reasoning;
+                        }
+                        if (data.content || data.response) {
+                            fullResponse += (data.content || data.response || '');
+                        }
+                        if (data.content || data.response || data.reasoning) {
+                            updateBotMessage(messageId, reasoningResponse, fullResponse);
+                            if (messageHistory.length > 0) {
+                                messageHistory[messageHistory.length - 1].content = fullResponse;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('[AI] 解析消息失败:', line.substring(0, 100), e.message);
+                    }
+                }
+                
+                buffer = lines[lines.length - 1];
+            }
+            console.log('[AI] 流式完成, 共' + chunkCount + '个chunk, fullResponse长度=' + fullResponse.length);
+
+            // 处理缓冲区中剩余的数据
+            if (buffer && buffer.trim()) {
+                try {
+                    var remainLine = buffer.trim();
+                    var remainJson = remainLine.startsWith('data: ') ? remainLine.substring(6) : remainLine;
+                    if (remainJson && remainJson !== '[DONE]') {
+                        var remainData = JSON.parse(remainJson);
+                        if (remainData.reasoning) reasoningResponse += remainData.reasoning;
+                        if (remainData.content != null && remainData.content !== '') fullResponse += remainData.content;
+                        else if (remainData.response != null && remainData.response !== '') fullResponse += remainData.response;
+                    }
+                } catch(e) {}
+            }
+
+            // 强制最终渲染（不使用防抖，确保完整内容显示）
+            if (fullResponse || reasoningResponse) {
+                clearTimeout(updateBotTimer);
+                _doUpdateBotMessage(messageId, reasoningResponse, fullResponse);
+                if (messageHistory.length > 0) {
+                    messageHistory[messageHistory.length - 1].content = fullResponse;
+                }
+            }
+
+            // 处理空回复
+            if (!fullResponse && !reasoningResponse) {
+                fullResponse = '未收到有效回复，请稍后重试。';
+                _doUpdateBotMessage(messageId, '', fullResponse);
+                if (messageHistory.length > 0) {
+                    messageHistory[messageHistory.length - 1].content = fullResponse;
+                }
+            }
+        }
+
+    } catch (error) {
+        console.error("sendMessage Error:", error);
+        var errMsg = '';
+        if (error && error.name === 'AbortError') {
+            errMsg = '请求超时，请稍后重试';
+        } else if (error && error.message) {
+            errMsg = '请求出错: ' + error.message;
+        } else {
+            errMsg = '发生未知错误，请稍后重试';
+        }
+        
+        // 更新历史记录
+        if (messageHistory.length > 0 && messageHistory[messageHistory.length - 1].content === "") {
+            messageHistory[messageHistory.length - 1].content = errMsg;
+        }
+        
+        // 显示错误消息给用户（使用直接渲染，绕过防抖）
+        try {
+            clearTimeout(updateBotTimer);
+            if (messageId) {
+                _doUpdateBotMessage(messageId, '', errMsg);
+            } else {
+                addMessage("bot", errMsg);
+            }
+        } catch(displayErr) {
+            console.error('显示错误消息失败:', displayErr);
+            try {
+                var errDiv = document.createElement('div');
+                errDiv.className = 'message bot';
+                errDiv.innerHTML = '<div class="markdown-content" style="color:#e74c3c;">' + escapeHtml(errMsg) + '</div>';
+                chatHistory.appendChild(errDiv);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            } catch(e) {}
+        }
+    } finally {
+        // 确保始终恢复UI状态
+        try { document.getElementById("loading").style.display = "none"; } catch(e) {}
+        try { sendButtonmsg.disabled = false; } catch(e) {}
+        try { if (sendButtonphoto) sendButtonphoto.disabled = false; } catch(e) {}
+        try { userTextarea.disabled = false; } catch(e) {}
+        try { document.getElementById("userInput").value = ""; } catch(e) {}
+        try { localStorage.setItem("chatHistory", chatHistory.innerHTML); } catch(e) {}
+    }
+}
+		
+// 使用 marked.js 改进的 Markdown 解析器（带健壮性保护）
+function parseMarkdown(text) {
+    if (!text) return '';
+    
+    // 如果 marked 库未加载，直接返回纯文本（转义HTML）
+    if (typeof marked === 'undefined' || !marked || !marked.parse) {
+        console.warn('marked 库未加载，使用纯文本显示');
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+    
+    try {
+        // 配置 marked.js
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            highlight: function(code, lang) {
+                if (window.hljs) {
+                    try {
+                        var language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                        return hljs.highlight(code, { language: language }).value;
+                    } catch(e) { return code; }
+                }
+                return code;
+            },
+            sanitize: false,
+        });
+
+        // 移除 <think> 标签及其内容（推理模型如 DeepSeek R1 可能包含）
+        var cleanText = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+        // 如果移除后为空（可能 think 未闭合），则只移除标签保留内容
+        if (!cleanText && text) {
+            cleanText = text.replace(/<\/?think>/gi, '').trim();
+        }
+        if (!cleanText) cleanText = text;
+        
+        // 使用 marked 渲染
+        var result = marked.parse(cleanText);
+        return result;
+    } catch (e) {
+        console.error('Markdown 解析错误:', e);
+        // 回退到纯文本
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+}
+
+// HTML 转义函数
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function addPosMessage(role, content, id) {
+    const messageDiv = document.createElement("div");
+    messageDiv.id = `msg-${id || Date.now()}`;
+    messageDiv.className = `message ${role}`;
+    
+    // 使用单独的markdown-content容器
+    messageDiv.innerHTML = `<div><img class ='avatar' src='deepseek.svg' /></div>
+	<div class="markdown-content">${parseMarkdown(content)}</div>`;
+    
+    chatHistory.appendChild(messageDiv);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+    
+    // 高亮代码块
+    if (role === 'bot') {
+        setTimeout(() => {
+            const blocks = messageDiv.querySelectorAll('pre code');
+            blocks.forEach(block => {
+                if (window.hljs) {
+                    hljs.highlightElement(block);
+                }
+            });
+        }, 100);
+    }
+    return messageDiv.id;
+}
+
+// 修改后的updateMessage函数（支持Markdown）
+const maincontainer = document.getElementById("maincontainer");
+var updateMsgTimer = null;  // updateMessage 专用定时器
+var updateBotTimer = null;  // updateBotMessage 专用定时器
+function updateMessage(id, role, content) {
+    var messageElement = document.getElementById('msg-' + id);
+    if (!messageElement) return;
+    
+    // 防抖处理
+    clearTimeout(updateMsgTimer);
+    updateMsgTimer = setTimeout(function() {
+        try {
+            var contentDiv = messageElement.querySelector('.markdown-content');
+            if (contentDiv) {
+                var wasScrolledToBottom = 
+                    chatHistory.scrollTop + chatHistory.clientHeight >= 
+                    chatHistory.scrollHeight - 50;
+                
+                contentDiv.innerHTML = parseMarkdown(content);
+                
+                if (window.hljs) {
+                    var blocks = messageElement.querySelectorAll('pre code');
+                    for (var j = 0; j < blocks.length; j++) {
+                        try { hljs.highlightElement(blocks[j]); } catch(e) {}
+                    }
+                }
+                
+                if (wasScrolledToBottom) {
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                }
+            }
+        } catch(e) {
+            console.error('updateMessage 错误:', e);
+        }
+    }, 60);
+}
+
+// 更新机器人消息核心逻辑（无防抖，确保立即渲染）
+function _doUpdateBotMessage(id, reasoning, content) {
+    try {
+        var messageElement = document.getElementById('msg-' + id);
+        if (!messageElement) return;
+        var contentDiv = messageElement.querySelector('.markdown-content');
+        if (!contentDiv) return;
+        
+        var wasScrolledToBottom = 
+            chatHistory.scrollTop + chatHistory.clientHeight >= 
+            chatHistory.scrollHeight - 50;
+        
+        var html = '';
+        
+        // 显示思考过程（推理内容）
+        if (reasoning) {
+            html += '<details class="thinking-section"' + (!content ? ' open' : '') + '>';
+            html += '<summary class="thinking-summary">\ud83d\udca1 \u601d\u8003\u8fc7\u7a0b</summary>';
+            html += '<div class="thinking-content">' + parseMarkdown(reasoning) + '</div>';
+            html += '</details>';
+        }
+        
+        // 显示正式回复内容
+        if (content) {
+            html += parseMarkdown(content);
+        } else if (reasoning) {
+            html += '<div class="thinking-indicator">\u6b63\u5728\u601d\u8003\u4e2d...</div>';
+        }
+        
+        contentDiv.innerHTML = html;
+        
+        // 高亮代码块
+        if (window.hljs) {
+            var blocks = messageElement.querySelectorAll('pre code');
+            for (var j = 0; j < blocks.length; j++) {
+                try { hljs.highlightElement(blocks[j]); } catch(e) {}
+            }
+        }
+        
+        // 为代码块添加复制按钮
+        var pres = messageElement.querySelectorAll('pre');
+        for (var k = 0; k < pres.length; k++) {
+            if (!pres[k].querySelector('.copy-icon')) {
+                (function(pre) {
+                    var copyIcon = document.createElement('i');
+                    copyIcon.className = 'fas fa-copy copy-icon';
+                    copyIcon.title = '复制代码';
+                    copyIcon.onclick = function() {
+                        var codeEl = pre.querySelector('code');
+                        if (!codeEl) return;
+                        var code = codeEl.innerText;
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(code).then(function() {
+                                copyIcon.style.color = '#4ade80';
+                                setTimeout(function() { copyIcon.style.color = ''; }, 1000);
+                            }).catch(function() {});
+                        } else {
+                            var ta = document.createElement('textarea');
+                            ta.value = code;
+                            document.body.appendChild(ta);
+                            ta.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(ta);
+                            copyIcon.style.color = '#4ade80';
+                            setTimeout(function() { copyIcon.style.color = ''; }, 1000);
+                        }
+                    };
+                    pre.appendChild(copyIcon);
+                })(pres[k]);
+            }
+        }
+        
+        // 保持滚动到底部
+        if (wasScrolledToBottom) {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+    } catch(e) {
+        console.error('_doUpdateBotMessage 错误:', e);
+    }
+}
+
+// 更新机器人消息（带防抖，用于流式更新中间过程）
+function updateBotMessage(id, reasoning, content) {
+    clearTimeout(updateBotTimer);
+    updateBotTimer = setTimeout(function() {
+        _doUpdateBotMessage(id, reasoning, content);
+    }, 80);
+}
+
+        async function sendPhoto() {
+			let photoHistory = []; // 新增：存储对话历史的数组
+            const userInput = document.getElementById("userInput").value.trim();
+            if (!userInput) return;
+			
+            sendButtonmsg.disabled = true;
+            sendButtonphoto.disabled = true;
+			userTextarea.disabled = true;
+
+            // 新增：将用户消息添加到历史记录
+            const userMessage = { role: "user", content: userInput };
+            photoHistory.push(userMessage);
+            addMessage("user", userInput);
+			
+            try {
+                document.getElementById("loading").style.display = "block";
+                const response = await fetch(apiPhotoUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: photoHistory }) // 改为发送完整对话历史
+                });
+                
+                const data = await response.json();
+                
+                // 新增：将AI回复添加到历史记录
+                addMessage("bot", data.response);
+            } catch (error) {
+                console.error("Error:", error);
+                const errorMessage = { role: "assistant", content: `Error: ${error.message}` };
+                addMessage("bot", `Error: ${error.message}`);
+            } finally {
+                document.getElementById("loading").style.display = "none";
+                sendButtonmsg.disabled = false;
+                sendButtonphoto.disabled = false;
+				userTextarea.disabled = false;
+                document.getElementById("userInput").value = "";
+            }
+        }
+
+
+		function addMessage(role, content, id) {
+			try {
+				var messageDiv = document.createElement("div");
+				messageDiv.id = 'msg-' + (id || Date.now());
+				messageDiv.className = 'message ' + role;
+
+				// 如果是机器人消息，则渲染 Markdown（使用安全的 parseMarkdown）
+				if (role === "bot") {
+					var renderedContent = parseMarkdown(content);
+					messageDiv.innerHTML = '<span class="content">' + renderedContent + '</span>';
+
+					// 高亮代码块
+					setTimeout(function() {
+						try {
+							if (window.hljs) {
+								var blocks = messageDiv.querySelectorAll('pre code');
+								for (var j = 0; j < blocks.length; j++) {
+									try { hljs.highlightElement(blocks[j]); } catch(e) {}
+								}
+							}
+
+							// 为每个代码块添加复制图标
+							var pres = messageDiv.querySelectorAll('pre');
+							for (var k = 0; k < pres.length; k++) {
+								(function(pre) {
+									var copyIcon = document.createElement('i');
+									copyIcon.className = 'fas fa-copy copy-icon';
+									copyIcon.title = '复制代码';
+									copyIcon.onclick = function() {
+										var codeEl = pre.querySelector('code');
+										if (!codeEl) return;
+										var code = codeEl.innerText;
+										if (navigator.clipboard) {
+											navigator.clipboard.writeText(code).then(function() {
+												copyIcon.style.color = '#4CAF50';
+												setTimeout(function() { copyIcon.style.color = '#fff'; }, 1000);
+											}).catch(function() {});
+										} else {
+											var ta = document.createElement('textarea');
+											ta.value = code;
+											document.body.appendChild(ta);
+											ta.select();
+											document.execCommand('copy');
+											document.body.removeChild(ta);
+											copyIcon.style.color = '#4CAF50';
+											setTimeout(function() { copyIcon.style.color = '#fff'; }, 1000);
+										}
+									};
+									pre.appendChild(copyIcon);
+								})(pres[k]);
+							}
+						} catch(e) {
+							console.error('代码高亮处理失败:', e);
+						}
+					}, 30);
+				} else {
+					messageDiv.innerHTML = '<span class="content">' + escapeHtml(content) + '</span>';
+				}
+
+				chatHistory.appendChild(messageDiv);
+				chatHistory.scrollTop = chatHistory.scrollHeight;
+			} catch(e) {
+				console.error('addMessage 错误:', e);
+			}
+		}
+
+        // 监听输入框的 Enter 键
+        document.getElementById("userInput").addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault(); // 阻止默认换行行为
+                sendMessage();
+            }
+        });
+
+        // 自动调整输入框高度
+        document.getElementById("userInput").addEventListener("input", (event) => {
+            event.target.style.height = "auto";
+            event.target.style.height = event.target.scrollHeight + "px";
+        });
+		
+    </script>
+</body>
+</html>

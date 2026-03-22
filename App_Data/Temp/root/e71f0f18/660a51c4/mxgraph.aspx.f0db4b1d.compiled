@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/mxgraph.aspx" hash="fffffff94ae4f160" filehash="2e635146fd0c" flags="110000" assembly="App_Web_kxd7kyhq" type="ASP.student_mxgraph_aspx">
+    <filedeps>
+        <filedep name="/student/mxgraph.aspx" />
+    </filedeps>
+</preserve>

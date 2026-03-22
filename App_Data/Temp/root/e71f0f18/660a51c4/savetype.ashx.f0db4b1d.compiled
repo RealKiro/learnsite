@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/Savetype.ashx" hash="33c60594" filehash="631c3e4afff" flags="110000" assembly="App_Web_kxd7kyhq" type="Savetype">
+    <filedeps>
+        <filedep name="/student/Savetype.ashx" />
+    </filedeps>
+</preserve>

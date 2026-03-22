@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/webstore.aspx" hash="fffffff94ae4f160" filehash="fffff0a68f01accc" flags="110000" assembly="App_Web_w_oty_lo" type="ASP.student_webstore_aspx">
+    <filedeps>
+        <filedep name="/student/webstore.aspx" />
+    </filedeps>
+</preserve>

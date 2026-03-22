@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/student/upchat.ashx" hash="33c60594" filehash="2235767f528a" flags="110000" assembly="App_Web_zgidwflv" type="upchat">
+    <filedeps>
+        <filedep name="/student/upchat.ashx" />
+    </filedeps>
+</preserve>

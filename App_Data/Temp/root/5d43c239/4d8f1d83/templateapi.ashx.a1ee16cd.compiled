@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/templateapi.ashx" hash="33c60594" filehash="ffffca71cf468b98" flags="110000" assembly="App_Web_i22wbv5x" type="templateapi">
+    <filedeps>
+        <filedep name="/teacher/templateapi.ashx" />
+    </filedeps>
+</preserve>

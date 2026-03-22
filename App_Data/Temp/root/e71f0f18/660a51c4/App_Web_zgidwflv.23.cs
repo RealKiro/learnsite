@@ -1,0 +1,68 @@
+#pragma checksum "C:\Users\Administrator\Downloads\LearnSite2026-1-5\LearnSite2\LearnSite信息学习平台2026-1-5\student\uploadexam.ashx" "{406ea660-64cf-4c82-b6f0-42d48172a799}" "14AD292C4A17D5C88788F1C78D0CCB0F"
+
+#line 1 "C:\Users\Administrator\Downloads\LearnSite2026-1-5\LearnSite2\LearnSite信息学习平台2026-1-5\student\uploadexam.ashx"
+
+
+using System;
+using System.Web;
+
+public class uploadexam : IHttpHandler
+{    
+    public void ProcessRequest (HttpContext context) {
+        LearnSite.Model.Cook cook = new LearnSite.Model.Cook();
+        if (cook.IsExist())
+        {
+            string selectstr = HttpContext.Current.Request.Form["selectstr"];
+            string score = HttpContext.Current.Request.Form["score"];
+            string lidstr = HttpContext.Current.Request.Form["lidstr"];
+            string cidstr = HttpContext.Current.Request.Form["cidstr"];
+            string vidstr = HttpContext.Current.Request.Form["vidstr"];
+            string vtypestr = HttpContext.Current.Request.Form["vtypestr"];
+
+            string Wtime = cook.LoginTime;
+            DateTime Wdate = DateTime.Now;
+            LearnSite.Model.SurveyFeedback fmodel = new LearnSite.Model.SurveyFeedback();
+            fmodel.Fnum = cook.Snum;
+            fmodel.Fyear = cook.Syear;
+            fmodel.Fgrade = cook.Sgrade;
+            fmodel.Fclass = cook.Sclass;
+            fmodel.Fterm = cook.ThisTerm;
+            fmodel.Fcid = Int32.Parse(cidstr);
+            fmodel.Fvid = Int32.Parse(vidstr);
+            fmodel.Fvtype = Int32.Parse(vtypestr);
+            fmodel.Fselect = selectstr;
+            fmodel.Fscore = Int32.Parse(score);
+            fmodel.Fdate = DateTime.Now;
+            fmodel.Fsid = cook.Sid;
+            fmodel.Flid = Int32.Parse(lidstr);
+
+            LearnSite.BLL.SurveyFeedback fbll = new LearnSite.BLL.SurveyFeedback();
+            if (fbll.Add(fmodel) > 0)
+            {
+                //添加课堂活动记录
+                LearnSite.Model.MenuWorks kmodel = new LearnSite.Model.MenuWorks();
+                kmodel.Klid = Int32.Parse(lidstr);
+                kmodel.Ksid = cook.Sid;
+                kmodel.Ktime = LearnSite.Common.Computer.GoneMinute(DateTime.Parse(Wtime), Wdate);
+                kmodel.Kcheck = false;
+                LearnSite.BLL.MenuWorks kbll = new LearnSite.BLL.MenuWorks();
+                kbll.Add(kmodel);
+                context.Response.Write("ok");
+            }
+            else
+            {
+                context.Response.Write("no");
+            }
+        }
+    }
+ 
+    public bool IsReusable {
+        get {
+            return false;
+        }
+    }
+
+}
+
+#line default
+#line hidden

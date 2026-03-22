@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  LearnSite 版本更新日志
+  
+  使用说明：
+  - 新增版本时，在 <changelog> 下添加新的 <version> 节点
+  - 最新版本放在最前面，第一个 <version> 会自动标记为"最新"样式
+  - tag 属性：new（新功能）、improve（改进）、fix（修复）、stable（稳定版）
+  - item 的 type 属性：feat（功能）、ui（界面）、fix（修复），留空则为默认样式
+  
+  示例：
+  <version ver="v2026.3" tag="new" date="2026年3月">
+    <item type="feat">新增数据仪表盘功能</item>
+    <item type="ui">优化移动端适配</item>
+  </version>
+-->
+<changelog>
+  <version ver="v3.1.7" tag="new" date="2026年3月">
+    <item>【打字练习】mytype.aspx 原文区与输入区继续优化：逐字高亮更稳定，支持更多正文显示，并对 210 字后内容做差异化高亮\n【游戏入口】myfinger.aspx 新增“更多游戏”入口，并联动 teacher/start.aspx 游戏开关实现灰显禁用/恢复可用\n【学号查询】mynum.aspx 支持按学号显示学生头像，找不到时自动回退默认头像，同时移除缺失的 footer-diagnostic.js 引用\n【部署兼容】deploy.ps1 统一修复为 UTF-8 with BOM，避免 Windows PowerShell 5.1 下中文乱码导致的误报语法错误</item>
+  </version>
+  <version ver="v3.1.6.2" tag="new" date="2026年3月">
+    <item>优化系统更新页面弹窗错误</item>
+  </version>
+  <version ver="v3.1.6.1" tag="new" date="2026年3月">
+    <item>更新后台更新弹窗bug,安装引导页面</item>
+  </version>
+  <version ver="v3.1.6" tag="new" date="2026年3月">
+    <item>【安装向导】新增 install.html 可视化安装引导页：一键自动部署配置生成器 + 5步手动安装向导双模式切换\n【部署脚本】新增 deploy.ps1：仅需输入数据库密码 + 管理员密码，自动完成 IIS 安装、文件部署、IIS 配置、连接字符串、数据库初始化及管理员密码设置（MD5+Salt）\n【版本修正】IIS 应用程序池运行时统一修正为 .NET CLR v2.0（ASP.NET 2.0 WebForms 正确运行时）</item>
+  </version>
+  <version ver="v3.1.5" tag="new" date="2026年3月">
+    <item>【资源分类】resourcecategory.aspx 所有图标替换为 SVG 矢量图标，关键词自动匹配，实时预览和 Toast 同步改为 SVG\n【作品管理】works.aspx 去除大屏展示列，保留顶部大屏展示按钮\n【接口修复】worksdetail.ashx / worksstat.ashx 修复 AppendFormat 及 Response.Write 输出错误；worksbigscreen.aspx 修复 AutoEventWireup 配置\n【系统修复】checkupdate.ashx 修复 500 错误；footersetting.aspx 新增页脚显示控制开关</item>
+  </version>
+  <version ver="v3.1.4" tag="new" date="2026年3月19日">
+    <!-- 游戏管理系统 -->
+    <item type="feat">游戏管理页面全面重构：现代化英雄页头、统计卡片（游戏总数/已显示/已隐藏）、卡片网格布局</item>
+    <item type="feat">游戏开关状态横幅：实时从 Room.Rgame 数据库字段读取，自动显示全开/部分关/全关三种状态</item>
+    <item type="feat">游戏卡片操作：显示/隐藏开关、编辑弹窗（名称/链接/备注/兑换学分）、删除、预览</item>
+    <item type="feat">添加游戏页面（gameupdate.aspx）：支持注册本站路径或外部链接游戏，含常用内置游戏路径参考</item>
+    <item type="feat">gamesave.ashx 接口增强：统一处理 toggle/delete/addlink/edit/globalToggle/list 操作</item>
+    <item type="ui">教师导航新增“游戏管理”菜单入口</item>
+    <!-- 学生游戏中心 -->
+    <item type="feat">学生游戏中心页面（gamelist.aspx）升级：彩色卡片网格布局，展示所有可用游戏</item>
+    <item type="feat">游戏禁用提示：老师在上课页关闭游戏后，学生端自动显示“暂时关闭”提示横幅</item>
+    <item type="feat">游戏学分兑换：付费游戏显示所需学分，学生可消耗学分兑换解锁</item>
+    <item type="feat">gamepurchase.ashx 兑换接口：验证学分余额、防重复兑换、自动创建 GamePurchase 表</item>
+    <item type="ui">学分信息栏：显示可用学分、累计学分、已消耗学分</item>
+    <item type="ui">兑换状态标签：已兑换但老师未开启时显示“已兑换——等待老师开启”</item>
+    <!-- 打字练习侧边栏 -->
+    <item type="feat">打字练习页（myfinger.aspx）侧边栏新增游戏快捷入口，展示最多 4 款已启用游戏</item>
+    <item type="feat">侧边栏实时检测班级 Rgame 状态，关闭时自动隐藏游戏入口</item>
+    <!-- AI/讨论开关状态接口 -->
+    <item type="feat">CheckAIStatus.ashx：学生端实时查询 AI 对话（Room.Rai）开关状态</item>
+    <item type="feat">CheckDiscussStatus.ashx：学生端实时查询小组讨论（Room.Rdiscuss）开关状态</item>
+    <item type="improve">状态接口兼容字段不存在场景（默认开启），减少数据库升级阻断</item>
+    <!-- 数据库 -->
+    <item type="feat">数据库升级脚本（add_room_ai_discuss_columns.sql）：Room 表新增 Rdiscuss、Rai、Rgame 三个 bit 字段，默认 1，可重复执行</item>
+    <!-- 课程总览页 -->
+    <item type="ui">学生课程总览页（showcourse.aspx）重构：现代卡片布局，隐藏左侧导航并全宽展示课程统计与任务列表</item>
+  </version>
+  <version ver="v3.1.3" tag="improve" date="2026年3月18日">
+    <!-- 学生管理页面改版 -->
+    <item type="ui">学生管理页面全面改版：现代化卡片式布局，功能分组工具栏（密码管理/分组管理/导出恢复），清晰的色彩区分</item>
+    <item type="ui">工具栏分组图标：蓝色（密码）、绿色（分组）、橙色（导出），按色彩语义区分操作分区</item>
+    <item type="ui">权限设置行：独立的淡色背景设置行，统一展示注册开关和班级/照片/性别/姓名修改权限</item>
+    <item type="ui">分页器美化：自定义分页模板，显示当前页/总页数，按钮悬停高亮</item>
+    <!-- 修改学生密码弹窗 -->
+    <item type="feat">学生密码修改弹窗：直接在学生列表内点击"修改密码"按钮，弹出精美弹窗修改单个学生密码，无需跳转页面</item>
+    <item type="feat">新增 changestupwd.ashx 接口：教师端AJAX方式修改学生密码，自动检测 Ssalt 字段兼容 MD5+Salt 加密版本</item>
+    <item type="ui">修改密码弹窗设计：渐变紫色头部、弹入动画、毛玻璃遮罩、密码最短3位校验</item>
+    <!-- 添加学生页面改版 -->
+    <item type="ui">添加学生页面全面改版：Modal卡片风格，渐变紫色头部，3列响应式表单网格布局</item>
+    <item type="feat">添加学生时支持选择所属校区：School表存在时自动加载校区选项，添加后自动关联</item>
+    <item type="ui">表单输入框分级：只读字段灰色背景，可编辑字段黄色背景，聚焦蓝色光晕</item>
+    <!-- 更新检查服务重构 -->
+    <item type="improve">checkupdate.ashx 重构：自动从 changelog.xml 第一个 version 节点读取当前版本号</item>
+    <item type="improve">更新检查结果应用级缓存：缓存远程版本信息1小时，减少重复请求远端服务器</item>
+    <item type="improve">语义化版本比较：支持 v3.1.2 与 v3.1.3 格式的多段版本号大小比较</item>
+    <!-- 后台 Master 优化 -->
+    <item type="improve">Manage.master 版本号显示：GetAppVersion() 优先从 changelog.xml 读取最新版本，DLL 为回退方案</item>
+    <item type="improve">Manage.master 支持 favicon.png 格式：GetFaviconLinkTag() 同时检测 .ico 和 .png</item>
+  </version>
+  <version ver="v3.1.2" tag="new" date="2026年3月18日">
+    <!-- 虚拟宠物系统 -->
+    <item type="feat">虚拟宠物系统：全新的班级宠物功能，学生可拥有并互动自己的虚拟宠物</item>
+    <item type="feat">宠物管理页面：教师可查看各班级宠物状态（HP、心情、食物、清洁度），卡片式布局</item>
+    <item type="feat">宠物图标设置：支持为8种宠物（猫/狗/兔/狐/熊猫/青蛙/虎/鸟）上传各成长阶段（lv0-lv4）图标</item>
+    <item type="feat">宠物换装设置：教师可配置7种服装（墨镜/帽子/蝴蝶结/星星/幽灵/皇冠/翅膀）图片和兑换参数</item>
+    <item type="feat">宠物成长阶段：可视化设置各阶段所需经验值，数据保存至 App_Data/petstages.json</item>
+    <item type="feat">学生宠物页面：学生可在个人中心查看和互动自己的宠物，消耗积分喂食/互动</item>
+    <item type="feat">宠物卡片兑换：学生可使用积分兑换宠物服装卡片</item>
+    <item type="ui">宠物状态可视化：HP/心情/食物/清洁度进度条，状态颜色（开心/中性/难过）</item>
+    <item type="ui">宠物卡片设计：渐变背景，悬停动画，成长阶段徽章显示</item>
+    <!-- 评价类型分类 -->
+    <item type="feat">评价类型分类：AttitudeType 支持自定义颜色分类，新增 AttitudeCategory 表自动创建</item>
+    <item type="feat">评价类别管理：支持添加、编辑、删除评价类别，自动关联到评价类型</item>
+    <item type="feat">评价类别AJAX接口：新增 attitudecatajax.ashx，前端实时加载类别数据</item>
+    <item type="ui">评价类型颜色标签：列表中显示所属类别的彩色标签</item>
+    <!-- 徽章系统增强 -->
+    <item type="feat">徽章分类管理：徽章设置页新增 BadgeCategory 分类表，自动创建并预置默认类别（学业/品德/特长/创新/合作/其他）</item>
+    <item type="ui">徽章商城积分钱包：展示学生总积分、已用积分、可用积分统计卡片</item>
+    <!-- 学生资源中心 -->
+    <item type="feat">学生资源浏览页面：全新 myfile.aspx，支持浏览知识库资料，统计卡片展示总量/分类/存储大小</item>
+    <item type="feat">资源详情页：resourcedetail.aspx，支持章节/非章节双模式显示，关联 ResourceCategories 分类</item>
+    <item type="ui">文件类型颜色图标：按扩展名显示对应颜色图标（PDF红色、Word蓝色、代码绿色等）</item>
+    <item type="feat">资源关键词搜索：按文件名搜索资源，支持文件夹分类筛选</item>
+    <!-- 上课页面优化 -->
+    <item type="feat">上课页面校区联动：校区下拉框选择后自动筛选对应年级和班级列表</item>
+    <item type="fix">修复年级/班级下拉框未按校区过滤的问题，与 createroom.aspx 逻辑保持一致</item>
+    <!-- 循环展播美化 -->
+    <item type="ui">循环展播页面全面美化：渐变紫色页头、卡片式控制栏、学生姓名滑入动画</item>
+    <item type="improve">展播后端重构：提取评分映射字典，统一参数解析逻辑</item>
+    <!-- 缺席备注美化 -->
+    <item type="ui">缺席备注弹窗美化：渐变橙色头部，圆角卡片，弹出动画，聚焦光晕效果</item>
+    <!-- 用户管理 -->
+    <item type="feat">用户管理页面：全新统一用户管理界面，合并学生/教师列表，支持类型筛选和关键词搜索</item>
+    <item type="feat">用户统计卡片：显示学生数、教师数、总用户数</item>
+    <item type="ui">用户列表：展示学校信息、权限类型，兼容未升级数据库（动态检测字段）</item>
+    <!-- 系统更新优化 -->
+    <item type="improve">系统更新页自动识别 Gitee/GitHub 仓库地址并转换为 version.json 直链，显示实际请求地址</item>
+    <!-- 导航与Master -->
+    <item type="feat">个人中心导航支持宠物入口：Pf.master 新增 mypet 页面路由识别</item>
+    <item type="feat">教师导航新增宠物管理菜单：petmanage/petsetting/petcostume 路由识别</item>
+  </version>
+  <version ver="v3.1.1" tag="improve" date="2026年3月13日">
+    <!-- 教师上课页面 -->
+    <item type="feat">游戏/讨论/AI开关弹窗提示：打勾显示“XX已开启”，取消显示“XX已关闭”</item>
+    <item type="fix">修复机房下拉框不显示数据：新增LoadHouseDropdown从House表加载机房列表</item>
+    <!-- 机房座位图页面 -->
+    <item type="ui">机房座位图全面美化：白色背景、卡片式布局、渐变头部栏</item>
+    <item type="ui">宽屏自适应设计：宽度设为96vw（最大1400px），充分利用屏幕空间</item>
+    <item type="ui">CSS SVG图标替换：首页按钮使用内联SVG图标替代home.png图片</item>
+    <item type="ui">电脑座位显示器风格：上方圆角屏幕+下方底座支架，屏幕高光反射效果</item>
+    <item type="ui">座位状态颜色：紫色（默认）、绿色（学生在线）、灰色（空座位），底座颜色同步变化</item>
+    <item type="ui">座位区域网格纹理：淡色网格背景，顶部径向渐变点缀</item>
+    <item type="feat">座位自动间距调整：根据容器尺寸按比例拉开横竖排间距，充分利用空间</item>
+    <item type="feat">座位位置修复：自动将电脑坐标平移到容器顶部，解决原始坐标偏移问题</item>
+    <item type="ui">电脑座位增大：尺寸从60×40增大到72×46，显示更清晰</item>
+  </version>
+  <version ver="v3.1.0" tag="new" date="2026年3月">
+    <!-- 题库功能增强 -->
+    <item type="feat">题库编辑功能：支持在线编辑题目，修改题目所有信息</item>
+    <item type="feat">多媒体内容支持：支持图片、视频、音频、相关链接、编程附件</item>
+    <item type="feat">选项图片上传：支持为选择题的每个选项（A/B/C/D）单独上传图片</item>
+    <item type="feat">实时图片预览：选择图片后立即显示预览，支持删除</item>
+    <item type="feat">文件分类存储：按媒体类型分类存储（image/video/audio/program）</item>
+    <item type="feat">数据库字段自动创建：自动检查并创建所需字段</item>
+    <!-- 界面美化 -->
+    <item type="ui">题目列表图标美化：使用精美的SVG图标替代Unicode字符</item>
+    <item type="ui">编辑弹窗全面美化：渐变背景、毛玻璃效果、流畅动画</item>
+    <item type="ui">弹窗遮罩层升级：深色半透明+毛玻璃模糊效果</item>
+    <item type="ui">表单标签装饰：左侧彩色竖条，不同区域不同颜色</item>
+    <item type="ui">输入框升级：渐变背景，聚焦时蓝色光晕+向上浮动</item>
+    <item type="ui">按钮水波纹效果：点击扩散动画，悬停向上浮动</item>
+    <item type="ui">自定义滚动条：渐变滑块，圆角设计</item>
+    <!-- 在线更新系统 -->
+    <item type="feat">在线更新部署指南：详细的自建服务器更新部署文档</item>
+    <item type="feat">自动化打包脚本：build_update.ps1 自动打包，计算MD5</item>
+    <item type="feat">自动化部署脚本：deploy_to_server.ps1 一键部署</item>
+    <item type="feat">三种更新方式：本地更新、自建服务器、GitHub托管</item>
+    <item type="feat">多方法压缩打包：支持5种压缩方法自动选择</item>
+    <item type="feat">version.json配置：支持版本号、更新日志、MD5校验</item>
+    <!-- Web构建器 -->
+    <item type="feat">Web更新包构建器：基于浏览器的可视化打包部署工具</item>
+    <item type="feat">一键打包功能：网页点击按钮即可自动打包</item>
+    <item type="feat">打包自动复制：打包完成后自动复制到配置的服务器路径</item>
+    <item type="feat">一键部署功能：自动上传到服务器并更新version.json</item>
+    <item type="feat">实时日志显示：打包和部署过程实时显示</item>
+    <item type="feat">配置自动保存：服务器配置自动保存和加载</item>
+    <item type="feat">下载功能：打包完成后可直接下载更新包</item>
+    <!-- 部署向导 -->
+    <item type="ui">可视化部署向导：精美的引导式部署页面，5步完成配置</item>
+    <item type="ui">进度条可视化：实时显示部署进度，支持点击跳转</item>
+    <item type="ui">三种方式选择：卡片式选择界面，推荐标签提示</item>
+    <item type="ui">智能配置展示：根据选择自动显示对应配置步骤</item>
+    <item type="ui">代码块一键复制：所有代码支持复制</item>
+    <item type="ui">测试清单功能：交互式复选框，确保测试完整</item>
+    <!-- 系统更新功能 -->
+    <item type="feat">系统更新WebClient异常修复：增强错误处理和诊断</item>
+    <item type="feat">多种TLS协议支持：支持TLS 1.0/1.1/1.2</item>
+    <item type="feat">详细错误提示：针对每种错误提供具体解决方案</item>
+    <item type="feat">下载地址验证：增强下载地址验证和错误提示</item>
+    <!-- 兼容性修复 -->
+    <item type="fix">.NET 2.0兼容性修复：替换泛型集合为ArrayList</item>
+    <item type="fix">Lambda表达式替换：改为foreach循环</item>
+    <item type="fix">SqlDataReader兼容：使用GetOrdinal()方法</item>
+    <item type="fix">PowerShell脚本编码修复：解决中文字符乱码问题</item>
+    <item type="fix">XML解析问题修复：使用XmlDocument.Load方法</item>
+    <!-- 教师编辑页面修复 -->
+    <item type="fix">教师编辑页面空引用异常修复：兼容constr和SqlServer两种连接字符串</item>
+    <item type="fix">调试页面.NET 2.0兼容：移除var关键字，使用显式类型声明</item>
+    <item type="fix">连接字符串自动检测：优先使用constr，自动回退到SqlServer</item>
+    <item type="fix">友好错误提示：显示所有可用连接字符串，帮助快速定位问题</item>
+    <!-- 学校设置功能 -->
+    <item type="feat">学校设置功能：新增学校/校区管理页面</item>
+    <item type="feat">学校信息管理：支持添加、删除学校，设置学校代码、地址、电话等信息</item>
+    <item type="feat">学校编辑功能：支持编辑已有学校信息，点击编辑按钮自动填充表单</item>
+    <item type="feat">批量删除功能：支持勾选多个学校进行批量删除操作</item>
+    <item type="feat">全选功能：表头复选框支持一键全选/取消全选</item>
+    <item type="feat">学校状态控制：可启用/禁用学校，控制学生是否可选择该校区</item>
+    <item type="feat">数据库自动升级：自动创建School表和Students.SchoolId字段</item>
+    <item type="feat">数据库初始化脚本：提供独立的SQL脚本用于首次初始化数据库结构</item>
+    <item type="feat">学生校区关联：学生可关联到对应校区，实现按校区分类显示</item>
+    <item type="feat">删除保护：有学生关联的学校无法删除，保护数据完整性</item>
+    <item type="feat">批量设置脚本：提供SQL脚本方便批量设置学生校区，含前置检查</item>
+    <item type="feat">校区分布统计：SQL脚本支持查看各年级、班级的校区分布情况</item>
+    <item type="ui">学校设置菜单：在系统管理下新增学校设置入口，位于班级设置前</item>
+    <item type="ui">学生导入优化：添加校区选择步骤（UI已完成，后端待集成）</item>
+    <item type="fix">数据库表名修正：将Student修正为Students，匹配实际数据库结构</item>
+    <item type="fix">事件验证修复：禁用事件验证，修复批量操作下拉框回发错误</item>
+    <!-- 学生管理页面 -->
+    <item type="feat">学生列表页面：全新的学生管理页面，支持校区筛选和批量操作</item>
+    <item type="feat">多维度筛选：支持按校区、年级、关键词（学号/姓名）筛选学生</item>
+    <item type="feat">批量设置校区：可根据筛选条件批量设置学生所属校区</item>
+    <item type="feat">学生删除功能：支持单个删除学生记录</item>
+    <item type="feat">分页显示：每页显示20条记录，支持翻页导航</item>
+    <item type="feat">校区标签显示：学生列表中显示所属校区，未设置显示灰色标签</item>
+    <item type="ui">学生列表菜单：在学生管理分类下新增学生列表入口</item>
+    <item type="ui">统计卡片：显示当前筛选条件下的学生总数</item>
+    <item type="ui">响应式设计：表格支持横向滚动，适配不同屏幕尺寸</item>
+    <!-- 未分配学生页面 -->
+    <item type="feat">未分配学生页面：专门显示尚未分配校区的学生名单</item>
+    <item type="feat">智能筛选：支持按年级、关键词筛选未分配学生</item>
+    <item type="feat">批量分配校区：可根据筛选条件（如年级）批量设置学生校区</item>
+    <item type="feat">实时统计：显示未分配学生总数，方便掌握分配进度</item>
+    <item type="feat">橙色主题：使用橙色渐变配色，区别于其他页面</item>
+    <item type="feat">警告提示：批量操作前显示警告信息，避免误操作</item>
+    <item type="ui">未分配学生菜单：在学生列表和新生导入之间新增入口</item>
+    <item type="ui">统计卡片：醒目显示未分配学生数量</item>
+    <item type="ui">分页导航：每页20条记录，支持首页/尾页/上下页跳转</item>
+    <item type="improve">移除临时表查看：删除临时表查看菜单和页面，简化学生管理流程</item>
+    <item type="fix">新生导入校区选择修复：修复校区下拉菜单显示不全的问题，使用双重加载机制（服务器端+AJAX）</item>
+    <item type="feat">校区数据API：新增 GetSchools.aspx 接口，提供 JSON 格式的校区数据</item>
+    <item type="feat">校区加载测试页面：新增 test-schools.html 用于测试校区数据加载功能</item>
+    <item type="fix">学年升班页面修复：修复"当前学年"文本框宽度不足导致显示不全的问题</item>
+    <item type="feat">帮助中心系统信息：在帮助中心设置页面添加固定的系统信息展示（LearnSite重庆美化版 QQ群：565444740）</item>
+    <item type="feat">教师管理学校栏：教师列表页面新增学校栏，显示教师所属校区</item>
+    <item type="feat">教师表学校字段：提供 SQL 脚本为 Teacher 表添加 SchoolId 字段</item>
+    <item type="feat">教师批量分配学校：教师列表支持勾选多个教师批量设置学校</item>
+    <item type="feat">教师全选功能：表头复选框支持一键全选/取消全选教师</item>
+    <item type="feat">教师添加学校选择：添加教师时可选择所属学校，支持不设置</item>
+    <item type="feat">教师编辑学校选择：编辑教师时可修改所属学校，自动加载当前学校</item>
+    <item type="fix">SQL脚本注释修复：修复教师表添加学校字段脚本的注释语法错误</item>
+    <!-- SQL脚本 -->
+    <item type="feat">SQL脚本错误修复：去掉USE语句，支持任意数据库名</item>
+    <item type="feat">SQL脚本重复执行保护：避免重复添加字段和属性</item>
+    <item type="feat">SQL脚本使用文档：详细的使用说明和错误处理指南</item>
+    <!-- 文档完善 -->
+    <item type="feat">项目README文档：完整的项目介绍和功能说明</item>
+    <item type="feat">在线更新快速指南：10分钟快速部署步骤</item>
+    <item type="feat">压缩解压改进文档：详细的方法对比和使用建议</item>
+    <item type="feat">故障排查指南：常见问题及解决方案</item>
+    <item type="feat">安全和维护建议：HTTPS、MD5校验、权限控制等</item>
+  </version>
+  <version ver="v2026.3.1" tag="new" date="2026年3月1日">
+    <item type="feat">教师课程表管理：新增课程表菜单，支持在线编辑和文件上传两种方式</item>
+    <item type="feat">在线编辑课程表：可视化表格编辑器，支持自定义节次和时间</item>
+    <item type="feat">节次管理：直接在页面管理节次，支持添加、编辑、删除节次</item>
+    <item type="feat">课程表上传：支持PNG、JPG、GIF、WebP、PDF格式，最大10MB</item>
+    <item type="feat">课程表打印：支持直接打印课程表，自动隐藏编辑按钮</item>
+    <item type="feat">课程表数据保存：数据保存在App_Data/schedule.json，支持跨学期保留</item>
+    <item type="ui">节次卡片设计：渐变背景、彩色边框、编号徽章、悬停动画</item>
+    <item type="ui">课程表Tab切换：在线编辑和上传文件两种模式，状态记忆</item>
+    <item type="ui">响应式布局：节次卡片网格自适应，移动端友好</item>
+    <item type="improve">节次实时更新：修改节次后课程表立即同步更新</item>
+    <item type="improve">智能节次命名：自动生成"第一节"、"第二节"等中文名称</item>
+  </version>
+  <version ver="v2026.2.28-7" tag="improve" date="2026年2月28日">
+    <item type="feat">系统更新功能：新增系统在线更新功能，支持检查更新和下载更新包</item>
+    <item type="feat">版本检查：自动检查GitHub最新版本，显示版本号和更新日志</item>
+    <item type="feat">更新下载：支持下载更新包到backupdb目录，显示下载进度</item>
+    <item type="feat">更新说明文档：提供详细的系统更新使用说明和注意事项</item>
+    <item type="feat">版本信息文件：version.json包含完整版本信息和更新日志</item>
+    <item type="fix">修复HTTPS连接错误：启用TLS 1.2支持，兼容.NET Framework 2.0</item>
+    <item type="ui">更新页面设计：卡片式布局，显示当前版本和最新版本对比</item>
+    <item type="ui">更新日志分页：管理后台首页更新日志每页显示6条，支持翻页</item>
+  </version>
+  <version ver="v2026.2.28-6" tag="new" date="2026年2月28日">
+    <item type="feat">管理员邮箱绑定：个人中心新增邮箱绑定功能，支持验证码验证</item>
+    <item type="feat">学生邮箱绑定：个人设置页面新增邮箱绑定功能，支持验证码验证</item>
+    <item type="feat">邮箱验证码：10分钟有效期，60秒倒计时防重复发送</item>
+    <item type="feat">邮箱脱敏显示：已绑定邮箱自动脱敏显示，保护隐私</item>
+    <item type="ui">邮箱绑定弹窗：统一的弹窗设计，支持修改已绑定邮箱</item>
+    <item type="ui">绑定按钮优化：显示编辑图标，未绑定显示"绑定"，已绑定显示"修改"</item>
+  </version>
+  <version ver="v2026.2.28-5" tag="new" date="2026年2月28日">
+    <item type="feat">找回密码功能：教师和学生均可通过新页面找回密码</item>
+    <item type="feat">教师找回密码：三步流程（验证身份→验证邮箱→重置密码），邮箱验证码10分钟有效</item>
+    <item type="feat">学生找回密码：三步流程（验证身份→验证邮箱→重置密码），学号+姓名+邮箱验证</item>
+    <item type="feat">验证码发送：60秒倒计时防重复发送，邮箱地址脱敏显示</item>
+    <item type="ui">找回密码页面：采用左右分栏设计，左侧品牌展示，右侧表单操作</item>
+    <item type="ui">登录页面优化：教师和学生登录页"找回密码"链接指向新页面</item>
+    <item type="ui">动态Logo显示：找回密码页面自动加载管理后台上传的Logo</item>
+  </version>
+  <version ver="v2026.2.28-4" tag="new" date="2026年2月28日">
+    <item type="feat">考试监考功能：新增考试监考页面，实时查看学生提交状态</item>
+    <item type="feat">提交统计：显示应考人数、已提交人数、未提交人数、提交率</item>
+    <item type="feat">学生名单：分别展示已提交和未提交学生的学号、姓名信息</item>
+    <item type="feat">提交时间：已提交学生显示具体提交时间</item>
+    <item type="feat">实时刷新：支持手动刷新和30秒自动刷新，带倒计时显示</item>
+    <item type="feat">名单弹窗：点击统计卡片弹窗显示学生姓名，网格布局每行6个</item>
+    <item type="ui">统计卡片：使用渐变色卡片展示关键数据，可点击查看详情</item>
+    <item type="ui">表格展示：已提交/未提交学生分表显示，状态标签醒目</item>
+    <item type="ui">自动刷新指示器：绿色脉动圆点和倒计时显示，实时更新状态</item>
+    <item type="ui">菜单调整：考试监考放在考试发布下方，成绩分析放在成绩管理下方</item>
+  </version>
+  <version ver="v2026.2.28-3-hotfix4" tag="fix" date="2026年2月28日">
+    <item type="fix">修复TeaCook模型兼容性问题：移除对Hnum属性的直接访问</item>
+    <item type="fix">修复RNGCryptoServiceProvider的using语句错误</item>
+    <item type="fix">修复默认参数编译错误：使用方法重载替代</item>
+    <item type="fix">修复命名空间编译错误：移除命名空间声明</item>
+    <item type="fix">完全兼容.NET Framework 2.0和现有系统架构</item>
+  </version>
+  <version ver="v2026.2.28-3" tag="improve" date="2026年2月28日">
+    <item type="feat">密码加密存储：使用MD5+Salt算法加密密码，大幅提升安全性</item>
+    <item type="feat">密码迁移工具：可视化界面，一键迁移教师和学生密码</item>
+    <item type="feat">登录保护：失败5次锁定15分钟，防止暴力破解</item>
+    <item type="feat">密码强度验证：支持长度、大小写、数字、特殊字符要求</item>
+    <item type="feat">安全助手类：提供密码加密、XSS防护、SQL注入防护等功能</item>
+    <item type="improve">教师登录：自动兼容新旧密码，无缝升级</item>
+    <item type="improve">密码修改：修改后自动使用加密存储</item>
+    <item type="improve">数据库升级：自动添加盐值字段</item>
+  </version>
+  <version ver="v2026.2.28-2" tag="improve" date="2026年2月28日">
+    <item type="feat">教师个人中心：新增个人中心页面，支持头像上传、密码修改、邮箱绑定</item>
+    <item type="feat">教师登录验证码：新增图形验证码功能，提升登录安全性</item>
+    <item type="feat">头像管理：支持JPG、PNG、GIF、WebP格式，最大2MB，实时预览</item>
+    <item type="feat">密码修改：验证当前密码，设置新密码（最少6位），二次确认</item>
+    <item type="feat">邮箱绑定：绑定邮箱地址，用于找回密码和接收通知</item>
+    <item type="feat">验证码生成：4位随机字符，渐变背景，随机噪点和干扰线，点击刷新</item>
+    <item type="ui">用户下拉菜单：将"个人信息"改为"个人中心"</item>
+    <item type="ui">个人中心设计：渐变色头部，卡片式布局，响应式设计</item>
+  </version>
+  <version ver="v2026.2.28" tag="improve" date="2026年2月28日">
+    <item type="feat">Python代码查看器：教师批改页面新增VS Code风格的Python代码查看器，支持语法高亮</item>
+    <item type="fix">修复Python编程题显示问题：考试模式下点击返回自动保存代码到数据库</item>
+    <item type="fix">修复学生提交后教师批改页面不显示答案的问题，自动同步答案到ExamAnswer表</item>
+    <item type="feat">考试分析页面：新增全面的考试数据分析功能，支持按考试/年级/班级筛选</item>
+    <item type="feat">考试分析统计卡片：参与人数、平均分、最高分、最低分、及格率可视化展示</item>
+    <item type="feat">题目答题分析：显示每道题的正确率、错误率、正确人数、错误人数，带进度条</item>
+    <item type="feat">徽章商城图片支持：支持emoji表情和图片文件上传，自动fallback机制</item>
+    <item type="feat">徽章商城编辑功能：新增商品编辑面板，支持修改名称、积分、库存、图标、描述</item>
+    <item type="feat">考试发布全年级：支持一键发布考试到全年级所有班级，不限授课班级</item>
+    <item type="feat">知识库资料说明：上传资料时可添加详细说明文字（最多500字），支持适用年级、章节等信息</item>
+    <item type="feat">知识库自动填充：选择文件后自动填充资料名称，可手动修改</item>
+    <item type="feat">AI智能出题关键词过滤：知识库改为可选，支持输入关键词精准提取相关内容</item>
+    <item type="feat">AI出题多关键词支持：支持空格、逗号、分号分隔多个关键词</item>
+    <item type="improve">试卷管理页面AI出题功能同步更新，支持知识库关键词过滤</item>
+    <item type="improve">重新开始考试功能优化：彻底删除学生所有答题记录，而非标记删除</item>
+    <item type="improve">考试批改页面统计卡片：初始隐藏，有数据时才显示</item>
+    <item type="ui">考试完成页面优化：修复提交后空白显示问题，绿色对勾图标居中显示</item>
+    <item type="ui">学生登出优化：直接退出到首页，移除确认对话框</item>
+    <item type="ui">知识库表格优化：内容不换行显示，长文本自动省略号</item>
+    <item type="ui">考试分析题号优化：题号一行显示不换行</item>
+    <item type="fix">修复ntext字段SQL错误：使用DATALENGTH()替代LEN()函数</item>
+    <item type="fix">修复考试提交后显示"代码内容为空"的问题</item>
+    <item type="fix">修复"重新开始"后仍显示旧分数的问题</item>
+    <item type="fix">修复徽章商城图片显示为破损图标的问题</item>
+  </version>
+  <version ver="v2026.2" tag="improve" date="2026年2月">
+    <item type="ui">管理后台全新现代化UI设计，侧边栏导航 + 卡片式布局</item>
+    <item type="ui">登录页面采用玻璃效果重新设计</item>
+    <item type="feat">机房IP管理页面整合到后台布局</item>
+    <item type="ui">数据备份、数据清理、优秀作品备份等页面美化</item>
+    <item type="feat">新增数据仪表盘，实时统计学生、教师、班级等数据</item>
+    <item type="feat">版本更新日志改为 changelog.xml 自动读取，无需修改页面代码</item>
+  </version>
+  <version ver="v2026.1" tag="improve" date="2026年1月">
+    <item type="feat">系统设置页面重新设计为CSS Grid卡片布局</item>
+    <item type="feat">班级管理、教师管理、学生导入页面美化</item>
+    <item type="feat">学年升班、重新分班功能页面优化</item>
+    <item type="ui">统一后台侧边栏导航样式，支持折叠和状态记忆</item>
+  </version>
+  <version ver="v1.3.3.3" tag="stable" date="2021年11月">
+    <item>原始版本，基于ASP.NET WebForms三层架构</item>
+    <item>支持学案管理、签到、作品、打字、资源等功能</item>
+  </version>
+</changelog>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/pythonIdle.aspx" hash="fffffff94ae4f160" filehash="43e2c8cdf457" flags="110000" assembly="App_Web_pythonidle.aspx.f0db4b1d.tsdvpfiu" type="ASP.student_pythonidle_aspx">
+    <filedeps>
+        <filedep name="/student/pythonIdle.aspx" />
+    </filedeps>
+</preserve>

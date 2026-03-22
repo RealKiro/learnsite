@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/excel.aspx" hash="fffffff94ae4f160" filehash="2c725ae7e3c2" flags="110000" assembly="App_Web_excel.aspx.f0db4b1d.rmoonisx" type="ASP.student_excel_aspx">
+    <filedeps>
+        <filedep name="/student/excel.aspx" />
+    </filedeps>
+</preserve>

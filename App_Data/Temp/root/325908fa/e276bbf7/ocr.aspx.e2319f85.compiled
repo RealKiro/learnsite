@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/deepseek/ocr.aspx" hash="fffffff94ae4f160" filehash="3b9075c1f941" flags="110000" assembly="App_Web_2vt6njs1" type="ASP.deepseek_ocr_aspx">
+    <filedeps>
+        <filedep name="/deepseek/ocr.aspx" />
+    </filedeps>
+</preserve>

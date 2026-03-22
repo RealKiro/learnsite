@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/kitymindadd.aspx" hash="fffffff94ae4f160" filehash="b2031ddab2c54b23" flags="110000" assembly="App_Web_td-jscq3" type="ASP.teacher_kitymindadd_aspx">
+    <filedeps>
+        <filedep name="/teacher/kitymindadd.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

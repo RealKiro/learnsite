@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<levels>
+  <level threshold="0" name="见习组员" icon="/images/levelicons/lv_639092579027779768.png" color="#ffffff" />
+  <level threshold="10" name="初级组员" icon="/images/levelicons/lv_639092579049533233.png" color="#ffffff" />
+  <level threshold="30" name="中级组员" icon="/images/levelicons/lv_639092579082783913.png" color="#ffffff" />
+  <level threshold="60" name="高级组员" icon="/images/levelicons/lv_639092579108404722.png" color="#ffffff" />
+  <level threshold="100" name="资深组员" icon="/images/levelicons/lv_639092579143941733.png" color="#ffffff" />
+  <level threshold="150" name="明星组员" icon="/images/levelicons/lv_639092579175606713.png" color="#ffffff" />
+</levels>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/manager/dbupgrade.aspx" hash="fffffff94ae4f160" filehash="f49011de370a0b02" flags="110000" assembly="App_Web_dbupgrade.aspx.a9b56182.a_eycsja" type="ASP.manager_dbupgrade_aspx">
+    <filedeps>
+        <filedep name="/manager/dbupgrade.aspx" />
+        <filedep name="/manager/Manage.master" />
+    </filedeps>
+</preserve>

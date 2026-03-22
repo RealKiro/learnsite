@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/plugins/qrcode/qrcanvas-proxy.aspx" hash="fffffff94ae4f160" filehash="20a0fab6baf6" flags="110000" assembly="App_Web_qfljtbrk" type="ASP.plugins_qrcode_qrcanvas_proxy_aspx">
+    <filedeps>
+        <filedep name="/plugins/qrcode/qrcanvas-proxy.aspx" />
+    </filedeps>
+</preserve>

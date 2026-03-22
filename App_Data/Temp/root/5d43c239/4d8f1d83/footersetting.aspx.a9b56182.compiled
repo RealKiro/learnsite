@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/manager/footersetting.aspx" hash="fffffff94ae4f160" filehash="feb5296f46117a53" flags="110000" assembly="App_Web_footersetting.aspx.a9b56182.k_ehv0sn" type="ASP.manager_footersetting_aspx">
+    <filedeps>
+        <filedep name="/manager/footersetting.aspx" />
+        <filedep name="/manager/Manage.master" />
+    </filedeps>
+</preserve>

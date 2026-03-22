@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/Runpy.ashx" hash="33c60594" filehash="ffffdc5e5b2507f8" flags="110000" assembly="App_Web_j3vbsri1" type="Runpy">
+    <filedeps>
+        <filedep name="/teacher/Runpy.ashx" />
+    </filedeps>
+</preserve>

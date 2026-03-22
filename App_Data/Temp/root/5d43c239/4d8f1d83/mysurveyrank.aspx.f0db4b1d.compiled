@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/mysurveyrank.aspx" hash="fffffff94ae4f160" filehash="fffffd379f4686c2" flags="110000" assembly="App_Web_w_oty_lo" type="ASP.student_mysurveyrank_aspx">
+    <filedeps>
+        <filedep name="/student/mysurveyrank.aspx" />
+    </filedeps>
+</preserve>

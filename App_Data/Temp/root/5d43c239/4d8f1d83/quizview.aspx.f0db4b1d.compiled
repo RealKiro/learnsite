@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/quizview.aspx" hash="fffffff94ae4f160" filehash="17e2a7909568" flags="110000" assembly="App_Web_w_oty_lo" type="ASP.student_quizview_aspx">
+    <filedeps>
+        <filedep name="/student/quizview.aspx" />
+    </filedeps>
+</preserve>

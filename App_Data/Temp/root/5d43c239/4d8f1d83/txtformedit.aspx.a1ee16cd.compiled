@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/txtformedit.aspx" hash="fffffff94ae4f160" filehash="bf425a124163425c" flags="110000" assembly="App_Web_nhifnefy" type="ASP.teacher_txtformedit_aspx">
+    <filedeps>
+        <filedep name="/teacher/Teach.master" />
+        <filedep name="/teacher/txtformedit.aspx" />
+    </filedeps>
+</preserve>

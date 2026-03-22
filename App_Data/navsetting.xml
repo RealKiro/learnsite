@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navsetting>
+  <profileSideNav>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>]]></icon>
+      <text>小组</text>
+      <url>../profile/mygroup.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>]]></icon>
+      <text>签到</text>
+      <url>../profile/mysign.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>]]></icon>
+      <text>密码</text>
+      <url>../profile/mypwd.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>]]></icon>
+      <text>班级</text>
+      <url>../profile/myclass.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>]]></icon>
+      <text>相片</text>
+      <url>../profile/myphoto.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>]]></icon>
+      <text>性别</text>
+      <url>../profile/mysex.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>]]></icon>
+      <text>小组等级</text>
+      <url>../profile/grouplevel.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>]]></icon>
+      <text>学分等级</text>
+      <url>../profile/creditlevel.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>]]></icon>
+      <text>我的徽章</text>
+      <url>../profile/mybadge.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>]]></icon>
+      <text>徽章图鉴</text>
+      <url>../profile/badgestore.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>]]></icon>
+      <text>学分商城</text>
+      <url>../profile/badgeshop.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>]]></icon>
+      <text>兑换记录</text>
+      <url>../profile/badgeexchange.aspx</url>
+    </item>
+    <item>
+      <icon><![CDATA[<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>]]></icon>
+      <text>宠物乐园</text>
+      <url>../profile/mypet.aspx</url>
+    </item>
+  </profileSideNav>
+</navsetting>

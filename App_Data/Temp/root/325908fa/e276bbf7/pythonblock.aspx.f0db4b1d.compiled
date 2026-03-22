@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/pythonblock.aspx" hash="fffffff94ae4f160" filehash="ffffca21f3813176" flags="110000" assembly="App_Web_v0nriqn2" type="ASP.student_pythonblock_aspx">
+    <filedeps>
+        <filedep name="/student/pythonblock.aspx" />
+    </filedeps>
+</preserve>

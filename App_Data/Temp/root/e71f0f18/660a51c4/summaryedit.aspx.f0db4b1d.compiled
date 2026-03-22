@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/summaryedit.aspx" hash="fffffff94ae4f160" filehash="97b044ed358631d6" flags="110000" assembly="App_Web_kpvsktpg" type="ASP.student_summaryedit_aspx">
+    <filedeps>
+        <filedep name="/student/Scm.master" />
+        <filedep name="/student/summaryedit.aspx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/manager/index.aspx" hash="fffffff94ae4f160" filehash="45d4017732bc71c4" flags="110000" assembly="App_Web_index.aspx.a9b56182.yajfsbdc" type="ASP.manager_index_aspx">
+    <filedeps>
+        <filedep name="/manager/index.aspx" />
+        <filedep name="/manager/Manage.master" />
+    </filedeps>
+</preserve>

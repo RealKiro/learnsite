@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/student/kitymind.aspx" hash="fffffff94ae4f160" filehash="ffffdbe2ece40848" flags="110000" assembly="App_Web_kitymind.aspx.f0db4b1d.mhpuimyo" type="ASP.student_kitymind_aspx">
+    <filedeps>
+        <filedep name="/student/kitymind.aspx" />
+    </filedeps>
+</preserve>

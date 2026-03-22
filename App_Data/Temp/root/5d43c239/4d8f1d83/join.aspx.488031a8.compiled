@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/about/join.aspx" hash="fffffff94ae4f160" filehash="4a8b13cd2025b1ca" flags="110000" assembly="App_Web_c8p3lksz" type="ASP.about_join_aspx">
+    <filedeps>
+        <filedep name="/about/join.aspx" />
+        <filedep name="/student/Stud.master" />
+    </filedeps>
+</preserve>

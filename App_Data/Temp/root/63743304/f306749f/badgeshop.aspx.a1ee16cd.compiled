@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/badgeshop.aspx" hash="fffffff94ae4f160" filehash="4a0acd81e0c1ba7d" flags="110000" assembly="App_Web_akkvzxy3" type="ASP.teacher_badgeshop_aspx">
+    <filedeps>
+        <filedep name="/teacher/badgeshop.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

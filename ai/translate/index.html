@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线翻译</title>
+    <script src="../../code/jquery.min.js"></script>
+	<script src="../../ai/crypto-js.js"></script>
+		<style>	
+		textarea{ width:600px;height:100px;}
+
+	</style>
+</head>
+<body>
+<div>
+
+<div>输入文本：</div>
+<textarea id = "textIn">好好学习，天天向上!</textarea>
+
+
+<div>输出文本：</div>
+<textarea id = "textOut"></textarea>
+
+</div>
+
+<div style="margin:auto;width:600px;">
+<button type="button" onclick="test()" >翻译</button></div>
+</div>
+
+<script type="text/javascript">
+var appKey = '17f655da229a13b1'; // appIDvar 
+var key = 'FyWlYEvjVRbbGsxBIzdzsmE4Fa3EHlhI'; // 申请的密钥
+var from = 'zh-CHS';
+var to = 'en';
+function test(){
+var query = document.getElementById("textIn").value;
+var salt = (new Date).getTime();
+var curtime = Math.round(new Date().getTime()/1000);
+var str1 = appKey + truncate(query) + salt + curtime + key;
+var sign = CryptoJS.SHA256(str1).toString(CryptoJS.enc.Hex);
+$.ajax({
+	url: 'http://openapi.youdao.com/api',
+	type: 'post',
+	dataType: 'jsonp',// jsonp 类型
+	data: {q: query,appKey: appKey,salt: salt,from: from,to: to,sign: sign,signType: "v3",curtime: curtime,},
+
+	success: function (data) {
+	var dataObj = data.translation;
+	document.getElementById("textOut").value = dataObj;
+	console.log(dataObj);
+	console.log("获取数据成功！");}
+});
+
+function truncate(q){
+	var len = q.length;
+	if(len<=20) return q;
+	console.log(q.substring(0, 10) + len + q.substring(len-10, len));
+	return q.substring(0, 10) + len + q.substring(len-10, len);
+}}
+
+</script>
+</body>
+
+</html>

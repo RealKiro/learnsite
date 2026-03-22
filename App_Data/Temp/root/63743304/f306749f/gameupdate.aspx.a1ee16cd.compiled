@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/gameupdate.aspx" hash="fffffff94ae4f160" filehash="c4d6a8f27369abb4" flags="110000" assembly="App_Web_crfpj8vs" type="ASP.teacher_gameupdate_aspx">
+    <filedeps>
+        <filedep name="/teacher/gameupdate.aspx" />
+        <filedep name="/teacher/Teach.master" />
+    </filedeps>
+</preserve>

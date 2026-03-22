@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/petcosupl.ashx" hash="33c60594" filehash="ffffc6a4580746b7" flags="110000" assembly="App_Web_5qa_rpu0" type="petcosupl">
+    <filedeps>
+        <filedep name="/teacher/petcosupl.ashx" />
+    </filedeps>
+</preserve>

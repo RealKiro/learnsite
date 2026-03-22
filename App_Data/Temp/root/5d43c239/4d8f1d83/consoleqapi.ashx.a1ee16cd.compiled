@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="2" virtualPath="/teacher/consoleqapi.ashx" hash="33c60594" filehash="38426e32ea54" flags="110000" assembly="App_Web_s54_nlzj" type="consoleqapi">
+    <filedeps>
+        <filedep name="/teacher/consoleqapi.ashx" />
+    </filedeps>
+</preserve>

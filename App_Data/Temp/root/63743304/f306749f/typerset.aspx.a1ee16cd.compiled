@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/teacher/typerset.aspx" hash="fffffff94ae4f160" filehash="9a86fc57015bf30b" flags="110000" assembly="App_Web_crfpj8vs" type="ASP.teacher_typerset_aspx">
+    <filedeps>
+        <filedep name="/teacher/Teach.master" />
+        <filedep name="/teacher/typerset.aspx" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/manager/setting.aspx" hash="fffffff94ae4f160" filehash="6375b6021c41a86d" flags="110000" assembly="App_Web_setting.aspx.a9b56182.bft6xave" type="ASP.manager_setting_aspx">
+    <filedeps>
+        <filedep name="/manager/Manage.master" />
+        <filedep name="/manager/setting.aspx" />
+    </filedeps>
+</preserve>

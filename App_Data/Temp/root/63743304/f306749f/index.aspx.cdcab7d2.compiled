@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/index.aspx" hash="fffffff94ae4f160" filehash="6f768a1ff90" flags="110000" assembly="App_Web_index.aspx.cdcab7d2.cwy92pg8" type="ASP.index_aspx">
+    <filedeps>
+        <filedep name="/index.aspx" />
+    </filedeps>
+</preserve>
